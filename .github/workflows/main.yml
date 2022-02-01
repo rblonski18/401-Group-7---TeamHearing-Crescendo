@@ -1,0 +1,21 @@
+name: deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy: 
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+        
+      - name: Sync files to hosting
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: ftp.teamhearing.org
+          username: crescendo@teamhearing.org
+          password: ${{ secrets.ftp_password }} 
+      
