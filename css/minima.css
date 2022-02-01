@@ -1,0 +1,80 @@
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:calc(1.5vh + 0.75vw);
+	margin:0;
+	padding:0;
+	-webkit-touch-callout:none;
+	-webkit-user-select:none;
+	-khtml-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
+}
+
+/* apply a natural box layout model to all elements */
+*, *:before, *:after {
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	box-sizing:border-box;
+}
+
+/* get rid of ugly grey tap highlight */
+* {
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+}
+
+/* set width useful in input dialogs */
+h1, h2 {
+	margin-bottom: 0px;
+	margin-top: 0px;
+}
+hr {
+	margin-bottom: 4px;
+	margin-top: 4px;
+}
+
+input { font-size: 100%; width: 100%; }
+select { font-size: 100%; width: 100%; }
+
+/* layout divs */
+#header {
+	height:  10%;
+	padding-bottom: 1vh;
+	padding-left: 1vw;
+	padding-right: 1vw;
+	padding-top: 1vh;
+	position: absolute;
+	top: 0%;
+	width: 100%;
+	z-index: 9;
+}
+#main {
+	height: 80%;
+	overflow: auto;
+	padding: 1%;
+	position: absolute;
+	top: 10%;
+	width: 100%;
+}
+#footer {
+	bottom: 0%;
+	height: 10%;
+	padding-bottom: 1vh;
+	padding-left: 1vw;
+	padding-right: 1vw;
+	padding-top: 1vh;
+	position: absolute;
+	width: 100%;
+	z-index: 9;
+}
+
+/*  */
+.protocol { color: green; float: right; display: inline; margin: 2px; }
+.score { height: 1em }
+
+/* hacks to jQuery UI */
+.ui-dialog { overflow: visible !important; }
+.ui-dialog-titlebar-close { visibility: hidden; }
+.ui-state-focus:focus { outline: none !important; }
+.ui-widget { font-family: inherit !important; }
+.ui.widget.header { margin: 4px; }
