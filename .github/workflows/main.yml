@@ -12,9 +12,9 @@ jobs:
     
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@2.0.0
-      with:
-        ftp_server: ftp.teamhearing.org
-        ftp_username: crescendo@teamhearing.org
-        ftp_password: ${{ secrets.ftp_password }} 
+      env:
+        FTP_SERVER: ${{ secrets.ftp_server }}
+        FTP_USERNAME: ${{ secrets.ftp_username }}
+        FTP_PASSWORD: ${{ secrets.ftp_password }}
           
       
