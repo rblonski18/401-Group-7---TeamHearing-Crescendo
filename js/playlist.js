@@ -23,7 +23,7 @@ Clinic.prototype.menu = function () {
 	
 	// main
 	var main = layout.main(
-		'Rory changed this from github',
+		'Rory changed this from github and Sasoun tested it again',
 		false//{ 	Results: function () { that.results(); }}
 	);
 	
