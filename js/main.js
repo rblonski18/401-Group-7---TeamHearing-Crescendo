@@ -791,7 +791,7 @@ layout = {
 			() => { layout.percept(); },
 			() => { shs(); },
 			() => { layout.speech(); },
-			() => { layout.music(); }
+			() => { layout.playlist(); }
 		];
 		const messages = [
 			'Organize hearing healthcare information.',
@@ -896,6 +896,112 @@ layout = {
 	music: function () {
 		// main
 		var main = layout.main('Musical Listening Exercises', () => { layout.menu(); });
+
+		// menu definition
+		const options = [
+			'Melodic Contour',
+			'Melody & Rhythm Comparisons',
+			'Musical Interval Identification',
+			'Pleasantness Ratings'
+		];
+
+		// callbacks
+		let callbacks = [];
+
+		// melodic contour
+		callbacks.push(() => {
+			musanim({
+				back: () => { layout.music(); },
+				init: () => { activity.menu(); }
+			});
+		});
+
+		// melody and rhythm comparisons
+		callbacks.push(() => {
+			confronto({
+				back: () => { layout.music(); },
+				init: () => { activity.menu(); }
+			});
+		});
+
+		// musical interval identification
+		callbacks.push(() => {
+			loadscript('intervals', () => {
+				intervals({
+					back: () => { layout.music(); },
+					init: () => { activity.menu(); }
+				});
+			})
+		});
+
+		// pleasantness ratings
+		callbacks.push(() => {
+			loadscript('pleasantness', () => {
+				pleasantness({
+					back: () => { layout.music(); },
+					init: () => { activity.menu(); }
+				});
+			})
+		});
+
+		//
+		var images = ['musanim.png'], messages = [];
+		for (let a = 0; a < options.length; a++) {
+			messages[a] = '<b>'+options[a]+'</b><br>';
+		}
+		var a = 0;
+		messages[a++] += 'Practice listening to melodic contours.';
+		messages[a++] += 'Practice comparing melodies and rhythms.';
+		messages[a++] += 'Practice listening to musical intervals.';
+		messages[a++] += 'Rate the consonance and dissonance of musical dyads..';
+
+		// footer
+		layout.footer();
+
+		// create menu
+		var menu = document.createElement('div');
+		for (let a = 0; a < options.length; a++) {
+			// help
+			var help = layout.help(options[a], messages[a]);
+			help.style.cssFloat = 'right';
+			help.style.zindex = 10;
+
+			// item
+			var item = document.createElement('li');
+			item.id = a;
+			item.onclick = function () {
+				document.getElementById('home').title = 'Return home.';
+				document.getElementById('logout').style.visibility = 'hidden';
+				callbacks[Number(this.id)]();
+			};
+
+			// icon
+			var img = document.createElement('img');
+			img.src = 'images/'+images[Math.min(images.length-1,a)];
+			img.style.height = '1.5em';
+			img.style.paddingRight = '8px';
+
+			// title
+			var span = document.createElement('span');
+			span.innerHTML = options[a];
+			span.style.display = 'inline-block';
+
+			// anchor
+			var anchor = document.createElement('a');
+			anchor.id = 'menuitem'+a;
+			anchor.appendChild(img);
+			anchor.appendChild(span);
+			menu.appendChild(item);
+			item.appendChild(anchor);
+			anchor.appendChild(help);
+			if(iOS){FastClick(item)}
+		}
+		main.appendChild(menu);
+		jQuery(menu).menu();
+	},
+	playlist: function () {
+		// main
+		var main = layout.main('Random Playlist Exercises', () => { layout.menu(); });
 
 		// menu definition
 		const options = [
