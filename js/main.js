@@ -44,7 +44,8 @@ loadscripts([
 	'tonal',
 	'vocoder',
 	'voice',
-	'vowels'
+	'vowels',
+	'playlist'
 ]);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 window.onerror = function(msg, url, linenumber) {
@@ -776,7 +777,8 @@ layout = {
 			'Musical Listening Exercises',
 			'Psychophysics',
 			'Seeing & Hearing Speech',
-			'Speech Recognition'
+			'Speech Recognition',
+			'Random Exercise Playlist'
 		];
 		var callbacks = [
 			() => { audiologic(); },
@@ -788,7 +790,8 @@ layout = {
 			() => { layout.music(); },
 			() => { layout.percept(); },
 			() => { shs(); },
-			() => { layout.speech(); }
+			() => { layout.speech(); },
+			() => { something(); }
 		];
 		const messages = [
 			'Organize hearing healthcare information.',
@@ -797,7 +800,8 @@ layout = {
 			'Musical listening exercises and assessments',
 			'Auditory and visual psychophysics.',
 			'A wide range of speech recognition activities with audio-visual materials.',
-			'Speech recognition activities including phoneme, word, and sentence materials.'
+			'Speech recognition activities including phoneme, word, and sentence materials.',
+			'Play through a random playlist of exercises.'
 		];
 		const imagelist = [
 			'audi.png',
@@ -806,6 +810,7 @@ layout = {
 			'musanim.png',
 			'psi.png',
 			'shs.gif',
+			'speech.png',
 			'speech.png'
 		];
 
