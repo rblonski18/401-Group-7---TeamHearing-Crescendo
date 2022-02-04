@@ -791,7 +791,7 @@ layout = {
 			() => { layout.percept(); },
 			() => { shs(); },
 			() => { layout.speech(); },
-			() => { something(); }
+			() => { layout.music(); }
 		];
 		const messages = [
 			'Organize hearing healthcare information.',
