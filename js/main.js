@@ -797,7 +797,7 @@ layout = {
 			'Organize hearing healthcare information.',
 			'Measure and organize audiograms.',
 			'Hearing tests and training exercises using environmental sounds.',
-			'Musical listening exercises and assessments',
+			'Musical listening exercises and assessments', 
 			'Auditory and visual psychophysics.',
 			'A wide range of speech recognition activities with audio-visual materials.',
 			'Speech recognition activities including phoneme, word, and sentence materials.',
