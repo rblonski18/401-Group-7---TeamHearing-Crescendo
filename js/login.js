@@ -114,18 +114,6 @@ function login() {
 	jQuery(signin).button();
 	login.appendChild(signin);
 
-	// sign in
-	var test = document.createElement('button');
-	test.innerHTML = 'Test';
-	test.onclick = function () {
-		//alert('this is a test');
-		//loadscript('clinic',function(){clinic();});
-		loadscript('playlist',function(){something();});
-	};
-	test.style.cssFloat = 'right';
-	jQuery(test).button();
-	login.appendChild(test);
-
 
 	// new account
 	var button = document.createElement('button');
