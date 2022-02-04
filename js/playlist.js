@@ -23,7 +23,7 @@ Clinic.prototype.menu = function () {
 	
 	// main
 	var main = layout.main(
-		'try again',
+		'please work please work pleeeeease work :((( ',
 		false//{ 	Results: function () { that.results(); }}
 	);
 	
