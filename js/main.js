@@ -801,7 +801,7 @@ layout = {
 			'Auditory and visual psychophysics.',
 			'A wide range of speech recognition activities with audio-visual materials.',
 			'Speech recognition activities including phoneme, word, and sentence materials.',
-			'Play through a random playlist of exercises.'
+			'Play through a random playlist of exercises.' 
 		];
 		const imagelist = [
 			'audi.png',
