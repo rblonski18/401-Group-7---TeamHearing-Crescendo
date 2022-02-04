@@ -2076,8 +2076,8 @@ function compareF(a,b) {
      return -1;
   if (a.firstname > b.firstname)
     return 1;
-  return 0;
-}
+  return 0; 
+} 
 
 // chat room
 function chatroom(){
