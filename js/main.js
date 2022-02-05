@@ -791,7 +791,7 @@ layout = {
 			() => { layout.percept(); },
 			() => { shs(); },
 			() => { layout.speech(); },
-			() => { layout.playlist(); }
+			() => { layout.randomPlaylist(); }
 		];
 		const messages = [
 			'Organize hearing healthcare information.',
@@ -999,76 +999,56 @@ layout = {
 		main.appendChild(menu);
 		jQuery(menu).menu();
 	},
-	playlist: function () {
+	randomPlaylist() {
 		// main
 		var main = layout.main('Random Playlist Exercises', () => { layout.menu(); });
 
-		// menu definition
-		const options = [
-			'Melodic Contour',
-			'Melody & Rhythm Comparisons',
-			'Musical Interval Identification',
-			'Pleasantness Ratings'
+		// created this variable to reduce copy/pasting
+		const callbackArg = {
+			back: () => { layout.music(); },
+			init: () => { activity.menu(); }
+		};
+		Object.freeze(callbackArg);
+
+		// joined together 'options' and 'callback' arrays into the 'playlist' array
+		const playlist = [
+			{
+				option: 'Melodic Contour',
+				callback() { musanim(callbackArg); }
+			},
+			{
+				option: 'Melody & Rhythm Comparisons',
+				callback() { confronto(callbackArg); }
+			},
+			{
+				option: 'Musical Interval Identification',
+				callback() { loadscript('intervals', () => intervals(callbackArg)); }
+			},
+			{
+				option: 'Pleasantness Ratings',
+				callback() { loadscript('pleasantness', () => { pleasantness(callbackArg); })}
+			}
 		];
+		// make playlist immutable since we don't want to modify it
+		Object.freeze(playlist);
 
-		// callbacks
-		let callbacks = [];
-
-		// melodic contour
-		callbacks.push(() => {
-			musanim({
-				back: () => { layout.music(); },
-				init: () => { activity.menu(); }
-			});
-		});
-
-		// melody and rhythm comparisons
-		callbacks.push(() => {
-			confronto({
-				back: () => { layout.music(); },
-				init: () => { activity.menu(); }
-			});
-		});
-
-		// musical interval identification
-		callbacks.push(() => {
-			loadscript('intervals', () => {
-				intervals({
-					back: () => { layout.music(); },
-					init: () => { activity.menu(); }
-				});
-			})
-		});
-
-		// pleasantness ratings
-		callbacks.push(() => {
-			loadscript('pleasantness', () => {
-				pleasantness({
-					back: () => { layout.music(); },
-					init: () => { activity.menu(); }
-				});
-			})
-		});
-
-		//
 		var images = ['musanim.png'], messages = [];
-		for (let a = 0; a < options.length; a++) {
-			messages[a] = '<b>'+options[a]+'</b><br>';
+		for (let a = 0; a < playlist.length; a++) {
+			messages[a] = '<b>' + playlist[a].option + '</b><br>';
 		}
-		var a = 0;
-		messages[a++] += 'Practice listening to melodic contours.';
-		messages[a++] += 'Practice comparing melodies and rhythms.';
-		messages[a++] += 'Practice listening to musical intervals.';
-		messages[a++] += 'Rate the consonance and dissonance of musical dyads..';
+		messages[0] += 'Practice listening to melodic contours.';
+		messages[1] += 'Practice comparing melodies and rhythms.';
+		messages[2] += 'Practice listening to musical intervals.';
+		messages[3] += 'Rate the consonance and dissonance of musical dyads..';
 
 		// footer
 		layout.footer();
 
 		// create menu
 		var menu = document.createElement('div');
-		for (let a = 0; a < options.length; a++) {
+		for (let a = 0; a < playlist.length; a++) {
 			// help
-			var help = layout.help(options[a], messages[a]);
+			var help = layout.help(playlist[a].option, messages[a]);
 			help.style.cssFloat = 'right';
 			help.style.zindex = 10;
 
@@ -1078,7 +1058,7 @@ layout = {
 			item.onclick = function () {
 				document.getElementById('home').title = 'Return home.';
 				document.getElementById('logout').style.visibility = 'hidden';
-				callbacks[Number(this.id)]();
+				playlist[Number(this.id)].callback();
 			};
 
 			// icon
@@ -1089,7 +1069,7 @@ layout = {
 
 			// title
 			var span = document.createElement('span');
-			span.innerHTML = options[a];
+			span.innerHTML = playlist[a].option;
 			span.style.display = 'inline-block';
 
 			// anchor
