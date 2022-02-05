@@ -778,7 +778,7 @@ layout = {
 			'Psychophysics',
 			'Seeing & Hearing Speech',
 			'Speech Recognition',
-			'Random Exercise Playlist'
+			'Random Playlist Exercises'
 		];
 		var callbacks = [
 			() => { audiologic(); },
@@ -1000,8 +1000,12 @@ layout = {
 		jQuery(menu).menu();
 	},
 	randomPlaylist() {
-		// main
-		var main = layout.main('Random Playlist Exercises', () => { layout.menu(); });
+
+		let back = layout.music();//back ? back : () => { layout.dashboard(); };
+
+		// init
+		const mode = 'bel_intervals_training';
+		let a = 0, callbacks = [], options = [];
 
 		// created this variable to reduce copy/pasting
 		const callbackArg = {
@@ -1010,78 +1014,105 @@ layout = {
 		};
 		Object.freeze(callbackArg);
 
+		/*
+		TODO: note to self, you can possibly change callback() {} to callback
+		since it's one line of code anyways
+		*/
+
 		// joined together 'options' and 'callback' arrays into the 'playlist' array
 		const playlist = [
+			// Musical Listening Exercises
 			{
 				option: 'Melodic Contour',
 				callback() { musanim(callbackArg); },
-				message: 'Practice listening to melodic contours.'
 			},
 			{
 				option: 'Melody & Rhythm Comparisons',
 				callback() { confronto(callbackArg); },
-				message: 'Practice comparing melodies and rhythms.'
 			},
 			{
 				option: 'Musical Interval Identification',
 				callback() { loadscript('intervals', () => intervals(callbackArg)); },
-				message: 'Practice listening to musical intervals.'
 			},
 			{
 				option: 'Pleasantness Ratings',
-				callback() { loadscript('pleasantness', () => { pleasantness(callbackArg); })},
-				message: 'Rate the consonance and dissonance of musical dyads..'
+				callback() { loadscript('pleasantness', () => pleasantness(callbackArg)); },
+			},
+			// Interval Training (just one)
+			{
+				option: 'Interval Training',
+				callback() { 
+					// there is probably a better way to do this...
+					let dummy = function(id) {
+						protocol = new Protocol();
+						protocol.activity = 'intervals';
+						protocol.callback = () => { assignment(); };
+						protocol.ID = id;
+						protocol.settings.push({
+							trials: 20,
+							volume: true
+						});
+						protocol.start(6);
+					}.bind(null, mode+'.'+a++)();
+				},
+			},
+			{
+				option: 'Loudness of Pure Tones',
+				callback() {
+					harmonics({
+						alternatives: 3,
+						back: () => { layout.perceptLoudness(); },
+						chances: 3,
+						init: () => { activity.menu(); },
+						material: new Harmonics({
+							activity: 3,
+							difference: new Adaptive({rule:'exponential', value0:24, valueMax:24}),
+							f0: 0,
+							f1: 1000,
+							mode: 0,
+							title: 'Loudness Discrimination'
+						})
+					});
+				}
+			},
+			{
+				option: 'Instrument Identification',
+				callback() {
+					let dummy = function(id){
+						protocol = new Protocol();
+						protocol.activity = 'musescore';
+						protocol.callback = () => { assignment(); };
+						protocol.ID = id;
+						const range = [[39,51],[51,63],[63,75],[75,87]], f0 = [110,220,440], instruments = ['piano','tenor sax'], path = ['data/musescore/3secpiano/','data/musescore/3sectenorsax/'];
+						for (let a = 0; a < range.length; a++) {
+							protocol.settings.push({
+								chances: 100,
+								f0: f0[a],
+								instruments: instruments,
+								mode: 1,
+								path: path,
+								range: range[a],
+								trials: 20,
+								vocoder: false,
+								volume: true
+							});
+						}
+						protocol.start(3);
+					}.bind(null,mode+'.'+a++)();
+				}
 			}
 		];
 		// make playlist immutable since not necessary to modify it
 		Object.freeze(playlist);
 
-		var images = ['musanim.png'];
-		let messages = playlist.map(obj => `<b>${obj.option}</b><br>${obj.message}`);
-
-		// footer
-		layout.footer();
-
-		// create menu
-		var menu = document.createElement('div');
-		for (let a = 0; a < playlist.length; a++) {
-			// help
-			var help = layout.help(playlist[a].option, messages[a]);
-			help.style.cssFloat = 'right';
-			help.style.zindex = 10;
-
-			// item
-			var item = document.createElement('li');
-			item.id = a;
-			item.onclick = function () {
-				document.getElementById('home').title = 'Return home.';
-				document.getElementById('logout').style.visibility = 'hidden';
-				playlist[Number(this.id)].callback();
-			};
-
-			// icon
-			var img = document.createElement('img');
-			img.src = 'images/'+images[Math.min(images.length-1,a)];
-			img.style.height = '1.5em';
-			img.style.paddingRight = '8px';
-
-			// title
-			var span = document.createElement('span');
-			span.innerHTML = playlist[a].option;
-			span.style.display = 'inline-block';
-
-			// anchor
-			var anchor = document.createElement('a');
-			anchor.id = 'menuitem'+a;
-			anchor.appendChild(img);
-			anchor.appendChild(span);
-			menu.appendChild(item);
-			item.appendChild(anchor);
-			anchor.appendChild(help);
-			if(iOS){FastClick(item)}
-		}
-		main.appendChild(menu);
-		jQuery(menu).menu();
+		layout.assignment(
+			'Random Exercise Playlist', 
+			playlist.map(obj => obj.option),
+			playlist.map(obj => obj.callback),
+			{},
+			mode,
+			back
+		);
 	},
 	percept: function () {
 		// main
