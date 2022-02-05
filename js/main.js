@@ -1014,32 +1014,30 @@ layout = {
 		const playlist = [
 			{
 				option: 'Melodic Contour',
-				callback() { musanim(callbackArg); }
+				callback() { musanim(callbackArg); },
+				message: 'Practice listening to melodic contours.'
 			},
 			{
 				option: 'Melody & Rhythm Comparisons',
-				callback() { confronto(callbackArg); }
+				callback() { confronto(callbackArg); },
+				message: 'Practice comparing melodies and rhythms.'
 			},
 			{
 				option: 'Musical Interval Identification',
-				callback() { loadscript('intervals', () => intervals(callbackArg)); }
+				callback() { loadscript('intervals', () => intervals(callbackArg)); },
+				message: 'Practice listening to musical intervals.'
 			},
 			{
 				option: 'Pleasantness Ratings',
-				callback() { loadscript('pleasantness', () => { pleasantness(callbackArg); })}
+				callback() { loadscript('pleasantness', () => { pleasantness(callbackArg); })},
+				message: 'Rate the consonance and dissonance of musical dyads..'
 			}
 		];
-		// make playlist immutable since we don't want to modify it
+		// make playlist immutable since not necessary to modify it
 		Object.freeze(playlist);
 
-		var images = ['musanim.png'], messages = [];
-		for (let a = 0; a < playlist.length; a++) {
-			messages[a] = '<b>' + playlist[a].option + '</b><br>';
-		}
-		messages[0] += 'Practice listening to melodic contours.';
-		messages[1] += 'Practice comparing melodies and rhythms.';
-		messages[2] += 'Practice listening to musical intervals.';
-		messages[3] += 'Rate the consonance and dissonance of musical dyads..';
+		var images = ['musanim.png'];
+		let messages = playlist.map(obj => `<b>${obj.option}</b><br>${obj.message}`);
 
 		// footer
 		layout.footer();
