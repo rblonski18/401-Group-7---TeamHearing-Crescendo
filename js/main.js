@@ -1100,6 +1100,34 @@ layout = {
 						protocol.start(3);
 					}.bind(null,mode+'.'+a++)();
 				}
+			},
+			{
+				option: 'Consonants',
+				callback() {
+					consonants({
+						back: () => { layout.speech(); },
+						init: () => { activity.menu(); }
+					});
+				}
+			},
+			{
+				option: 'Pure Tone Frequency Discrimination',
+				callback() {
+					harmonics({
+						alternatives: 2,
+						back: () => { layout.perceptPitch(); },
+						chances: 3,
+						init: () => { activity.menu(); },
+						material: new Harmonics({
+							activity: 1,
+							duration: .4,
+							f0: 0,
+							f1: 1000,
+							mode: 0,
+							title: 'Frequency Discrimination'
+						})
+					});
+				}
 			}
 		];
 		// make playlist immutable since not necessary to modify it
