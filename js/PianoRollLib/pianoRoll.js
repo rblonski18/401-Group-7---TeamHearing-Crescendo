@@ -181,13 +181,21 @@ function pianoRoll(instrument, length, dom, audioCtx){
         return this._beatStates[beatIndex + noteIndex * length];
     };
 
-    this.play = function(bpm, loop){
+    this.play = function(bpm, loop, startBeat, endBeat){
         if(this.audioCtx.state === 'suspended'){
             this.audioCtx.resume().then(()=>this.play(bpm, loop));
             return;
         }
 
-        this._playHeadAnimator.play(bpm, loop);
+        if(startBeat === undefined){
+            startBeat = 0;
+        }
+
+        if(endBeat === undefined){
+            endBeat = length;
+        }
+
+        this._playHeadAnimator.play(bpm, loop, startBeat, endBeat);
 
         this._isPlaying = true;
     }
@@ -221,6 +229,10 @@ function pianoRoll(instrument, length, dom, audioCtx){
     };
 
     this.playBeat = function(beatIndex, time){
+        if(time === undefined){
+            time = this.audioCtx.currentTime;
+        }
+
         for(let i = 0; i < this.instrument.notes.length; i++){
             if(this._beatStates[beatIndex + i * length]){
                 this.instrument.playNote(this.instrument.notes.length - 1 - i, time);
