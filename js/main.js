@@ -814,7 +814,6 @@ layout = {
 			'Auditory and visual psychophysics.',
 			'A wide range of speech recognition activities with audio-visual materials.',
 			'Speech recognition activities including phoneme, word, and sentence materials.',
-			'Play through a random playlist of exercises.' 
 		]; 
 		const imagelist = [
 			'audi.png',
@@ -824,7 +823,6 @@ layout = {
 			'psi.png',
 			'shs.gif',
 			'speech.png',
-			'speech.png'
 		];
 
 		// menu: build
@@ -1033,7 +1031,7 @@ layout = {
 		*/
 
 		// joined together 'options' and 'callback' arrays into the 'playlist' array
-		const playlist = [
+		let playlist = [
 			// Musical Listening Exercises
 			{
 				option: 'Melodic Contour',
@@ -1143,8 +1141,10 @@ layout = {
 				}
 			}
 		];
-		// make playlist immutable since not necessary to modify it
-		Object.freeze(playlist);
+		
+		loadscript('playlist', () => {
+			playlist = randSelect(playlist, 6);
+		});
 
 		layout.assignment(
 			'Random Exercise Playlist', 
