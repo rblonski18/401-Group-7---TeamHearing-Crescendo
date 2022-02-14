@@ -518,7 +518,7 @@ layout = {
 		};
 		// NOTE: need to add dice.png to images directory
 		// but this is not accessible in ftp server (?)
-		image.src = 'images/dice.png';
+		image.src = 'crescendo/js/images/dice.png';
 		image.style.cssFloat = 'left';
 		image.style.height = '100%';
 		image.style.marginRight = '1%';
@@ -1142,9 +1142,13 @@ layout = {
 			}
 		];
 		
-		loadscript('playlist', () => {
-			playlist = randSelect(playlist, 6);
-		});
+		// loadscript('playlist', () => {
+		// 	console.log(playlist);
+		// 	playlist = randSelect(playlist, 6);
+		// 	console.log(playlist);
+		// });
+		// console.log(playlist);
+		playlist = randSelect(playlist, 6);
 
 		layout.assignment(
 			'Random Exercise Playlist', 
