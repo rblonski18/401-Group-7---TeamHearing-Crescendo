@@ -49,6 +49,10 @@ function assignment(mode) {
 	options.push('Stream Segregation');
 	callbacks.push(()=>{loadassignment('bel_stream',callback)});
 
+	// Sequence Recreation
+	options.push('Sequence Recreation');
+	callbacks.push(()=>{loadassignment('bel_sequence',callback)});
+
 	// extra
 	let extra = {};//{'Assign':function(){homework.assignment()}};
 
