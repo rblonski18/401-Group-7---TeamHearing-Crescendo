@@ -3,7 +3,7 @@ function shuffle(arr) {
 	let copy = [...arr];
 	// fisher yates shuffle algorithm 
 	// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-	for (let i = n-1; i > 0; ++i) {
+	for (let i = arr.length - 1; i > 0; --i) {
 		// 0 <= j <= i
 		let j = randInt(0, i+1);
 		// do a swap
