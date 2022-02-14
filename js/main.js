@@ -519,7 +519,7 @@ layout = {
 		// NOTE: need to add dice.png to images directory
 		// but this is not accessible in ftp server (?)
 		image.src = 'images/dice.png';
-		image.style.cssFloat = 'center';
+		image.style.cssFloat = 'left';
 		image.style.height = '100%';
 		image.style.marginRight = '1%';
 		image.style.maxWidth = '12vw';
@@ -793,7 +793,6 @@ layout = {
 			'Psychophysics',
 			'Seeing & Hearing Speech',
 			'Speech Recognition',
-			'Random Playlist Exercises'
 		];
 		var callbacks = [
 			() => { audiologic(); },
@@ -806,7 +805,6 @@ layout = {
 			() => { layout.percept(); },
 			() => { shs(); },
 			() => { layout.speech(); },
-			() => { layout.randomPlaylist(); }
 		];
 		const messages = [
 			'Organize hearing healthcare information.',
