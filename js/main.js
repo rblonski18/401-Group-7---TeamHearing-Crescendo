@@ -516,12 +516,14 @@ layout = {
 		image.onclick = function () {
 			layout.randomPlaylist();
 		};
+		// NOTE: need to add dice.png to images directory
+		// but this is not accessible in ftp server (?)
 		image.src = 'images/dice.png';
-		image.style.cssFloat = 'left';
+		image.style.cssFloat = 'center';
 		image.style.height = '100%';
 		image.style.marginRight = '1%';
 		image.style.maxWidth = '12vw';
-		image.title = 'calibration';
+		image.title = 'dice';
 		footer.appendChild(image);
 
 		// bugger
