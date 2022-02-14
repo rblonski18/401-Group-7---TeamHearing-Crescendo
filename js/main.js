@@ -511,6 +511,19 @@ layout = {
 			footer.appendChild(image);
 		}
 
+		// dice
+		var image = document.createElement('img');
+		image.onclick = function () {
+			layout.randomPlaylist();
+		};
+		image.src = 'images/dice.png';
+		image.style.cssFloat = 'left';
+		image.style.height = '100%';
+		image.style.marginRight = '1%';
+		image.style.maxWidth = '12vw';
+		image.title = 'calibration';
+		footer.appendChild(image);
+
 		// bugger
 		var image = document.createElement('img');
 		image.onclick = function () {
