@@ -518,7 +518,7 @@ layout = {
 		};
 		// NOTE: need to add dice.png to images directory
 		// but this is not accessible in ftp server (?)
-		image.src = 'crescendo/js/images/dice.png';
+		image.src = 'images/die.png';
 		image.style.cssFloat = 'left';
 		image.style.height = '100%';
 		image.style.marginRight = '1%';
