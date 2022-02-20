@@ -53,7 +53,15 @@
 }
 
 .pianoRollSquareHighlighted {
-    background-color: rgb(235, 235, 8);
+    background-color: #ebeb08;
+}
+
+.pianoRollSquareFailed {
+    background-color: #eb0808;
+}
+
+.pianoRollSquareSucceeded {
+    background-color: #22eb08;
 }
 
 .pianoRollButton{
