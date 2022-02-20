@@ -509,6 +509,19 @@ layout = {
 			image.style.maxWidth = '12vw';
 			image.title = 'messages';
 			footer.appendChild(image);
+
+			// dice
+			var image = document.createElement('img');
+			image.onclick = function () {
+				layout.randomPlaylist();
+			};
+			image.src = 'images/die.png';
+			image.style.cssFloat = 'left';
+			image.style.height = '100%';
+			image.style.marginRight = '1%';
+			image.style.maxWidth = '12vw';
+			image.title = 'dice';
+			footer.appendChild(image);
 		}
 
 		// bugger
@@ -778,7 +791,6 @@ layout = {
 			'Psychophysics',
 			'Seeing & Hearing Speech',
 			'Speech Recognition',
-			'Random Playlist Exercises'
 		];
 		var callbacks = [
 			() => { audiologic(); },
@@ -791,7 +803,6 @@ layout = {
 			() => { layout.percept(); },
 			() => { shs(); },
 			() => { layout.speech(); },
-			() => { layout.randomPlaylist(); }
 		];
 		const messages = [
 			'Organize hearing healthcare information.',
@@ -801,7 +812,6 @@ layout = {
 			'Auditory and visual psychophysics.',
 			'A wide range of speech recognition activities with audio-visual materials.',
 			'Speech recognition activities including phoneme, word, and sentence materials.',
-			'Play through a random playlist of exercises.' 
 		]; 
 		const imagelist = [
 			'audi.png',
@@ -811,7 +821,6 @@ layout = {
 			'psi.png',
 			'shs.gif',
 			'speech.png',
-			'speech.png'
 		];
 
 		// menu: build
@@ -999,7 +1008,8 @@ layout = {
 		main.appendChild(menu);
 		jQuery(menu).menu();
 	},
-	randomPlaylist() {
+	randomPlaylist(difficulty) {
+		if (!difficulty) difficulty = 'easy';
 
 		let back = layout.music();//back ? back : () => { layout.dashboard(); };
 
@@ -1009,51 +1019,74 @@ layout = {
 
 		// created this variable to reduce copy/pasting
 		const callbackArg = {
-			back: () => { layout.music(); },
+			back: () => { layout.randomPlaylist(); },
 			init: () => { activity.menu(); }
 		};
 		Object.freeze(callbackArg);
 
-		/*
-		TODO: note to self, you can possibly change callback() {} to callback
-		since it's one line of code anyways
-		*/
-
-		// joined together 'options' and 'callback' arrays into the 'playlist' array
-		const playlist = [
+		let easyPlaylist = [
 			// Musical Listening Exercises
 			{
 				option: 'Melodic Contour',
-				callback() { musanim(callbackArg); },
+				callback() { 
+					musanim({
+						back: () => { layout.randomPlaylist(); },
+						init: () => { activity.menu(); },
+						practice: false,
+					});
+				},
 			},
 			{
 				option: 'Melody & Rhythm Comparisons',
-				callback() { confronto(callbackArg); },
+				callback() { 
+					confronto({
+						back: () => { layout.randomPlaylist(); },
+						init: () => { activity.menu(); },
+						practice: false,
+						trials: 10,
+					});
+				},
 			},
 			{
 				option: 'Musical Interval Identification',
 				callback() { loadscript('intervals', () => intervals(callbackArg)); },
 			},
+			// this doesn't work...
 			{
 				option: 'Pleasantness Ratings',
 				callback() { loadscript('pleasantness', () => pleasantness(callbackArg)); },
 			},
-			// Interval Training (just one)
 			{
-				option: 'Interval Training',
-				callback() { 
-					// there is probably a better way to do this...
-					let dummy = function(id) {
-						protocol = new Protocol();
-						protocol.activity = 'intervals';
-						protocol.callback = () => { assignment(); };
-						protocol.ID = id;
-						protocol.settings.push({
-							trials: 20,
-							volume: true
-						});
-						protocol.start(6);
-					}.bind(null, mode+'.'+a++)();
+				option: 'Interval Identification',
+				callback() {
+					// protocol = new Protocol();
+					// protocol.activity = 'intervals';
+					// protocol.callback = () => { assignment(); };
+					// protocol.ID = mode + '.' + a++;
+					// protocol.settings.push({
+					// 	trials: 20,
+					// 	volume: true,
+					// 	level: 1,
+					// 	practice: false,
+					// });
+					// protocol.start(6);
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = () => { assessment(); };
+					protocol.ID = mode + '.' + a++;
+					const level = [127]
+					const range = [[39,51]];//centered on MIDI 45 (A2, 110 Hz), 57 (A3, 220 Hz), 69 (A4, 440 Hz)
+					
+					protocol.settings.push({
+						intervals: [4,7,12],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 20,
+						volume: true
+					});
+				
+					protocol.start(3);
 				},
 			},
 			{
@@ -1061,7 +1094,7 @@ layout = {
 				callback() {
 					harmonics({
 						alternatives: 3,
-						back: () => { layout.perceptLoudness(); },
+						back: () => { layout.randomPlaylist(); },
 						chances: 3,
 						init: () => { activity.menu(); },
 						material: new Harmonics({
@@ -1105,7 +1138,7 @@ layout = {
 				option: 'Consonants',
 				callback() {
 					consonants({
-						back: () => { layout.speech(); },
+						back: () => { layout.randomPlaylist(); },
 						init: () => { activity.menu(); }
 					});
 				}
@@ -1115,7 +1148,7 @@ layout = {
 				callback() {
 					harmonics({
 						alternatives: 2,
-						back: () => { layout.perceptPitch(); },
+						back: () => { layout.randomPlaylist(); },
 						chances: 3,
 						init: () => { activity.menu(); },
 						material: new Harmonics({
@@ -1130,17 +1163,78 @@ layout = {
 				}
 			}
 		];
-		// make playlist immutable since not necessary to modify it
-		Object.freeze(playlist);
 
+		// TODO: select correct playlist
+		switch (difficulty) {
+		case 'easy':
+			console.log('ez money');
+			break;
+		case 'medium':
+			console.log('medium i suppose');
+			break;
+		case 'hard':
+			console.log('2hard');
+			break;
+		default:
+			console.log('uh oh');
+		}
+		let playlist = easyPlaylist;
+
+		// using map() function to isolate properties of playlist
+		// which is technically not efficient but it does the job
 		layout.assignment(
-			'Random Exercise Playlist', 
+			`Random Exercise Playlist - ${difficulty}`, 
 			playlist.map(obj => obj.option),
 			playlist.map(obj => obj.callback),
 			{},
 			mode,
 			back
 		);
+
+		/*
+		NOTE: layout.assignment calls layout.footer(),
+		so this is technically not efficient to rerender
+		the footer twice, but it's easier than having to 
+		create another footer function. I'm lazy :) 
+		*/
+		let footer = layout.footer();
+
+		// easy
+		var button = document.createElement('button');
+		button.innerHTML = 'easy';
+		button.onclick = layout.randomPlaylist.bind(null, 'easy');
+		button.style.cssFloat = 'left';
+		button.style.fontSize = '150%';
+		button.style.height = '100%';
+		button.style.marginLeft = '.2em';
+		button.style.width = '7em';
+		jQuery(button).button();
+		footer.appendChild(button);
+
+		// medium
+		var button = document.createElement('button');
+		button.innerHTML = 'medium';
+		button.onclick = layout.randomPlaylist.bind(null, 'medium');
+		button.style.cssFloat = 'left';
+		button.style.fontSize = '150%';
+		button.style.height = '100%';
+		button.style.marginLeft = '.2em';
+		button.style.width = '7em';
+		jQuery(button).button();
+		footer.appendChild(button);
+
+		// hard
+		var button = document.createElement('button');
+		button.innerHTML = 'hard';
+		button.onclick = layout.randomPlaylist.bind(null, 'hard');
+		button.style.cssFloat = 'left';
+		button.style.fontSize = '150%';
+		button.style.height = '100%';
+		button.style.marginLeft = '.2em';
+		button.style.width = '7em';
+		jQuery(button).button();
+		footer.appendChild(button);
+
 	},
 	percept: function () {
 		// main
