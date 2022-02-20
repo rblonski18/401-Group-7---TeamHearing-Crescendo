@@ -101,6 +101,24 @@ export function createRollController(domParent){
     controls.appendChild(playButton);
     dom.playButton = playButton;
 
+    var saveButton = document.createElement("button");
+    saveButton.classList.add("pianoRollButton");
+    saveButton.innerText = "Save"
+    controls.appendChild(saveButton);
+    dom.saveButton = saveButton;
+
+    var loadButton = document.createElement("button");
+    loadButton.classList.add("pianoRollButton");
+    loadButton.innerText = "Load"
+    controls.appendChild(loadButton);
+    dom.loadButton = loadButton;
+    
+    var exportButton = document.createElement("button");
+    exportButton.classList.add("pianoRollButton");
+    exportButton.innerText = "Export"
+    controls.appendChild(exportButton);
+    dom.exportButton = exportButton;
+
     // Create bpm button
     /*
     var bpmSlider = document.createElement("input");
@@ -110,7 +128,7 @@ export function createRollController(domParent){
     */
 
     return new pianoRollController(dom);
-}
+} 
 
 function pianoRollController(dom){
     this.pianoRoll;
@@ -118,6 +136,9 @@ function pianoRollController(dom){
 
     dom.playButton.onclick = () => this.onClickPlayButtom();
     dom.resetButton.onclick = () => this.onClickReset();
+    dom.exportButton.onclick = () => this.onClickExport();
+    dom.saveButton.onclick = () => this.onClickSave();
+    dom.loadButton.onclick = () => this.onClickLoad();
 
     this.bindToPianoRoll = function(pianoRoll){
         this.pianoRoll = pianoRoll;
@@ -150,14 +171,136 @@ function pianoRollController(dom){
         this.pianoRoll.reset();
         this._dom.playButton.innerText = "Play";
     }
+
+    this.onClickExport = function(){
+        const notes = this.pianoRoll.instrument.notes.length;
+        const length = this.pianoRoll.length;
+        const state = boolArrayToBase64(this.pianoRoll.getBeatStates().getState());
+        
+        console.log(`beatFromEncodedState(${notes}, ${length}, \"${state}\")`);
+    }
+
+    this.onClickSave = function(){
+        const beatState = this.pianoRoll.getBeatStates().getState();
+        const encoded = boolArrayToBase64(beatState);
+        navigator.clipboard.writeText(encoded);
+    }
+
+    this.onClickLoad = function(){
+        const beatState = navigator.clipboard.readText().then(
+            text => {
+                const decoded = base64ToBoolArray(text);
+
+                const stateCopy = this.pianoRoll.getBeatStates();
+                stateCopy.setState(decoded);
+
+                this.pianoRoll.loadBeatStates(stateCopy);
+        });
+    }
 }
+
+function beat(numNotes, length){
+    this._state = new Array(numNotes * length).fill(false);
+
+    this.isBeatToggled = function(beatIndex, noteIndex){
+        return this._state[beatIndex + noteIndex * length];
+    }
+
+    this.setBeat = function(beatIndex, noteIndex, value){
+        this._state[beatIndex + noteIndex * length] = value;
+    }
+
+    this.getCopy = function(){
+        let copy = new beat(numNotes, length);
+        copy._state = Array.from(this._state);
+
+        return copy;
+    }
+
+    this.setAll = function(value){
+        this._state.fill(value);
+    }
+
+    this.getState = function(){
+        return Array.from(this._state);
+    }
+
+    this.setState = function(state){
+        this._state = Array.from(state);
+    }
+}
+
+export function beatFromEncodedState(numNotes, length, state){
+    const newBeat = new beat(numNotes, length);
+    const decoded = base64ToBoolArray(state);
+
+    newBeat.setState(decoded);
+
+    return newBeat;
+}
+
+// From https://stackoverflow.com/a/67039932/10184960
+function boolArrayToBase64(arr){
+    // Base64 character set
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    // How many bits does one character represent
+    const bitsInChar = 6; // = Math.floor( Math.log2(characters.length) );
+
+    // The output string
+    let string = "";
+
+    // Loop through the bool array (six bools at a time)
+    for (let charIndex = 0; charIndex < arr.length / bitsInChar; charIndex++) {
+        let number = 0;
+
+        // Convert these six bools to a number (think of them as bits of the number) 
+        for (let bit = 0; bit < bitsInChar; bit++)
+            number = number * 2 + (arr[charIndex*bitsInChar + bit] ? 1 : 0);
+
+        // Convert the number to a Base64 character and add it to output
+        string += characters.charAt(number);
+    }
+
+    return string;
+}
+
+// From https://stackoverflow.com/a/67039932/10184960
+function base64ToBoolArray(string) {
+    // Base64 character set
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    // How many bits does one character represent
+    const bitsInChar = 6; // = Math.floor( Math.log2(characters.length) );
+
+    // The output array
+    const array = [];
+
+    // Loop through the input string one character at a time
+    for (let charIndex = 0; charIndex < string.length; charIndex++) {
+        
+        // Convert the Base64 char to a number 
+        let number = characters.indexOf(string.charAt(charIndex));
+
+        // Convert the number to six bools (think of them as bits of the number) 
+        // And assign them to the right places in the array
+        for (let bit = bitsInChar - 1; bit >= 0; bit--) {
+            array[charIndex*bitsInChar + bit] = !!(number % 2)
+            number = Math.floor(number / 2);
+        }
+    }
+
+    return array;
+}
+
 
 function pianoRoll(instrument, length, dom, audioCtx){
     this.instrument = instrument;
     this.audioCtx = audioCtx;
+    this.length = length;
 
     this._dom = dom;
-    this._beatStates = new Array(dom.squares.length).fill(false);
+    this._beatStates = new beat(instrument.notes.length, length);
     this._isPlaying = false;
     this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
     this._bpm = 70;
@@ -165,7 +308,7 @@ function pianoRoll(instrument, length, dom, audioCtx){
     this._beatListeners = []
 
     this.toggleSquare = function(noteIndex, beatIndex){
-        let isToggled = this._beatStates[beatIndex + noteIndex * length];
+        let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
 
         if(isToggled){
             this._dom.squares[beatIndex + noteIndex * length].classList.remove("pianoRollSquareHighlighted");
@@ -174,16 +317,16 @@ function pianoRoll(instrument, length, dom, audioCtx){
             this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
         }
 
-        this._beatStates[beatIndex + noteIndex * length] = !isToggled;
+        this._beatStates.setBeat(beatIndex, noteIndex, !isToggled)
     };
 
-    this.isBeatToggled = function(noteIndex, beatIndex){
-        return this._beatStates[beatIndex + noteIndex * length];
+    this.isBeatToggled = function(beatIndex, noteIndex){
+        return this._beatStates.isBeatToggled(beatIndex, noteIndex);
     };
 
     this.play = function(bpm, loop, startBeat, endBeat){
         if(this.audioCtx.state === 'suspended'){
-            this.audioCtx.resume().then(()=>this.play(bpm, loop));
+            this.audioCtx.resume().then(()=>this.play(bpm, loop, startBeat, endBeat));
             return;
         }
 
@@ -220,10 +363,11 @@ function pianoRoll(instrument, length, dom, audioCtx){
     }
 
     this.reset = function(){
-        for(let i = 0; i < this._beatStates.length; i++){
-            this._beatStates[i] = false;
+        for(let i = 0; i < this._dom.squares.length; i++){
             this._dom.squares[i].classList.remove("pianoRollSquareHighlighted");
         }
+
+        this._beatStates.setAll(false);
 
         this._playHeadAnimator.reset();
     };
@@ -234,18 +378,47 @@ function pianoRoll(instrument, length, dom, audioCtx){
         }
 
         for(let i = 0; i < this.instrument.notes.length; i++){
-            if(this._beatStates[beatIndex + i * length]){
+            if(this._beatStates.isBeatToggled(beatIndex, i)){
                 this.instrument.playNote(this.instrument.notes.length - 1 - i, time);
             }
         }
 
         for(const listener of this._beatListeners){
-            listener.onPlayBeat(beatIndex, time)
+            listener(beatIndex, time);
         }
     }
 
     this.addBeatListener = function(listener){
         this._beatListeners.push(listener);
+    }
+
+    this.addSquareStyle = function(beatIndex, noteIndex, styleClass){
+        this._dom.squares[beatIndex + noteIndex * length].classList.add(styleClass);
+    }
+
+    this.removeSquareStyle = function(beatIndex, noteIndex, styleClass){
+        this._dom.squares[beatIndex + noteIndex * length].classList.remove(styleClass);
+    }
+
+    this.getBeatStates = function(){
+        return this._beatStates.getCopy();
+    }
+
+    this.loadBeatStates = function(beatStates){
+        this._beatStates = beatStates;
+
+        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
+            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
+                let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
+
+                if(isToggled){
+                    this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
+                }
+                else {
+                    this._dom.squares[beatIndex + noteIndex * length].classList.remove("pianoRollSquareHighlighted");
+                }
+            }
+        }
     }
 }
 
@@ -273,13 +446,18 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
     this._startPos;
     this._startTime;
 
-    this.play = function(bpm, loop){
+    this._startBeat;
+    this._endBeat;
+
+    this.play = function(bpm, loop, startBeat, endBeat){
         if(this._isPlaying){
             this.reset();
         }
 
         this._bpm = bpm;
         this._isLooping = loop;
+        this._startBeat = startBeat;
+        this._endBeat = endBeat;
 
         // Calculate non rounded beat position
         const currentBeat = this._getCurrentBeat();
@@ -322,16 +500,14 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
         
         this._pos = (this._startPos + elapsedTime / 1000 * this._getPxPerSecond());
         if(this._isLooping){
-            this._pos = this._pos % this._getGridLength();
+            const playingGridLengthDebug = this._getPlayingGridLength();
+            this._pos = this._pos % this._getPlayingGridLength();
         }
-
-
-        const currentTimeDebug = this._audioCtx.currentTime;
 
         while(this._nextNoteTime < this._audioCtx.currentTime + LOOK_AHEAD){
             beatCallback(this._nextUnplayedNote, this._nextNoteTime);
             this._nextNoteTime += (60 / this._bpm) / 4;
-            this._nextUnplayedNote = (this._nextUnplayedNote + 1) % this._numBeats;
+            this._nextUnplayedNote = (this._nextUnplayedNote + 1) % this._getNumBeatsPlaying();
         }
 
         const x = this._pos;
@@ -340,7 +516,7 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
         this._animationId = window.requestAnimationFrame((t) => this._update(t));
 
-        if(this._pos >= this._getGridLength() && !this._isLooping){
+        if(this._pos >= this._getPlayingGridLength() && !this._isLooping){
             this.stop();
         }
 
@@ -354,6 +530,10 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
     this._getGridLength = function(){
         return this._dom.playHeadHolder.clientWidth;
+    }
+
+    this._getPlayingGridLength = function(){
+        return this._getGridLength() * (this._getNumBeatsPlaying() / this._numBeats);
     }
 
     this._getBeatWidth = function(){
@@ -371,5 +551,9 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
     this._getCurrentBeat = function(){
         return Math.floor(Math.round(this._pos) / this._getBeatWidth());
+    }
+
+    this._getNumBeatsPlaying = function(){
+        return this._endBeat - this._startBeat;
     }
 }
