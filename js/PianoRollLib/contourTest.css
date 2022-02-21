@@ -1,0 +1,75 @@
+.pianoRollHolder {
+    width: 100%;
+    position: relative;
+}
+
+.pianoRollPlayHeadHolder {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 100px;
+    right: 0px;
+    pointer-events: none;
+}
+
+.pianoRoll {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.pianoRollRow {
+    display: flex;
+    height: 50px;
+}
+
+.pianoRollControls {
+    background-color: gray;
+}
+
+.pianoRollRowLabel {
+    width: 100px;
+    background-color: darkgray;
+
+    border-style: solid;
+    border-color: gray;
+    border-width: 1px;
+    
+    color: white;
+    text-align: center;
+    line-height: 50px;
+    font-size: 120%;
+}
+
+.pianoRollSquare {
+    flex-grow: 1;
+    background-color: rgb(255, 255, 255);
+
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+    border-width: 1px;
+}
+
+.pianoRollSquareHighlighted {
+    background-color: rgb(235, 235, 8);
+}
+
+.pianoRollButton{
+    height: 50px;
+    width: 50px;
+    background-color: #2c2c2c;
+    color: white;
+    border-style: none;
+}
+
+.pianoRollPlayHead{
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+
+    width: 2px;
+    height: 100%;
+
+    background-color: rgb(141, 17, 17);
+}
