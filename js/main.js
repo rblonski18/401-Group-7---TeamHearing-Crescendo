@@ -1016,6 +1016,8 @@ layout = {
 		// init
 		const mode = 'bel_intervals_training';
 		let a = 0, callbacks = [], options = [];
+		// made this function to get rid of the bind(null, mode+'.'+a++) copy/paste
+		let getID = () => mode + '.' + a++;
 
 		// created this variable to reduce copy/pasting
 		const callbackArg = {
@@ -1024,98 +1026,111 @@ layout = {
 		};
 		Object.freeze(callbackArg);
 
+		// TODO: populate this array
+		let neutralPlaylist = [
+		
+		];
+
 		let easyPlaylist = [
-			// Musical Listening Exercises
 			{
-				option: 'Melodic Contour',
+				option: 'Melodic Contour - easy',
 				callback() { 
-					musanim({
-						back: () => { layout.randomPlaylist(); },
-						init: () => { activity.menu(); },
-						practice: false,
-					});
+					protocol = new Protocol();
+					protocol.activity = 'musanim';
+					protocol.ID = getID();
+					const spacings = [4];
+					for (let a = 0; a < spacings.length; a++) {
+						protocol.settings.push({
+							spacing:spacings[a], //material: new Musanim({spacing:spacings[a]})
+							trials: 15
+						});
+					}
+					protocol.start(3);
 				},
 			},
 			{
 				option: 'Melody & Rhythm Comparisons',
 				callback() { 
-					confronto({
-						back: () => { layout.randomPlaylist(); },
-						init: () => { activity.menu(); },
+					protocol = new Protocol();
+					protocol.activity = 'confronto';
+					protocol.callback = layout.randomPlaylist;
+					protocol.ID = getID();
+					protocol.settings.push({
 						practice: false,
-						trials: 10,
+						volume: true
 					});
+					protocol.start(3);
 				},
 			},
+			// interval training
 			{
-				option: 'Musical Interval Identification',
-				callback() { loadscript('intervals', () => intervals(callbackArg)); },
-			},
-			// this doesn't work...
-			{
-				option: 'Pleasantness Ratings',
-				callback() { loadscript('pleasantness', () => pleasantness(callbackArg)); },
-			},
-			{
-				option: 'Interval Identification',
+				option: 'Pefect 4th vs Octave',
 				callback() {
-					// protocol = new Protocol();
-					// protocol.activity = 'intervals';
-					// protocol.callback = () => { assignment(); };
-					// protocol.ID = mode + '.' + a++;
-					// protocol.settings.push({
-					// 	trials: 20,
-					// 	volume: true,
-					// 	level: 1,
-					// 	practice: false,
-					// });
-					// protocol.start(6);
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = () => { assessment(); };
-					protocol.ID = mode + '.' + a++;
-					const level = [127]
-					const range = [[39,51]];//centered on MIDI 45 (A2, 110 Hz), 57 (A3, 220 Hz), 69 (A4, 440 Hz)
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
 					
 					protocol.settings.push({
-						intervals: [4,7,12],
+						intervals: [5, 12],
+						words: ['Perfect 4th', 'Octave'],
 						level: 127,
 						practice: false,
 						range: [39, 51],
-						trials: 20,
+						trials: 15,
 						volume: true
 					});
-				
 					protocol.start(3);
 				},
 			},
 			{
-				option: 'Loudness of Pure Tones',
+				option: 'Major 2nd vs Minor 7th',
 				callback() {
-					harmonics({
-						alternatives: 3,
-						back: () => { layout.randomPlaylist(); },
-						chances: 3,
-						init: () => { activity.menu(); },
-						material: new Harmonics({
-							activity: 3,
-							difference: new Adaptive({rule:'exponential', value0:24, valueMax:24}),
-							f0: 0,
-							f1: 1000,
-							mode: 0,
-							title: 'Loudness Discrimination'
-						})
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [2, 10],
+						words: ['Major 2nd', 'Minor 7th'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
 					});
-				}
+					protocol.start(3);
+				},
+			},
+			{
+				option: 'Major 6th vs Minor 2nd',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [9, 1],
+						words: ['Major 6th', 'Minor 2nd'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
+					});
+					protocol.start(3);
+				},
 			},
 			{
 				option: 'Instrument Identification',
 				callback() {
-					let dummy = function(id){
+					
 						protocol = new Protocol();
 						protocol.activity = 'musescore';
-						protocol.callback = () => { assignment(); };
-						protocol.ID = id;
+						protocol.callback = layout.randomPlaylist;
+						protocol.ID = mode + '.' + a++;
 						const range = [[39,51],[51,63],[63,75],[75,87]], f0 = [110,220,440], instruments = ['piano','tenor sax'], path = ['data/musescore/3secpiano/','data/musescore/3sectenorsax/'];
 						for (let a = 0; a < range.length; a++) {
 							protocol.settings.push({
@@ -1125,60 +1140,245 @@ layout = {
 								mode: 1,
 								path: path,
 								range: range[a],
-								trials: 20,
+								trials: 15,
 								vocoder: false,
-								volume: true
+								volume: true,
+								snr: 6,
 							});
 						}
 						protocol.start(3);
-					}.bind(null,mode+'.'+a++)();
 				}
 			},
+		];
+
+		let mediumPlaylist = [
 			{
-				option: 'Consonants',
+				option: 'Melodic Contour - medium',
+				callback() { 
+					protocol = new Protocol();
+					protocol.activity = 'musanim';
+					protocol.ID = getID();
+					const spacings = [2];
+					for (let a = 0; a < spacings.length; a++) {
+						protocol.settings.push({
+							spacing:spacings[a], //material: new Musanim({spacing:spacings[a]})
+							trials: 15
+						});
+					}
+					protocol.start(3);
+				},
+			},
+			// interval training
+			{
+				option: 'Pefect 5th vs Major 3rd',
 				callback() {
-					consonants({
-						back: () => { layout.randomPlaylist(); },
-						init: () => { activity.menu(); }
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [7, 4],
+						words: ['Perfect 5th', 'Major 3rd'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
 					});
-				}
+					protocol.start(3);
+				},
 			},
 			{
-				option: 'Pure Tone Frequency Discrimination',
+				option: 'Major 2nd vs Perfect 5th vs Octave',
 				callback() {
-					harmonics({
-						alternatives: 2,
-						back: () => { layout.randomPlaylist(); },
-						chances: 3,
-						init: () => { activity.menu(); },
-						material: new Harmonics({
-							activity: 1,
-							duration: .4,
-							f0: 0,
-							f1: 1000,
-							mode: 0,
-							title: 'Frequency Discrimination'
-						})
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [2, 7, 12],
+						words: ['Major 2nd', 'Perfect 5th', 'Octave'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
 					});
+					protocol.start(3);
+				},
+			},
+			{
+				option: 'Minor 2nd vs Perfect 4th',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [1, 5],
+						words: ['Minor 2nd', 'Perfect 4th'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
+					});
+					protocol.start(3);
+				},
+			},
+			{
+				option: 'Pitch Discrimination for Piano and Saxophone',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'musescorePitchShifted';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					const instruments = ['piano','tenor sax'];
+					const range = [[39,51],[51,63],[63,75],[75,87]];
+					for (let a = 0; a < 1; a++) {
+						for (let b = 0; b < instruments.length; b++) {
+							protocol.settings.push({
+								chances: -1,
+								instrument: b,
+								instrument2: b,
+								mode: 0,
+								range: range[a],
+								timbreMode: 0,
+								vocoder: false,
+								volume: true,
+								trials: 10,
+							});
+						}
+					}
+					protocol.start(2);
 				}
 			}
 		];
 
-		// TODO: select correct playlist
+		let hardPlaylist = [
+			{
+				option: 'Melodic Contour - hard',
+				callback() { 
+					protocol = new Protocol();
+					protocol.activity = 'musanim';
+					protocol.ID = getID();
+					const spacings = [1];
+					for (let a = 0; a < spacings.length; a++) {
+						protocol.settings.push({
+							spacing:spacings[a], //material: new Musanim({spacing:spacings[a]})
+							trials: 15
+						});
+					}
+					protocol.start(3);
+				},
+			},
+			// interval training
+			{
+				option: 'Minor 2nd vs Major 3rd',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [1, 4],
+						words: ['Minor 2nd', 'Major 3rd'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
+					});
+					protocol.start(3);
+				},
+			},
+			{
+				option: 'Major 2nd vs Perfect 4th vs Major 6th',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [2, 5, 9],
+						words: ['Major 2nd', 'Perfect 4th', 'Major 6th'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
+					});
+					protocol.start(3);
+				},
+			},
+			{
+				option: 'Major 6th vs Octave',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'intervals';
+					protocol.callback = layout.randomPlaylist
+					protocol.ID = getID();
+					
+					protocol.settings.push({
+						intervals: [9, 12],
+						words: ['Major 6th', 'Octave'],
+						level: 127,
+						practice: false,
+						range: [39, 51],
+						trials: 15,
+						volume: true
+					});
+					protocol.start(3);
+				},
+			},
+			{
+				option: 'Pitch Discrimination with Mixed Instruments',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'musescorePitchShifted';
+					protocol.callback = () => { assignment(); };
+					protocol.ID = getID();
+					const instruments = ['piano','tenor sax'];
+					const range = [[39,51],[51,63],[63,75],[75,87]];
+					const path = ['data/musescore/pitchshiftedpiano/','data/musescore/pitchshiftedtenorsax/'];
+					for (let a = 0; a < range.length; a++) {
+						protocol.settings.push({
+							chances: -1,
+							instruments: instruments,
+							mode: 0,
+							range: range[a],
+							timbreMode: 2,
+							vocoder: false,
+							volume: true,
+							trials: 10
+						});
+					}
+					protocol.start(1);
+				}
+			}
+		];
+
+		let playlist;
 		switch (difficulty) {
 		case 'easy':
-			console.log('ez money');
+			playlist = easyPlaylist;
 			break;
 		case 'medium':
-			console.log('medium i suppose');
+			playlist = mediumPlaylist;
 			break;
 		case 'hard':
-			console.log('2hard');
+			playlist = hardPlaylist;
 			break;
 		default:
-			console.log('uh oh');
+			playlist = easyPlaylist;
 		}
-		let playlist = easyPlaylist;
+		playlist = playlist.concat(neutralPlaylist).shuffle();
+		
 
 		// using map() function to isolate properties of playlist
 		// which is technically not efficient but it does the job
@@ -1198,6 +1398,9 @@ layout = {
 		create another footer function. I'm lazy :) 
 		*/
 		let footer = layout.footer();
+
+		while (footer.firstChild)
+			footer.removeChild(footer.firstChild);
 
 		// easy
 		var button = document.createElement('button');
@@ -1234,6 +1437,11 @@ layout = {
 		button.style.width = '7em';
 		jQuery(button).button();
 		footer.appendChild(button);
+
+		footer.style.display = 'flex';
+		footer.style.justifyContent = 'center';
+
+		
 
 	},
 	percept: function () {
