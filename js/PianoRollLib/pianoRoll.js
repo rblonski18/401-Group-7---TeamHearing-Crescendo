@@ -61,7 +61,7 @@ export function createRoll(domParent, instrument, length, audioCtx){
             square.id = "pianoRollSquare_" + numRollSquares;
             numRollSquares += 1;
 
-            square.onclick = () => roll.toggleSquare(instrument.notes.length - 1 - i, j);
+            square.onclick = () => roll.clickSquare(instrument.notes.length - 1 - i, j);
 
             rollSquares.push(square);
 
@@ -298,6 +298,7 @@ function pianoRoll(instrument, length, dom, audioCtx){
     this.instrument = instrument;
     this.audioCtx = audioCtx;
     this.length = length;
+    this.isInteractionEnabled = true;
 
     this._dom = dom;
     this._beatStates = new beat(instrument.notes.length, length);
@@ -306,6 +307,13 @@ function pianoRoll(instrument, length, dom, audioCtx){
     this._bpm = 70;
 
     this._beatListeners = []
+
+    this.clickSquare = function(noteIndex, beatIndex){
+        if(this.isInteractionEnabled){
+            this.clearSquareStyles(beatIndex, noteIndex);
+            this.toggleSquare(noteIndex, beatIndex);
+        }
+    }
 
     this.toggleSquare = function(noteIndex, beatIndex){
         let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
