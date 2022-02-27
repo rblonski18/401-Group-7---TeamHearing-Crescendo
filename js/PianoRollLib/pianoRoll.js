@@ -304,6 +304,7 @@ function pianoRoll(instrument, length, dom, audioCtx){
     this._beatStates = new beat(instrument.notes.length, length);
     this._isPlaying = false;
     this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
+    this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
     this._bpm = 70;
 
     this._beatListeners = []
@@ -349,6 +350,11 @@ function pianoRoll(instrument, length, dom, audioCtx){
         this._playHeadAnimator.play(bpm, loop, startBeat, endBeat);
 
         this._isPlaying = true;
+    }
+
+    this.resetPlayProgress = function(){
+        this.stop();
+        this._playHeadAnimator.reset();
     }
 
     this.stop = function(){
@@ -526,6 +532,7 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
         if(this._pos >= this._getPlayingGridLength() && !this._isLooping){
             this.stop();
+            this.onFinishPlaying?.();
         }
 
         this._lastFrameTime = this._audioCtx.currentTime;
