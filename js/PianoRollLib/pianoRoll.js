@@ -414,6 +414,24 @@ function pianoRoll(instrument, length, dom, audioCtx){
         this._dom.squares[beatIndex + noteIndex * length].classList.remove(styleClass);
     }
 
+    this.clearSquareStyles = function(beatIndex, noteIndex){
+        this._dom.squares[beatIndex + noteIndex * length].className = "";
+
+        this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquare");
+
+        if(this._beatStates.isBeatToggled(beatIndex, noteIndex)){
+            this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
+        }
+    }
+
+    this.clearAllSquareStyles = function(){
+        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
+            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
+                this.clearSquareStyles(beatIndex, noteIndex);
+            }
+        }
+    }
+
     this.getBeatStates = function(){
         return this._beatStates.getCopy();
     }
