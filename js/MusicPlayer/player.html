@@ -13,6 +13,7 @@
   
   <!-- Load the custom CSS style file -->
   <link rel="stylesheet" type="text/css" href="player.css">
+  <link rel="stylesheet" type="text/css" href="notes.css">
 </head>
 <body>
   <div class="player">
@@ -21,6 +22,13 @@
     <div class="details">
       <div class="now-playing">PLAYING x OF y</div>
       <div class="track-art"></div>
+      <div id="container">
+        <div id="boo"></div>
+      </div>
+      <div id="controls">
+        <button id='add-note'>Add Note</button>
+        <button id='right-answer'>Right Answer</button>
+      </div>
       <div class="track-name">Track Name</div>
       <div class="track-artist">Track Artist</div>
     </div>
@@ -30,7 +38,7 @@
       <div class="prev-track" onclick="prevTrack()">
         <i class="fa fa-step-backward fa-2x"></i>
       </div>
-      <div class="playpause-track" onclick="playpauseTrack()">
+      <div id="play-pause-button" class="playpause-track" onclick="playpauseTrack()">
         <i class="fa fa-play-circle fa-5x"></i>
       </div>
       <div class="next-track" onclick="nextTrack()">
@@ -56,6 +64,10 @@
   </div>
   
   <!-- Load the main script for the player -->
+  <script src="https://unpkg.com/vexflow@4.0.0/build/vexflow.js" crossorigin></script>
+  <script src="https://unpkg.com/vexflow@4.0.0/build/vexflow-debug.js" crossorigin></script>
+
   <script src="player.js"></script>
+  <script src="notes.js"></script>
 </body>
 </html>

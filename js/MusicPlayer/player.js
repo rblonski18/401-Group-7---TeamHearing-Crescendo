@@ -19,6 +19,11 @@ let curr_track = document.createElement('audio');
   
 let track_list = [
   {
+    name: "Twinkle Twinkle Little Star",
+    artist: "Jane Taylor",
+    path: "TwinkleTwinkle.mp3"
+  },
+  {
     name: "Brandenburg Concerto",
     artist: "Johann Sebastian Bach",
     path: "BrandenBurg-Concerto.mp3"
