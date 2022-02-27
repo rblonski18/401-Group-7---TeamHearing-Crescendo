@@ -1,9 +1,24 @@
-import { beatFromEncodedState } from "./pianoRoll.js";
+import { beatFromEncodedState, createRoll } from "./pianoRoll.js";
 
-export function beatChecker(expectedBeat, pianoRoll){
+export function beatChecker(pianoRoll){
     pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
 
+    this._isCurrentlyChecking = false;
+    this._expectedBeat = undefined;
+
+    this.setCurrentlyChecking = function(value){
+        this._isCurrentlyChecking = value;
+    }
+
+    this.setExpectedBeat = function(expectedBeat){
+        this._expectedBeat = expectedBeat;
+    }
+
     this._onBeatPlay = function(beatIndex, time){
+        if(!this._isCurrentlyChecking){
+            return;
+        }
+
         // The beat is played at an arbitrary point in the future, we must delay 
         // calling the callbacks until approx that time
         const delay = Math.floor((time - pianoRoll.audioCtx.currentTime) * 1000);
@@ -11,7 +26,7 @@ export function beatChecker(expectedBeat, pianoRoll){
         var isCorrect = true;
 
         for(let i = 0; i < pianoRoll.instrument.notes.length; i++){
-            if(expectedBeat.isBeatToggled(beatIndex, i) != pianoRoll.isBeatToggled(beatIndex, i)){
+            if(this._expectedBeat.isBeatToggled(beatIndex, i) != pianoRoll.isBeatToggled(beatIndex, i)){
                 isCorrect = false;
 
                 this._callDelayed(() => this.onIncorrectNote?.(beatIndex, i), delay);
@@ -49,34 +64,136 @@ export function beatChecker(expectedBeat, pianoRoll){
     }
 
     this._onBeatSucceed = function(){
-        pianoRoll.stop();
         this.onSuccess?.();
     }
 }
 
-export function createGamePianoRoll(domParent){
+export function createGamePianoRoll(domParent, instrument, length, audioCtx){
     // TODO: create a custom piano roll controller to control the piano roll.
     // This controller should allow for testing a runthrough of the level or 
     // submitting a sequence. Input should be disabled when the piano roll is
     // running in submit mode
     // A gamestate object should also be created 
+
+    const stackContainer = document.createElement("div");
+    stackContainer.classList.add("gameSpace");
+    domParent.appendChild(stackContainer);
+
+    const wavesurferContainer = document.createElement("div");
+    wavesurferContainer.classList.add("wavesurfContainer");
+    wavesurferContainer.id = "waveform";
+    wavesurferContainer.style.width = "800px"
+    stackContainer.appendChild(wavesurferContainer);
+    
+    const wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'black',
+        progressColor: 'orange',
+        height: 100,
+        interact: false
+    });
+
+    wavesurfer.on('finish', () => wavesurfer.seekTo(0));
+    
+
+    wavesurfer.load("./sounds/levels/level1.wav")
+
+
+    const pianoRollContainer = document.createElement("div");
+    pianoRollContainer.classList.add("pianoRollContainer");
+    stackContainer.appendChild(pianoRollContainer);
+
+    const pianoRoll = createRoll(pianoRollContainer, instrument, length, audioCtx);
+    
+    const newGame = new game(pianoRoll);
+
+    const controls = document.createElement("div");
+    controls.classList.add("pianoRollRow");
+    controls.classList.add("pianoRollControls");
+    pianoRollContainer.appendChild(controls);
+
+    const listenBtn = createControllerButton("Listen", () => {
+        wavesurfer.play(0);
+    });
+
+    controls.appendChild(listenBtn);
+
+    const playBtn = createControllerButton("Play", () => {
+        pianoRoll.resetPlayProgress();
+        pianoRoll.play(newGame.currentLevel.bpm, false);
+    });
+
+    controls.appendChild(playBtn);
+
+    const submitBtn = createControllerButton("Submit", () => newGame.submitSolution());
+
+    controls.appendChild(submitBtn);
+
+    return {
+        game: newGame
+    }
 }
 
-export function startLevel(expectedBeat, pianoRoll){
-    const checker = new beatChecker(expectedBeat, pianoRoll);
-    checker.onCorrectNote = (beatIndex, noteIndex) => {
-        if(expectedBeat.isBeatToggled(beatIndex, noteIndex)){
+function createControllerButton(text, onClick){
+    const btn = document.createElement("button");
+    btn.classList.add("pianoRollButton");
+    btn.innerText = text;
+    btn.onclick = onClick;
+
+    return btn;
+}
+
+
+function game(pianoRoll){
+    this._beatChecker = new beatChecker(pianoRoll);
+
+    this._beatChecker.onCorrectNote = (i, j) => this._onCorrectNote(i, j);
+    this._beatChecker.onIncorrectNote = (i, j) => this._onIncorrectNote(i, j);
+    this._beatChecker.onFail = () => this._onFail();
+    this._beatChecker.onSuccess = () => this._onSuccess();
+
+    this.currentLevel = undefined;
+
+    this.startLevel = function(level){
+        this.currentLevel = level;
+        this._beatChecker.setExpectedBeat(level.beat);
+    }
+
+    this.submitSolution = function(){
+        this._beatChecker.setCurrentlyChecking(true);
+        pianoRoll.isInteractionEnabled = false;
+        
+        pianoRoll.resetPlayProgress();
+        pianoRoll.play(this.currentLevel.bpm, false);
+    }
+
+    this._onCorrectNote = function(beatIndex, noteIndex){
+        if(this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)){
             pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareSucceeded");
         }
     };
 
-    checker.onIncorrectNote = (beatIndex, noteIndex) => {
-        if(!expectedBeat.isBeatToggled(beatIndex, noteIndex)){
+    this._onIncorrectNote = function(beatIndex, noteIndex){
+        if(!this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)){
             pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareFailed");
         }
     }
+
+    this._onFail = function(){
+        this._beatChecker.setCurrentlyChecking(false);
+        pianoRoll.isInteractionEnabled = true;
+    }
+
+    this._onSuccess = function(){
+        this._beatChecker.setCurrentlyChecking(false);
+    }
+}
+
+function level(beat, bpm){
+    this.beat = beat;
+    this.bpm = bpm;
 }
 
 export const levels = [
-    beatFromEncodedState(3, 16, "qqoICIGA")
+    new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70)
 ]

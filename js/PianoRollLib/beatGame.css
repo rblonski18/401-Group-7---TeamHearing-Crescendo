@@ -1,0 +1,14 @@
+.gameSpace{
+    display: flex;
+    flex-direction: column;
+}
+
+.wavesurfContainer{
+    width: 800px;
+    height: 100px;
+    margin: 10px 0px 10px 100px;
+}
+
+.pianoRollContainer{
+    width: 100%;
+}
