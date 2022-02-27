@@ -539,7 +539,12 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
         while(this._nextNoteTime < this._audioCtx.currentTime + LOOK_AHEAD){
             beatCallback(this._nextUnplayedNote, this._nextNoteTime);
             this._nextNoteTime += (60 / this._bpm) / 4;
-            this._nextUnplayedNote = (this._nextUnplayedNote + 1) % this._getNumBeatsPlaying();
+
+            if(this._nextUnplayedNote + 1 >= this._getNumBeatsPlaying() && !this._isLooping){
+                break;
+            }
+
+            this._nextUnplayedNote = (this._nextUnplayedNote + 1) % this._getNumBeatsPlaying();            
         }
 
         const x = this._pos;
