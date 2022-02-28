@@ -7,6 +7,7 @@ function assignment(back) {
 	let chances = version == 'alpha' && subuser.ID == 3 ? 1 : 4;
 	let reps = version == 'alpha' && subuser.ID == 3 ? 1 : 3;
 
+
 	// Loudness Levels
 	options.push('Loudness Levels');
 	callbacks.push(function(id){
@@ -15,77 +16,103 @@ function assignment(back) {
 		gui.loudness(false,1e3);
 	}.bind(null,mode+'.'+a++));
 
-	// Detection Thresholds (500, 1000, 2000 Hz)
-	options.push('Pure Tone Detection Thresholds (500, 1000, 2000 Hz)');
+	// Sequencing (Percussion)
+	options.push('Sequence Recreation (Percussion)');
 	callbacks.push(function(id){
 		protocol = new Protocol();
 		protocol.activity = 'sequence';
 		protocol.callback = ()=>{assignment()};
 		protocol.ID = id;
-		protocol.random = false;
-		const f1 = [500,1000,2000];
-		for (let a = 0; a < f1.length; a++) {
-			protocol.settings.push({
-				activity: 0,
-				alternatives: 3,
-				attack: .02,
-				chances: chances,
-				duration: .4,
-				f0: 0,
-				f1: f1[a],
-				method: 0,
-				release: .02,
-				volume: {message: 'Set the volume to be soft but audible.'}
-			})
-		}
-		protocol.start(reps);
-	}.bind(null,mode+'.'+a++));
-
-	// Frequency Discrimination (1 kHz)
-	options.push('Pure Tone Frequency Discrimination (1 kHz)');
-	callbacks.push(function(id){
-		protocol = new Protocol();
-		protocol.activity = 'sequence';
-		protocol.callback = ()=> { assignment(); };
-		protocol.ID = id;
-		protocol.open = (callback) => { gui.gain({callback:callback}); };
 		protocol.settings.push({
-			activity: 1,
-			attack: .02,
-			chances: chances,
-			f0: 0,
-			f1: 1e3,
-			f1_rove: 1/4,
-			method: 0,
-			release: .02,
-			volume: false
+			mode: 0
 		});
 		protocol.start(reps);
-	}.bind(null,mode+'.'+a++));
+		
+	}.bind(null,mode+"."+a++));
 
-	// Fundamental Frequency Discrimination (110 Hz)
-	options.push('Fundamental Frequency Discrimination (110 Hz)');
+	options.push('Sequence Recreation (Melodic)');
 	callbacks.push(function(id){
 		protocol = new Protocol();
 		protocol.activity = 'sequence';
 		protocol.callback = ()=>{assignment()};
 		protocol.ID = id;
-		protocol.open = (callback) => { gui.gain({callback:callback}); };
 		protocol.settings.push({
-			activity: 2,
-			attack: .02,
-			chances: chances,
-			depth: 100,
-			f0: 110,
-			f0_rove: 1/4,
-			f1: 1e3,
-			f1_rove: 0,
-			method: 1,
-			release: .02,
-			volume: false
+			mode: 1
 		});
 		protocol.start(reps);
-	}.bind(null,mode+'.'+a++));
+	}.bind(null,mode+"."+a++));
+
+	// // Detection Thresholds (500, 1000, 2000 Hz)
+	// options.push('Pure Tone Detection Thresholds (500, 1000, 2000 Hz)');
+	// callbacks.push(function(id){
+	// 	protocol = new Protocol();
+	// 	protocol.activity = 'sequence';
+	// 	protocol.callback = ()=>{assignment()};
+	// 	protocol.ID = id;
+	// 	protocol.random = false;
+	// 	const f1 = [500,1000,2000];
+	// 	for (let a = 0; a < f1.length; a++) {
+	// 		protocol.settings.push({
+	// 			activity: 0,
+	// 			alternatives: 3,
+	// 			attack: .02,
+	// 			chances: chances,
+	// 			duration: .4,
+	// 			f0: 0,
+	// 			f1: f1[a],
+	// 			method: 0,
+	// 			release: .02,
+	// 			volume: {message: 'Set the volume to be soft but audible.'}
+	// 		})
+	// 	}
+	// 	protocol.start(reps);
+	// }.bind(null,mode+'.'+a++));
+
+	// // Frequency Discrimination (1 kHz)
+	// options.push('Pure Tone Frequency Discrimination (1 kHz)');
+	// callbacks.push(function(id){
+	// 	protocol = new Protocol();
+	// 	protocol.activity = 'sequence';
+	// 	protocol.callback = ()=> { assignment(); };
+	// 	protocol.ID = id;
+	// 	protocol.open = (callback) => { gui.gain({callback:callback}); };
+	// 	protocol.settings.push({
+	// 		activity: 1,
+	// 		attack: .02,
+	// 		chances: chances,
+	// 		f0: 0,
+	// 		f1: 1e3,
+	// 		f1_rove: 1/4,
+	// 		method: 0,
+	// 		release: .02,
+	// 		volume: false
+	// 	});
+	// 	protocol.start(reps);
+	// }.bind(null,mode+'.'+a++));
+
+	// // Fundamental Frequency Discrimination (110 Hz)
+	// options.push('Fundamental Frequency Discrimination (110 Hz)');
+	// callbacks.push(function(id){
+	// 	protocol = new Protocol();
+	// 	protocol.activity = 'sequence';
+	// 	protocol.callback = ()=>{assignment()};
+	// 	protocol.ID = id;
+	// 	protocol.open = (callback) => { gui.gain({callback:callback}); };
+	// 	protocol.settings.push({
+	// 		activity: 2,
+	// 		attack: .02,
+	// 		chances: chances,
+	// 		depth: 100,
+	// 		f0: 110,
+	// 		f0_rove: 1/4,
+	// 		f1: 1e3,
+	// 		f1_rove: 0,
+	// 		method: 1,
+	// 		release: .02,
+	// 		volume: false
+	// 	});
+	// 	protocol.start(reps);
+	// }.bind(null,mode+'.'+a++));
 
 	// Stream Segregation (Pure Tones)
 	// options.push('Stream Segregation (Pure Tones)');
