@@ -8,6 +8,7 @@ function sequence(settings) {
 	activity.init();
 }
 function Sequence(settings) {
+	// most of these will be removed, but still need to distinguish what can be used
 	this.A = [];
 	this.A_frequency = 1000;
 	this.A_fm = 0;
@@ -33,6 +34,8 @@ function Sequence(settings) {
 	this.period = .4;
 	this.responses = [];
 	this.stream = [];
+
+	this.playSequence = [];
 	this.trial = 0;
 	this.trials = Infinity;
 	this.mode = 0;
@@ -40,7 +43,7 @@ function Sequence(settings) {
 	// overrides
 	for (let key in settings) { this[key]=settings[key]; }
 	
-	//
+	// Unnecessary?
 	switch(this.method){
 		case 'Complex Tone':
 			this.A = dsp.ramp(dsp.complex(this.duration,this.A_fm));
@@ -52,6 +55,7 @@ function Sequence(settings) {
 	}
 	
 	// keypress
+	// Unnecessary?
 	document.onkeypress = function (e) {
 		e = e || window.event;
 		if (e.keyCode == 32 || e.key == 0) { jQuery('#repeat').click(); }
@@ -63,6 +67,9 @@ function Sequence(settings) {
 		if (e.key == '?') { activity.settings(); }
 	};
 };
+
+// Method for playing the next round
+// Need to replace to increase difficulty using piano roll library
 Sequence.prototype.next = function() {
 	let that = this;
 	
@@ -90,22 +97,23 @@ Sequence.prototype.next = function() {
 		};
 		
 		// save to database
-		let message = 'Delay detection: '+String(1e3*this.delay.value.toFixed(3))+' ms';
-		jQuery.ajax({
-			data: data,
-			error: function(jqXHR,textStatus,errorThrown){alert(errorThrown)},
-			success: function(data, status) {
-				if (protocol.active) {
-					protocol.IDs.push(data);
-					layout.message('Stream Segregation', message, ()=>{protocol.next()});
-				} else {
-					layout.message('Stream Segregation', message, ()=>{that.test()});
-				}
-			},
-			type: 'POST',
-			url: 'version/'+version+'/php/stream.php'
-		});
-		return;
+		// currently off
+		// let message = 'Delay detection: '+String(1e3*this.delay.value.toFixed(3))+' ms';
+		// jQuery.ajax({
+		// 	data: data,
+		// 	error: function(jqXHR,textStatus,errorThrown){alert(errorThrown)},
+		// 	success: function(data, status) {
+		// 		if (protocol.active) {
+		// 			protocol.IDs.push(data);
+		// 			layout.message('Stream Segregation', message, ()=>{protocol.next()});
+		// 		} else {
+		// 			layout.message('Stream Segregation', message, ()=>{that.test()});
+		// 		}
+		// 	},
+		// 	type: 'POST',
+		// 	url: 'version/'+version+'/php/stream.php'
+		// });
+		// return;
 	}
 	
 	// enable buttons
@@ -143,9 +151,12 @@ Sequence.prototype.next = function() {
 	this.calls.push(this.call);
 	
 	// stimulus
-	this.stimulus();
+	this.sound();
 }
-Sequence.prototype.stimulus = function() {
+
+// Method used to play the tone that user needs to recreate
+// Method will have cases depending on mode (percussion vs melodic)
+Sequence.prototype.sound = function() {
 	//
 	const A = dsp.gain([...this.A],this.A_gain);
 	const B = dsp.gain([...this.B],this.B_gain);
@@ -176,6 +187,8 @@ Sequence.prototype.stimulus = function() {
 	processor.play(stream);
 	return stream;
 }
+
+// Page layout code
 Sequence.prototype.test = function(){
 	let that = this;
 	
@@ -220,143 +233,149 @@ Sequence.prototype.test = function(){
 	
 	// button table
     // Remove (table for main buttons, replace with piano roll)
-	var table = document.createElement('table');
-	table.id = 'response_table';
-	table.style.height = '100%';
-	table.style.width = '100%';
-	container.appendChild(table);
+	// var table = document.createElement('table');
+	// table.id = 'response_table';
+	// table.style.height = '100%';
+	// table.style.width = '100%';
+	// container.appendChild(table);
+
+	//TODO: Will include piano roll setup
+
+
+	// TODO: Add logic for checking if sequence is correct
+	// may add method
 
 	// response buttons
     // Remove, actually creates the buttons(to be replaced)
-	const words = ['Early','Late'];
-	var cells = words.length;
-	for (let a = 0; a < words.length; a++) {				
-		// insert cell into table
-		if (a%cells == 0) {
-			var row = table.insertRow(a/cells);
-			row.style.height = '100%';
-			row.style.width = '100%';
-		}
-		var cell = row.insertCell(a%cells);
-		cell.style.width = '25%';
+	// const words = ['Early','Late'];
+	// var cells = words.length;
+	// for (let a = 0; a < words.length; a++) {				
+	// 	// insert cell into table
+	// 	if (a%cells == 0) {
+	// 		var row = table.insertRow(a/cells);
+	// 		row.style.height = '100%';
+	// 		row.style.width = '100%';
+	// 	}
+	// 	var cell = row.insertCell(a%cells);
+	// 	cell.style.width = '25%';
 
-		// response buttons
-		var button = document.createElement('button');
-		button.className = 'response';
-		button.id = 'afc'+a;
-		button.index = a;
-		button.innerHTML = words[a];
-		button.onclick = () => {
-			// disable buttons
-			if (this.disabled) { return; } 
-			else { 
-				this.disabled = true;
-				for (let a = 0; a < 2; a++) {
-					jQuery('#afc'+a).button('option','disabled',true);
-				}
-			}
+	// 	// response buttons
+	// 	var button = document.createElement('button');
+	// 	button.className = 'response';
+	// 	button.id = 'afc'+a;
+	// 	button.index = a;
+	// 	button.innerHTML = words[a];
+	// 	button.onclick = () => {
+	// 		// disable buttons
+	// 		if (this.disabled) { return; } 
+	// 		else { 
+	// 			this.disabled = true;
+	// 			for (let a = 0; a < 2; a++) {
+	// 				jQuery('#afc'+a).button('option','disabled',true);
+	// 			}
+	// 		}
 			
-			// check if correct
-			this.correct = (a == this.call);
+	// 		// check if correct
+	// 		this.correct = (a == this.call);
 			
-			// response log
-			this.responses.push(a);
+	// 		// response log
+	// 		this.responses.push(a);
 			
-			// feedback
-			if (this.feedback) {
-				if (this.correct) {
-					// feedback
-					var img = document.createElement('img');
-					img.src = 'images/check.png';
-					img.style.bottom = '10%';
-					img.style.height = '40%';
-					img.style.position = 'absolute';
-					img.style.right = '10%';
-					img.style.zIndex = '10';
-					document.getElementById('afc'+a).appendChild(img);
-					jQuery(img).fadeOut();
+	// 		// feedback
+	// 		if (this.feedback) {
+	// 			if (this.correct) {
+	// 				// feedback
+	// 				var img = document.createElement('img');
+	// 				img.src = 'images/check.png';
+	// 				img.style.bottom = '10%';
+	// 				img.style.height = '40%';
+	// 				img.style.position = 'absolute';
+	// 				img.style.right = '10%';
+	// 				img.style.zIndex = '10';
+	// 				document.getElementById('afc'+a).appendChild(img);
+	// 				jQuery(img).fadeOut();
 					
-					// score indicator
-					if (this.trials == Infinity) {
-						score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%';
-					} else if (that.trials < 20 && windowwidth > 4) {
-						document.getElementById('score'+this.trial).src = 'images/score-yay.png';
-					} else {
-						score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%'+', remaining: '+String(this.trials-this.trial-1);
-					}
-				} else {
-					// chance indicator
-					if (this.chances != Infinity) {
-						document.getElementById('chance'+this.chance).src = 'images/score-nay.png';
-					}
+	// 				// score indicator
+	// 				if (this.trials == Infinity) {
+	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%';
+	// 				} else if (that.trials < 20 && windowwidth > 4) {
+	// 					document.getElementById('score'+this.trial).src = 'images/score-yay.png';
+	// 				} else {
+	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%'+', remaining: '+String(this.trials-this.trial-1);
+	// 				}
+	// 			} else {
+	// 				// chance indicator
+	// 				if (this.chances != Infinity) {
+	// 					document.getElementById('chance'+this.chance).src = 'images/score-nay.png';
+	// 				}
 					
-					// score indicator
-					if (this.trials == Infinity) {
-						score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%';
-					} else if (this.trials < 20 && windowwidth > 4) {
-						document.getElementById('score'+this.trial).src = 'images/score-nay.png';
-					} else if (this.trials != Infinity) {
-						score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(1)+'%'+', remaining:'+String(this.trials-this.trial-1);
-					}						
+	// 				// score indicator
+	// 				if (this.trials == Infinity) {
+	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%';
+	// 				} else if (this.trials < 20 && windowwidth > 4) {
+	// 					document.getElementById('score'+this.trial).src = 'images/score-nay.png';
+	// 				} else if (this.trials != Infinity) {
+	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(1)+'%'+', remaining:'+String(this.trials-this.trial-1);
+	// 				}						
 				
-					// feedback
-					var img = document.createElement('img');
-					img.src = 'images/X.png';
-					img.style.bottom = '10%';
-					img.style.height = '40%';
-					img.style.position = 'absolute';
-					img.style.right = '10%';
-					img.style.zIndex = '10';
-					document.getElementById('afc'+a).appendChild(img);
-					jQuery(img).fadeOut();
+	// 				// feedback
+	// 				var img = document.createElement('img');
+	// 				img.src = 'images/X.png';
+	// 				img.style.bottom = '10%';
+	// 				img.style.height = '40%';
+	// 				img.style.position = 'absolute';
+	// 				img.style.right = '10%';
+	// 				img.style.zIndex = '10';
+	// 				document.getElementById('afc'+a).appendChild(img);
+	// 				jQuery(img).fadeOut();
 				
-					// practice
-					if (this.practice) {
-						// message
-						var item = that.material.words
-								? that.material.active
-									? that.material.words[that.material.active[that.call]]
-									: that.material.words[that.call]
-								: that.call+1,
-							message = that.mode == 'oddball'
-								? 'Repeat for practice.'
-								: 'Click on any item to practice.';
-						document.getElementById('message').innerHTML 
-						= 'The correct answer was "'
-						+'<span style=\'color:blue\'>'+item+'</span>'+'".<br>'
-						+message;
-						//document.getElementById('repeat').style.visibility = 'hidden';
-						document.getElementById('next').style.display = '';
-						that.modeHold = that.mode;
-						that.mode = 'practice';
+	// 				// practice
+	// 				if (this.practice) {
+	// 					// message
+	// 					var item = that.material.words
+	// 							? that.material.active
+	// 								? that.material.words[that.material.active[that.call]]
+	// 								: that.material.words[that.call]
+	// 							: that.call+1,
+	// 						message = that.mode == 'oddball'
+	// 							? 'Repeat for practice.'
+	// 							: 'Click on any item to practice.';
+	// 					document.getElementById('message').innerHTML 
+	// 					= 'The correct answer was "'
+	// 					+'<span style=\'color:blue\'>'+item+'</span>'+'".<br>'
+	// 					+message;
+	// 					//document.getElementById('repeat').style.visibility = 'hidden';
+	// 					document.getElementById('next').style.display = '';
+	// 					that.modeHold = that.mode;
+	// 					that.mode = 'practice';
 						
-						// enable buttons
-						that.disabled = false;
-						for (let a = 0; a < that.alternatives; a++) {
-							jQuery('#afc'+a).button('option','disabled',false);
-						}
-						return;
-					}
-				}
-			}
+	// 					// enable buttons
+	// 					that.disabled = false;
+	// 					for (let a = 0; a < that.alternatives; a++) {
+	// 						jQuery('#afc'+a).button('option','disabled',false);
+	// 					}
+	// 					return;
+	// 				}
+	// 			}
+	// 		}
 			
-			// lost chance
-			if (!this.correct) { this.chance++; }
+	// 		// lost chance
+	// 		if (!this.correct) { this.chance++; }
 			
-			// next
-			setTimeout(()=>{this.next()},1e3);
-		};
-		button.style.fontSize = '400%';
-		button.style.height = '100%';
-		button.style.marginLeft = '5%';
-		button.style.width = '90%';
-		button.value = 0;
-		jQuery(button).button();
+	// 		// next
+	// 		setTimeout(()=>{this.next()},1e3);
+	// 	};
+	// 	button.style.fontSize = '400%';
+	// 	button.style.height = '100%';
+	// 	button.style.marginLeft = '5%';
+	// 	button.style.width = '90%';
+	// 	button.value = 0;
+	// 	jQuery(button).button();
 
-		// button in cell
-		cell.appendChild(button);
-		if(iOS){FastClick(button)}
-	}
+	// 	// button in cell
+	// 	cell.appendChild(button);
+	// 	if(iOS){FastClick(button)}
+	// }
 	
     // bottom rectangle div, unsure yet
 	// controls
@@ -374,7 +393,7 @@ Sequence.prototype.test = function(){
     // actual message inside above div, can be changed or removed
 	var message = document.createElement('span');
 	message.id = 'message';
-	message.innerHTML = 'Was the last note in the pattern early or late?';
+	message.innerHTML = 'Match the sequence of notes.';
 	message.style.display = 'inline-block';
 	message.style.fontSize = '100%';
 	message.style.fontWeight = 'bold';
@@ -406,7 +425,7 @@ Sequence.prototype.test = function(){
 	var button = document.createElement('button');
 	button.id = 'repeat';
 	button.innerHTML = 'repeat';
-	button.onclick = () => { if(this.disabled){return} this.stimulus(); };
+	button.onclick = () => { if(this.disabled){return} this.sound(); };
 	button.style.cssFloat = 'right';
 	button.style.display = 'inline';
 	button.style.height = '100%';
@@ -417,27 +436,28 @@ Sequence.prototype.test = function(){
 	
 	// controls: plot
     // also unneeded, will likely have waveform instead
-	if (debug) {
-		var button = document.createElement('button');
-		button.id = 'plot';
-		button.innerHTML = 'plot';
-		button.onclick = function () {
-			x = that.stimulus();
-			dsp.plot(x);
-		};
-		button.style.cssFloat = 'right';
-		button.style.height = '100%';
-		button.style.visibility = 'visible';
-		jQuery(button).button();
-		controls.appendChild(button);
-		if (iOS) { FastClick(button); }
-	}
+	// if (debug) {
+	// 	var button = document.createElement('button');
+	// 	button.id = 'plot';
+	// 	button.innerHTML = 'plot';
+	// 	button.onclick = function () {
+	// 		x = that.sound();
+	// 		dsp.plot(x);
+	// 	};
+	// 	button.style.cssFloat = 'right';
+	// 	button.style.height = '100%';
+	// 	button.style.visibility = 'visible';
+	// 	jQuery(button).button();
+	// 	controls.appendChild(button);
+	// 	if (iOS) { FastClick(button); }
+	// }
 	
-    // ***** Below here is footer stuff (chanced, delay, score, etc)
+    // ***** Below here is footer stuff (chances, delay, score, etc)
 	// footer
 	var footer = layout.footer();
 	
 	// chances indicator
+	// Will likely have a certain amount of chances
 	if (this.chances != Infinity) {
 		var chances = document.createElement('span');
 		chances.id = 'chances';
@@ -461,6 +481,7 @@ Sequence.prototype.test = function(){
 	}
 	
 	// score indicator
+	// May need to update scoring metric
 	var score = document.createElement('span');
 	score.id = 'score';
 	score.insertAdjacentHTML('beforeend',' Score: ');
@@ -486,26 +507,26 @@ Sequence.prototype.test = function(){
 	footer.appendChild(br);
 	
 	// adaptive variable
-	var label = document.createElement('span');
-	label.id = 'adaptive';
-	label.innerHTML = 'Delay: '+String(1e3*this.delay.value.toFixed(3))+' ms';
-	label.style.paddingLeft = '16px';
-	label.style.verticalAlign = 'bottom';
-	footer.appendChild(label);
+	// Unnecessary, might replace with other metric
+	// var label = document.createElement('span');
+	// label.id = 'adaptive';
+	// label.innerHTML = 'Delay: '+String(1e3*this.delay.value.toFixed(3))+' ms';
+	// label.style.paddingLeft = '16px';
+	// label.style.verticalAlign = 'bottom';
+	// footer.appendChild(label);
 
 	// start dialog
-    // initialy start dialogue, kept, but changed
+    // initial start dialogue, kept, but changed
 	layout.message(
-		'Stream Segregation',
-		'Listen to the pattern and determine if the last note comes early or late.',
+		'Sequence Recreation',
+		'Listen to the notes played and recreate the sequence.',
 		{	Start: function () {
 				jQuery(this).dialog('destroy').remove();
-				setTimeout(()=>{ that.disabled = false; that.stimulus(); }, 1e3);
+				setTimeout(()=>{ that.disabled = false; that.sound(); }, 1e3);
 		}}
 	);
 
 	// add message next to start button
-    // for some reason, this is 
 	var message = document.createElement('span');
 	message.id = 'message';
 	message.innerHTML = 'Ready.&nbsp;';
