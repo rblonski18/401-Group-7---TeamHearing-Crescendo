@@ -1026,14 +1026,54 @@ layout = {
 		};
 		Object.freeze(callbackArg);
 
-		// TODO: populate this array
 		let neutralPlaylist = [
-		
-		];
+			{
+				option: 'Sentence Completion',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'spin';
+					protocol.ID = getID();
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.open = function (callback) {
+						layout.message('Protocol Message',
+						'This protocol includes 3 speech in noise tests.</br>Each test is presented with ongoing spoken speech as background noise.',
+						callback
+					)};
+					// TODO: tune this setting to make it more difficult
+					protocol.settings.push({
+						adaptive: 'snr',
+						behavior: 'Adaptive',
+						chances: 4,
+						noise: 'Two Talker Masker (English)',
+						step0: 2,
+						trials: Infinity,
+						value0 : 12,
+						valueMax: 24,
+						volume: true
+					});
+					protocol.start(3);
+				}
+			},
+			{
+				option: 'Sound Movement',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'lateralization';
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.ID = getID();
+					protocol.random = false;
+					protocol.settings.push({
+						chances: 4,
+						volume: true
+					});
+					protocol.start(3);
+				}
+			}
+		]
 
 		let easyPlaylist = [
 			{
-				option: 'Melodic Contour - easy',
+				option: 'Melodic Contour',
 				callback() { 
 					protocol = new Protocol();
 					protocol.activity = 'musanim';
@@ -1057,7 +1097,8 @@ layout = {
 					protocol.ID = getID();
 					protocol.settings.push({
 						practice: false,
-						volume: true
+						volume: true,
+						trials: 15
 					});
 					protocol.start(3);
 				},
@@ -1126,11 +1167,10 @@ layout = {
 			{
 				option: 'Instrument Identification',
 				callback() {
-					
 						protocol = new Protocol();
 						protocol.activity = 'musescore';
 						protocol.callback = layout.randomPlaylist;
-						protocol.ID = mode + '.' + a++;
+						protocol.ID = getID();
 						const range = [[39,51],[51,63],[63,75],[75,87]], f0 = [110,220,440], instruments = ['piano','tenor sax'], path = ['data/musescore/3secpiano/','data/musescore/3sectenorsax/'];
 						for (let a = 0; a < range.length; a++) {
 							protocol.settings.push({
@@ -1146,14 +1186,46 @@ layout = {
 								snr: 6,
 							});
 						}
-						protocol.start(3);
+						protocol.start(1);
+				}
+			},
+			{
+				option: 'Consonant Identification',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'consonants';
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.ID = getID();
+					protocol.settings.push({
+						level: 1,
+						noise: 'Speech-Shaped Noise',
+						trials: version == 'alpha' && subuser.ID == 3 ? 1 : 20,
+						volume: true
+					})
+					protocol.start(3);
+				}
+			},
+			{
+				option: 'Vowel Identification',
+				callback() {
+					protocol = new Protocol();
+					protocol.activity = 'vowels';
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.ID = getID();
+					protocol.settings.push({
+						level: 1,
+						noise: 'Speech-Shaped Noise',
+						trials: version == 'alpha' && subuser.ID == 3 ? 1 : 24,
+						volume: true
+					})
+					protocol.start(3);
 				}
 			},
 		];
 
 		let mediumPlaylist = [
 			{
-				option: 'Melodic Contour - medium',
+				option: 'Melodic Contour',
 				callback() { 
 					protocol = new Protocol();
 					protocol.activity = 'musanim';
@@ -1255,12 +1327,46 @@ layout = {
 					}
 					protocol.start(2);
 				}
-			}
+			},
+			{
+				option: 'Consonant Identification',
+				callback() 
+				{
+					protocol = new Protocol();
+					protocol.activity = 'consonants';
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.ID = getID();
+					protocol.settings.push({
+						level: 3,
+						noise: 'Speech-Shaped Noise',
+						trials: version == 'alpha' && subuser.ID == 3 ? 1 : 20,
+						volume: true
+					})
+					protocol.start(3);
+				}
+			},
+			{
+				option: 'Vowel Identification',
+				callback() 
+				{
+					protocol = new Protocol();
+					protocol.activity = 'vowels';
+					protocol.callback = () => { assignmerandomPlaylistnt(); };
+					protocol.ID = getID();
+					protocol.settings.push({
+						level: 3,
+						noise: 'Speech-Shaped Noise',
+						trials: version == 'alpha' && subuser.ID == 3 ? 1 : 24,
+						volume: true
+					})
+					protocol.start(3);
+				}
+			},
 		];
 
 		let hardPlaylist = [
 			{
-				option: 'Melodic Contour - hard',
+				option: 'Melodic Contour',
 				callback() { 
 					protocol = new Protocol();
 					protocol.activity = 'musanim';
@@ -1341,7 +1447,7 @@ layout = {
 				callback() {
 					protocol = new Protocol();
 					protocol.activity = 'musescorePitchShifted';
-					protocol.callback = () => { assignment(); };
+					protocol.callback = () => { randomPlaylist(); };
 					protocol.ID = getID();
 					const instruments = ['piano','tenor sax'];
 					const range = [[39,51],[51,63],[63,75],[75,87]];
@@ -1360,7 +1466,42 @@ layout = {
 					}
 					protocol.start(1);
 				}
-			}
+			},
+			{
+				option: 'Consonant Identification',
+				callback() 
+				{
+					protocol = new Protocol();
+					protocol.activity = 'consonants';
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.ID = getID();
+					protocol.settings.push({
+						level: 5,
+						noise: 'Speech-Shaped Noise',
+						trials: version == 'alpha' && subuser.ID == 3 ? 1 : 20,
+						volume: true
+					})
+					protocol.start(3);
+				}
+			},
+			{
+				option: 'Vowel Identification',
+				callback() 
+				{
+					protocol = new Protocol();
+					protocol.activity = 'vowels';
+					protocol.callback = () => { randomPlaylist(); };
+					protocol.ID = getID();
+					protocol.settings.push({
+						level: 5,
+						noise: 'Speech-Shaped Noise',
+						trials: version == 'alpha' && subuser.ID == 3 ? 1 : 24,
+						volume: true
+					})
+					protocol.start(3);
+				}
+			},
+
 		];
 
 		let playlist;
@@ -1377,7 +1518,9 @@ layout = {
 		default:
 			playlist = easyPlaylist;
 		}
-		playlist = playlist.concat(neutralPlaylist).shuffle();
+
+		
+		playlist = playlist.concat(neutralPlaylist).shuffle().slice(0, 6);
 		
 
 		// using map() function to isolate properties of playlist
@@ -1399,6 +1542,7 @@ layout = {
 		*/
 		let footer = layout.footer();
 
+		// empty footer and then add the easy/med/hard buttons
 		while (footer.firstChild)
 			footer.removeChild(footer.firstChild);
 
@@ -1438,11 +1582,9 @@ layout = {
 		jQuery(button).button();
 		footer.appendChild(button);
 
+		// center the buttons on the footer
 		footer.style.display = 'flex';
 		footer.style.justifyContent = 'center';
-
-		
-
 	},
 	percept: function () {
 		// main
