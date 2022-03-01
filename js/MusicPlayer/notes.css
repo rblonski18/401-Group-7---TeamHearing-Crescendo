@@ -34,4 +34,8 @@
   .too-slow {
     transform: translate(-400px, 2000px);
   }
+
+  .deleted {
+      opacity: 0.0
+  }
   

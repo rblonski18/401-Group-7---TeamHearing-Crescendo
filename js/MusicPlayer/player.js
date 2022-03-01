@@ -73,12 +73,13 @@ function loadTrack(track_index) {
   function playTrack() {
     curr_track.play();
     isPlaying = true;
-    playpause_btn.innerHTML = '<i class="fa fa-pause-circle fa-5x"></i>';
+    playpause_btn.innerHTML = '<i class="fa fa-stop-circle fa-5x"></i>';
   }
     
   function pauseTrack() {
     curr_track.pause();
     isPlaying = false;
+    curr_track.currentTime = 0;
     playpause_btn.innerHTML = '<i class="fa fa-play-circle fa-5x"></i>';
   }
     
@@ -100,11 +101,12 @@ function loadTrack(track_index) {
     playTrack();
   }
 
+  /*
   function seekTo() {
     seekto = curr_track.duration * (seek_slider.value / 100);
     
     curr_track.currentTime = seekto;
-  }
+  } */
     
   function setVolume() {
     curr_track.volume = volume_slider.value / 100;

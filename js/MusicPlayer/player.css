@@ -84,7 +84,17 @@ body {
   }
     
   /* Modify the appearance of the slider thumb */
-  .seek_slider::-webkit-slider-thumb,
+  .seek_slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    background: white;
+    /* cursor: pointer; */
+    border-radius: 50%; 
+  }
+
   .volume_slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     -moz-appearance: none;
