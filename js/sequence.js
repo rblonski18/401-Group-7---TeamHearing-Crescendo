@@ -1,12 +1,3 @@
-import {createRoll, createRollWithController} from "./PianoRollLib/pianoRoll.js";
-import {sample, sampler} from "./PianoRollLib/instrument.js";
-import { levels, createGamePianoRoll } from "./PianoRollLib/beatGame.js";
-var samples = [
-    new sample("Kick", "./PianoRollLib/sounds/kick.wav"),
-    new sample("Snare", "./PianoRollLib/sounds/snare.wav"),
-    new sample("Hi Hat", "./PianoRollLib/sounds/hihat.wav")
-]
-
 function sequence(settings) {
 	activity = new Sequence(settings);
 	
@@ -201,6 +192,14 @@ Sequence.prototype.sound = function() {
 
 // Page layout code
 Sequence.prototype.test = function(){
+	import {createRoll, createRollWithController} from "./PianoRollLib/pianoRoll.js";
+	import {sample, sampler} from "./PianoRollLib/instrument.js";
+	//import { levels, createGamePianoRoll } from "./PianoRollLib/beatGame.js";
+	var samples = [
+    	new sample("Kick", "./PianoRollLib/sounds/kick.wav"),
+    	new sample("Snare", "./PianoRollLib/sounds/snare.wav"),
+    	new sample("Hi Hat", "./PianoRollLib/sounds/hihat.wav")
+	]
 	let that = this;
 	
 	// reset
