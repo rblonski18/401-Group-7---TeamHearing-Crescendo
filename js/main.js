@@ -1517,6 +1517,35 @@ layout = {
 		}
 		playlist = playlist.concat(neutralPlaylist);//.shuffle().slice(0, 6);
 
+		// i will clean this up later
+		if (window.localStorage.getItem('day') !== null &&
+				window.localStorage.getItem('month') !== null &&
+				window.localStorage.getItem('year') !== null
+		) {
+			let prevDay = JSON.parse(window.localStorage.getItem('day'));
+			let prevMonth = JSON.parse(window.localStorage.getItem('month'));
+			let prevYear = JSON.parse(window.localStorage.getItem('year'));
+
+			let currDate = new Date();
+			let currDay = currDate.getDate();
+			let currMonth = currDate.getMonth();
+			let currYear = currDate.getFullYear();
+
+			// time flows in one direction, so if any of these are not equal, we assume
+			// that a new day has occurred and reset the playlist
+			// otherwise, do nothing
+			if (currDay !== prevDay || currMonth !== prevMonth || currYear !== prevYear) {
+				window.localStorage.removeItem('easy');
+				window.localStorage.removeItem('medium');
+				window.localStorage.removeItem('hard');
+			}
+		} else {
+			let date = new Date();
+			window.localStorage.setItem('day', JSON.stringify(date.getDate()));
+			window.localStorage.setItem('month', JSON.stringify(date.getMonth()));
+			window.localStorage.setItem('year', JSON.stringify(date.getFullYear()));
+		}
+
 		let indices;
 		if (window.localStorage.getItem(difficulty) === null) {
 			// 
