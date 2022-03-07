@@ -1019,21 +1019,16 @@ layout = {
 		// made this function to get rid of the bind(null, mode+'.'+a++) copy/paste
 		let getID = () => mode + '.' + a++;
 
-		// created this variable to reduce copy/pasting
-		const callbackArg = {
-			back: () => { layout.randomPlaylist(); },
-			init: () => { activity.menu(); }
-		};
-		Object.freeze(callbackArg);
+
 
 		let neutralPlaylist = [
 			{
 				option: 'Sentence Completion',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'spin';
 					protocol.ID = getID();
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.open = function (callback) {
 						layout.message('Protocol Message',
 						'This protocol includes 3 speech in noise tests.</br>Each test is presented with ongoing spoken speech as background noise.',
@@ -1056,10 +1051,10 @@ layout = {
 			},
 			{
 				option: 'Sound Movement',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'lateralization';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					protocol.random = false;
 					protocol.settings.push({
@@ -1074,7 +1069,7 @@ layout = {
 		let easyPlaylist = [
 			{
 				option: 'Melodic Contour',
-				callback() { 
+				callback(i) { 
 					protocol = new Protocol();
 					protocol.activity = 'musanim';
 					protocol.ID = getID();
@@ -1090,10 +1085,10 @@ layout = {
 			},
 			{
 				option: 'Melody & Rhythm Comparisons',
-				callback() { 
+				callback(i) { 
 					protocol = new Protocol();
 					protocol.activity = 'confronto';
-					protocol.callback = layout.randomPlaylist;
+					protocol.callback = finishCallback.bind(null, i);;
 					protocol.ID = getID();
 					protocol.settings.push({
 						practice: false,
@@ -1106,10 +1101,10 @@ layout = {
 			// interval training
 			{
 				option: 'Pefect 4th vs Octave',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1126,10 +1121,10 @@ layout = {
 			},
 			{
 				option: 'Major 2nd vs Minor 7th',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1146,10 +1141,10 @@ layout = {
 			},
 			{
 				option: 'Major 6th vs Minor 2nd',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1166,10 +1161,10 @@ layout = {
 			},
 			{
 				option: 'Instrument Identification',
-				callback() {
+				callback(i) {
 						protocol = new Protocol();
 						protocol.activity = 'musescore';
-						protocol.callback = layout.randomPlaylist;
+						protocol.callback = finishCallback.bind(null, i);;
 						protocol.ID = getID();
 						const range = [[39,51],[51,63],[63,75],[75,87]], f0 = [110,220,440], instruments = ['piano','tenor sax'], path = ['data/musescore/3secpiano/','data/musescore/3sectenorsax/'];
 						for (let a = 0; a < range.length; a++) {
@@ -1191,10 +1186,10 @@ layout = {
 			},
 			{
 				option: 'Consonant Identification',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'consonants';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					protocol.settings.push({
 						level: 1,
@@ -1207,10 +1202,10 @@ layout = {
 			},
 			{
 				option: 'Vowel Identification',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'vowels';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					protocol.settings.push({
 						level: 1,
@@ -1226,7 +1221,7 @@ layout = {
 		let mediumPlaylist = [
 			{
 				option: 'Melodic Contour',
-				callback() { 
+				callback(i) { 
 					protocol = new Protocol();
 					protocol.activity = 'musanim';
 					protocol.ID = getID();
@@ -1243,10 +1238,10 @@ layout = {
 			// interval training
 			{
 				option: 'Pefect 5th vs Major 3rd',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1263,10 +1258,10 @@ layout = {
 			},
 			{
 				option: 'Major 2nd vs Perfect 5th vs Octave',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1283,10 +1278,10 @@ layout = {
 			},
 			{
 				option: 'Minor 2nd vs Perfect 4th',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1303,10 +1298,10 @@ layout = {
 			},
 			{
 				option: 'Pitch Discrimination for Piano and Saxophone',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'musescorePitchShifted';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					const instruments = ['piano','tenor sax'];
 					const range = [[39,51],[51,63],[63,75],[75,87]];
@@ -1330,11 +1325,11 @@ layout = {
 			},
 			{
 				option: 'Consonant Identification',
-				callback() 
+				callback(i) 
 				{
 					protocol = new Protocol();
 					protocol.activity = 'consonants';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					protocol.settings.push({
 						level: 3,
@@ -1347,11 +1342,11 @@ layout = {
 			},
 			{
 				option: 'Vowel Identification',
-				callback() 
+				callback(i) 
 				{
 					protocol = new Protocol();
 					protocol.activity = 'vowels';
-					protocol.callback = () => { assignmerandomPlaylistnt(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					protocol.settings.push({
 						level: 3,
@@ -1367,7 +1362,7 @@ layout = {
 		let hardPlaylist = [
 			{
 				option: 'Melodic Contour',
-				callback() { 
+				callback(i) { 
 					protocol = new Protocol();
 					protocol.activity = 'musanim';
 					protocol.ID = getID();
@@ -1384,10 +1379,10 @@ layout = {
 			// interval training
 			{
 				option: 'Minor 2nd vs Major 3rd',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1404,10 +1399,10 @@ layout = {
 			},
 			{
 				option: 'Major 2nd vs Perfect 4th vs Major 6th',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1424,10 +1419,10 @@ layout = {
 			},
 			{
 				option: 'Major 6th vs Octave',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'intervals';
-					protocol.callback = layout.randomPlaylist
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					
 					protocol.settings.push({
@@ -1444,10 +1439,10 @@ layout = {
 			},
 			{
 				option: 'Pitch Discrimination with Mixed Instruments',
-				callback() {
+				callback(i) {
 					protocol = new Protocol();
 					protocol.activity = 'musescorePitchShifted';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					const instruments = ['piano','tenor sax'];
 					const range = [[39,51],[51,63],[63,75],[75,87]];
@@ -1469,11 +1464,11 @@ layout = {
 			},
 			{
 				option: 'Consonant Identification',
-				callback() 
+				callback(i) 
 				{
 					protocol = new Protocol();
 					protocol.activity = 'consonants';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);
 					protocol.ID = getID();
 					protocol.settings.push({
 						level: 5,
@@ -1486,11 +1481,11 @@ layout = {
 			},
 			{
 				option: 'Vowel Identification',
-				callback() 
+				callback(i) 
 				{
 					protocol = new Protocol();
 					protocol.activity = 'vowels';
-					protocol.callback = () => { randomPlaylist(); };
+					protocol.callback = finishCallback.bind(null, i);;
 					protocol.ID = getID();
 					protocol.settings.push({
 						level: 5,
@@ -1503,6 +1498,8 @@ layout = {
 			},
 
 		];
+
+
 
 		let playlist;
 		switch (difficulty) {
@@ -1518,21 +1515,59 @@ layout = {
 		default:
 			playlist = easyPlaylist;
 		}
+		playlist = playlist.concat(neutralPlaylist);//.shuffle().slice(0, 6);
 
-		
-		playlist = playlist.concat(neutralPlaylist).shuffle().slice(0, 6);
-		
+		let indices;
+		if (window.localStorage.getItem(difficulty) === null) {
+			// 
+			indices = [];
+			for (let i = 0; i < playlist.length; ++i) 
+				indices[i] = i;
+			
+			indices = indices.shuffle().slice(0, 6);
+			window.localStorage.setItem(difficulty, JSON.stringify(indices));
+			console.log(indices);
+		} else {
+			indices = JSON.parse(window.localStorage.getItem(difficulty));
+			console.log(indices);
+		}
+		playlist.forEach((obj, i) => { 
+			obj.callback = obj.callback.bind(null, i);
+		});
+		playlist = playlist.filter((obj, i) => indices.includes(i));
+
+		//console.log(playlist);
+		// created this variable to reduce copy/pasting
+		// i will definitely need to clean up my code and document it.... it's a mess, to say the least
+		var finishCallback = (i) => {
+			let indices = JSON.parse(window.localStorage.getItem(difficulty));
+			const index = indices.indexOf(i);
+			indices.splice(index, 1);
+			window.localStorage.setItem(difficulty, JSON.stringify(indices));
+			layout.randomPlaylist();
+		};
 
 		// using map() function to isolate properties of playlist
 		// which is technically not efficient but it does the job
-		layout.assignment(
-			`Random Exercise Playlist - ${difficulty}`, 
-			playlist.map(obj => obj.option),
-			playlist.map(obj => obj.callback),
-			{},
-			mode,
-			back
-		);
+		if (playlist.length > 0) {
+			layout.assignment(
+				`Random Exercise Playlist - ${difficulty}`, 
+				playlist.map(obj => obj.option),
+				playlist.map(obj => obj.callback),
+				{},
+				mode,
+				back
+			);
+		} else {
+			layout.assignment(
+				`${difficulty} mode complete! See you Tomorrow`, 
+				[],
+				[],
+				{},
+				mode,
+				back
+			);
+		}
 
 		/*
 		NOTE: layout.assignment calls layout.footer(),
