@@ -1,3 +1,12 @@
+import {createRoll, createRollWithController} from "./PianoRollLib/pianoRoll.js";
+import {sample, sampler} from "./PianoRollLib/instrument.js";
+import { levels, createGamePianoRoll } from "./PianoRollLib/beatGame.js";
+var samples = [
+    new sample("Kick", "./PianoRollLib/sounds/kick.wav"),
+    new sample("Snare", "./PianoRollLib/sounds/snare.wav"),
+    new sample("Hi Hat", "./PianoRollLib/sounds/hihat.wav")
+]
+
 function sequence(settings) {
 	activity = new Sequence(settings);
 	
@@ -158,34 +167,36 @@ Sequence.prototype.next = function() {
 // Method will have cases depending on mode (percussion vs melodic)
 Sequence.prototype.sound = function() {
 	//
-	const A = dsp.gain([...this.A],this.A_gain);
-	const B = dsp.gain([...this.B],this.B_gain);
-	const delayAdaptive = this.call ? this.delay.value : -this.delay.value;
-	let bias, delay = 0, delayA, delayB, stream = [];
-	for (let a = 0; a < this.cycles; a++) {
-		bias = delayAdaptive*((a+1)/this.cycles)/2;
-		delayA = delay+(this.jitter-Math.abs(bias))*(2*Math.random()-1)+bias;
-		delayB = delay+this.period/2;
+	// const A = dsp.gain([...this.A],this.A_gain);
+	// const B = dsp.gain([...this.B],this.B_gain);
+	// const delayAdaptive = this.call ? this.delay.value : -this.delay.value;
+	// let bias, delay = 0, delayA, delayB, stream = [];
+	// for (let a = 0; a < this.cycles; a++) {
+	// 	bias = delayAdaptive*((a+1)/this.cycles)/2;
+	// 	delayA = delay+(this.jitter-Math.abs(bias))*(2*Math.random()-1)+bias;
+	// 	delayB = delay+this.period/2;
 		
-		//
-		if (a == this.cycle) {
-			delayB = delay+this.period/2+delayAdaptive;
-		}
+	// 	//
+	// 	if (a == this.cycle) {
+	// 		delayB = delay+this.period/2+delayAdaptive;
+	// 	}
 
-		//
-		stream = dsp.add(A,stream,delayA);
-		stream = dsp.add(B,stream,delayB);
-		delay += this.period;
-	}
+	// 	//
+	// 	stream = dsp.add(A,stream,delayA);
+	// 	stream = dsp.add(B,stream,delayB);
+	// 	delay += this.period;
+	// }
 	
-	//
-	if (this.extra) {
-		stream = dsp.add(A,stream,delay+(this.jitter-Math.abs(bias))*(2*Math.random()-1)+bias);
-	}
+	// //
+	// if (this.extra) {
+	// 	stream = dsp.add(A,stream,delay+(this.jitter-Math.abs(bias))*(2*Math.random()-1)+bias);
+	// }
 	
-	//
-	processor.play(stream);
-	return stream;
+	// //
+	// processor.play(stream);
+	// return stream;
+	
+
 }
 
 // Page layout code
@@ -240,6 +251,14 @@ Sequence.prototype.test = function(){
 	// container.appendChild(table);
 
 	//TODO: Will include piano roll setup
+
+	var pianoRoll = document.createElement('div');
+	pianoRoll.style.width = '100%';
+	pianoRoll.style.margin = 'auto';
+	container.appendChild
+	const audioCtx = new AudioContext();
+	var smpler = new sampler(samples, audioCtx);
+	const rollAndController = createRollWithController(pianoRoll, smpler, 16, audioCtx);
 
 
 	// TODO: Add logic for checking if sequence is correct
