@@ -1,6 +1,16 @@
 var numRollSquares = 0;
 const LOOK_AHEAD = .1;
 
+const wavesurfer = WaveSurfer.create({
+    container: '#wavesurf',
+    waveColor: 'black',
+    progressColor: 'orange',
+    height: 100,
+    interact: false
+});
+
+wavesurfer.on('finish', () => wavesurfer.seekTo(0));
+
 export function createRollWithController(domParent, instrument, length, audioCtx){
     const controls = createRollController(domParent);
     const pianoRoll = createRoll(domParent, instrument, length, audioCtx);
@@ -195,6 +205,7 @@ function pianoRollController(dom){
                 stateCopy.setState(decoded);
 
                 this.pianoRoll.loadBeatStates(stateCopy);
+                this.pianoRoll.drawWaveform(stateCopy);
         });
     }
 }
@@ -293,6 +304,57 @@ function base64ToBoolArray(string) {
     return array;
 }
 
+/**
+* Appends two ArrayBuffers into a new one.
+* 
+* @param {ArrayBuffer} buffer1 The first buffer.
+* @param {ArrayBuffer} buffer2 The second buffer.
+*/
+function appendBuffer(buffer1, buffer2, audioCtx) {
+    var numberOfChannels = Math.min( buffer1.numberOfChannels, buffer2.numberOfChannels );
+    var tmp = audioCtx.createBuffer( numberOfChannels, parseFloat(buffer1.length + buffer2.length), parseFloat(buffer1.sampleRate) );
+    for (var i=0; i<numberOfChannels; i++) {
+    var channel = tmp.getChannelData(i);
+    channel.set( buffer1.getChannelData(i), 0);
+    channel.set( buffer2.getChannelData(i), buffer1.length);
+    }
+    return tmp;
+}
+
+function mix(buffers, audioContext) {
+
+    var nbBuffer = buffers.length;// Get the number of buffer contained in the array buffers
+    var maxChannels = 0;// Get the maximum number of channels accros all buffers
+    var maxDuration = 0;// Get the maximum length
+
+    for (var i = 0; i < nbBuffer; i++) {
+        if (buffers[i].numberOfChannels > maxChannels) {
+            maxChannels = buffers[i].numberOfChannels;
+        }
+        if (buffers[i].duration > maxDuration) {
+            maxDuration = buffers[i].duration;
+        }
+    }
+
+    // Get the output buffer (which is an array of datas) with the right number of channels and size/duration
+    var mixed = audioContext.createBuffer(maxChannels, audioContext.sampleRate * maxDuration, audioContext.sampleRate);        
+
+    for (var j=0; j<nbBuffer; j++){
+
+        // For each channel contained in a buffer...
+        for (var srcChannel = 0; srcChannel < buffers[j].numberOfChannels; srcChannel++) {
+
+            var _out = mixed.getChannelData(srcChannel);// Get the channel we will mix into
+            var _in = buffers[j].getChannelData(srcChannel);// Get the channel we want to mix in
+
+            for (var i = 0; i < _in.length; i++) {
+                _out[i] += _in[i];// Calculate the new value for each index of the buffer array
+            }
+        }
+    }
+
+    return mixed;
+}
 
 function pianoRoll(instrument, length, dom, audioCtx){
     this.instrument = instrument;
@@ -451,6 +513,35 @@ function pianoRoll(instrument, length, dom, audioCtx){
                 }
             }
         }
+    }
+
+    this.drawWaveform = function(beatStates) {
+        this._beatStates = beatStates;
+        var emptyBuffer = this.audioCtx.createBuffer(2, 10500, 48000);
+        var finalBuffer;
+
+        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
+            var audioBuffers = [];
+            var bufferIndex = 0;
+            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
+                let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
+
+                if(isToggled){
+                    audioBuffers[bufferIndex++] = this.instrument.audio[noteIndex];
+                }
+                else {
+                    audioBuffers[bufferIndex++] = emptyBuffer;
+                }
+            }
+            var mixedBuffer = mix(audioBuffers, this.audioCtx);
+            if(beatIndex == 0) {
+                finalBuffer = mixedBuffer;
+            }
+            else {
+                finalBuffer = appendBuffer(finalBuffer, mixedBuffer, this.audioCtx);
+            }
+        }
+        wavesurfer.loadDecodedBuffer(finalBuffer);
     }
 }
 
