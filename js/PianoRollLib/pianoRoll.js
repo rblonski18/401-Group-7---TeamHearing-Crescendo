@@ -217,6 +217,10 @@ function beat(numNotes, length){
         return copy;
     }
 
+    this.length = function(){
+        return length;
+    }
+
     this.setAll = function(value){
         this._state.fill(value);
     }
@@ -291,6 +295,31 @@ function base64ToBoolArray(string) {
     }
 
     return array;
+}
+
+/*
+    Returns a promise of an audio buffer containing the rendered beat.
+*/
+export function renderBeat(beat, instrument, bpm){
+    const beatLength = 60 / bpm / 4;
+    const sampleRate = 44100;
+    const offlineCtx = new OfflineAudioContext(1, beat.length() * beatLength * sampleRate, sampleRate);
+
+    for(let beatIndex = 0; beatIndex < beat.length(); beatIndex++){
+        for(let i = 0; i < instrument.notes.length; i++){
+            if(beat.isBeatToggled(beatIndex, i)){
+                instrument.playNote(instrument.notes.length - 1 - i, beatIndex * beatLength, offlineCtx);
+            }
+        }
+    }
+
+    return new Promise(resolve => {
+        offlineCtx.oncomplete = function(e) {
+            resolve(e.renderedBuffer);
+        }
+    
+        offlineCtx.startRendering();
+    });
 }
 
 
@@ -393,7 +422,7 @@ function pianoRoll(instrument, length, dom, audioCtx){
 
         for(let i = 0; i < this.instrument.notes.length; i++){
             if(this._beatStates.isBeatToggled(beatIndex, i)){
-                this.instrument.playNote(this.instrument.notes.length - 1 - i, time);
+                this.instrument.playNote(this.instrument.notes.length - 1 - i, time, this.audioCtx);
             }
         }
 

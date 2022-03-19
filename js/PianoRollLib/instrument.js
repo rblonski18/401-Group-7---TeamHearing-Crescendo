@@ -7,10 +7,10 @@ export function sampler(samples, audioContext){
     this.notes = samples.map(sample => sample.name);
     this.audioContext = audioContext;
 
-    this.playNote = function(noteIndex, time){
-        const sampleSource = this.audioContext.createBufferSource();
+    this.playNote = function(noteIndex, time, audioCtx){
+        const sampleSource = audioCtx.createBufferSource();
         sampleSource.buffer = this.audio[noteIndex];
-        sampleSource.connect(this.audioContext.destination);
+        sampleSource.connect(audioCtx.destination);
         sampleSource.start(time);
     }
 
@@ -28,6 +28,8 @@ export function sampler(samples, audioContext){
         );
         
         this.audio = await Promise.all(requests);
+
+        this.onloadsamples?.();
     }
 
     this._loadSamples();

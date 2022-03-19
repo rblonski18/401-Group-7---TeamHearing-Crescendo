@@ -1,4 +1,4 @@
-import { beatFromEncodedState, createRoll } from "./pianoRoll.js";
+import { beatFromEncodedState, createRoll, renderBeat } from "./pianoRoll.js";
 
 export function beatChecker(pianoRoll){
     pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
@@ -94,10 +94,6 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
     });
 
     wavesurfer.on('finish', () => wavesurfer.seekTo(0));
-    
-
-    wavesurfer.load("./sounds/levels/level1.wav")
-
 
     const pianoRollContainer = document.createElement("div");
     pianoRollContainer.classList.add("pianoRollContainer");
@@ -105,7 +101,7 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
 
     const pianoRoll = createRoll(pianoRollContainer, instrument, length, audioCtx);
     
-    const newGame = new game(pianoRoll);
+    const newGame = new game(pianoRoll, wavesurfer);
 
     const controls = document.createElement("div");
     controls.classList.add("pianoRollRow");
@@ -144,7 +140,7 @@ function createControllerButton(text, onClick){
 }
 
 
-function game(pianoRoll){
+function game(pianoRoll, wavesurfer){
     this._beatChecker = new beatChecker(pianoRoll);
 
     this._beatChecker.onCorrectNote = (i, j) => this._onCorrectNote(i, j);
@@ -157,6 +153,11 @@ function game(pianoRoll){
     this.startLevel = function(level){
         this.currentLevel = level;
         this._beatChecker.setExpectedBeat(level.beat);
+
+        renderBeat(level.beat, pianoRoll.instrument, level.bpm)
+        .then(audioBuffer => {
+            wavesurfer.loadDecodedBuffer(audioBuffer);
+        });
     }
 
     this.submitSolution = function(){
@@ -186,6 +187,9 @@ function game(pianoRoll){
 
     this._onSuccess = function(){
         this._beatChecker.setCurrentlyChecking(false);
+        pianoRoll.isInteractionEnabled = true;
+
+        this.onlevelcomplete?.();
     }
 }
 
@@ -195,5 +199,6 @@ function level(beat, bpm){
 }
 
 export const levels = [
-    new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70)
+    new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70),
+    new level(beatFromEncodedState(3, 16, "/j8ICINC"), 70), 
 ]

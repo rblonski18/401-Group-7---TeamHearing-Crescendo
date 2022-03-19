@@ -1,6 +1,7 @@
 import {createRoll, createRollWithController} from "./pianoRoll.js";
 import {sample, sampler} from "./instrument.js";
 import { levels, createGamePianoRoll } from "./beatGame.js";
+
 var samples = [
     new sample("Kick", "./sounds/kick.wav"),
     new sample("Snare", "./sounds/snare.wav"),
@@ -13,8 +14,12 @@ var smpler = new sampler(samples, audioCtx);
 
 const rollAndController = createRollWithController(document.getElementById("roll1"), smpler, 16, audioCtx);
 
-//startLevel(levels[0], rollAndController.roll);
-
 
 const gameRollAndController = createGamePianoRoll(document.getElementById("roll2"), smpler, 16, audioCtx);
-gameRollAndController.game.startLevel(levels[0]);
+const game = gameRollAndController.game;
+var levelIndex = 0;
+
+game.onlevelcomplete = () => game.startLevel(levels[++levelIndex]);
+
+smpler.onloadsamples = () => game.startLevel(levels[levelIndex]);
+
