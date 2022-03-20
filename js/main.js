@@ -513,7 +513,7 @@ layout = {
 			// dice
 			var image = document.createElement('img');
 			image.onclick = function () {
-				layout.randomPlaylist();
+				layout.randomPlaylist('easy', 'music');
 			};
 			image.src = 'images/die.png';
 			image.style.cssFloat = 'left';
@@ -1008,8 +1008,9 @@ layout = {
 		main.appendChild(menu);
 		jQuery(menu).menu();
 	},
-	randomPlaylist(difficulty) {
+	randomPlaylist(difficulty, playlistMode) {
 		if (!difficulty) difficulty = 'easy';
+		if (!playlistMode) playlistMode = 'speech';
 
 		let back = layout.music();//back ? back : () => { layout.dashboard(); };
 
@@ -1023,6 +1024,7 @@ layout = {
 
 		let neutralPlaylist = [
 			{
+				mode: 'speech',
 				option: 'Sentence Completion',
 				callback(i) {
 					protocol = new Protocol();
@@ -1185,6 +1187,7 @@ layout = {
 				}
 			},
 			{
+				mode: 'speech',
 				option: 'Consonant Identification',
 				callback(i) {
 					protocol = new Protocol();
@@ -1324,6 +1327,7 @@ layout = {
 				}
 			},
 			{
+				mode: 'speech',
 				option: 'Consonant Identification',
 				callback(i) 
 				{
@@ -1463,6 +1467,7 @@ layout = {
 				}
 			},
 			{
+				mode: 'speech',
 				option: 'Consonant Identification',
 				callback(i) 
 				{
@@ -1515,8 +1520,11 @@ layout = {
 		default:
 			playlist = easyPlaylist;
 		}
-		playlist = playlist.concat(neutralPlaylist);//.shuffle().slice(0, 6);
-
+		playlist = playlist.concat(neutralPlaylist).filter(obj => {
+			return playlistMode === 'speech' ? obj.mode === 'speech'
+				: obj.mode !== 'speech';
+		});
+		
 		// i will clean this up later
 		if (window.localStorage.getItem('day') !== null &&
 				window.localStorage.getItem('month') !== null &&
@@ -1573,7 +1581,7 @@ layout = {
 			const index = indices.indexOf(i);
 			indices.splice(index, 1);
 			window.localStorage.setItem(difficulty, JSON.stringify(indices));
-			layout.randomPlaylist();
+			layout.randomPlaylist(difficulty);
 		};
 
 		// using map() function to isolate properties of playlist
@@ -1645,6 +1653,38 @@ layout = {
 		button.style.width = '7em';
 		jQuery(button).button();
 		footer.appendChild(button);
+
+		var div = document.createElement('div');
+
+		// speech button
+		var button = document.createElement('button');
+		button.innerHTML = 'speech';
+		button.style.cssFloat = 'left';
+		button.style.fontSize = '75%';
+		button.style.height = '50%';
+		button.style.marginLeft = '.2em';
+		button.style.width = '7em';
+		jQuery(button).button();
+		div.appendChild(button);
+		//document.querySelectorAll('#main > table > tbody > tr')[0].appendChild(button);
+
+		// music button
+		var button = document.createElement('button');
+		button.innerHTML = 'music';
+		button.style.cssFloat = 'left';
+		button.style.fontSize = '75%';
+		button.style.height = '50%';
+		button.style.marginLeft = '.2em';
+		button.style.width = '7em';
+		jQuery(button).button();
+		div.appendChild(button);
+
+		div.style.display = 'flex';
+		div.style.flexDirection = 'row';
+
+		// TODO: select in a better way
+		document.querySelectorAll('#main > table > tbody > tr')[0].appendChild(div);
+
 
 		// center the buttons on the footer
 		footer.style.display = 'flex';
