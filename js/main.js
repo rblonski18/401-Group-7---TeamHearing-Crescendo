@@ -1592,12 +1592,14 @@ layout = {
 		// created this variable to reduce copy/pasting
 		// i will definitely need to clean up my code and document it.... it's a mess, to say the least
 		var finishCallback = (i) => {
-			let indices = JSON.parse(window.localStorage.getItem(difficulty));
+			let indices = JSON.parse(window.localStorage.getItem(selection));
 			const index = indices.indexOf(i);
 			indices.splice(index, 1);
-			window.localStorage.setItem(difficulty, JSON.stringify(indices));
-			layout.randomPlaylist(difficulty);
+			window.localStorage.setItem(selection, JSON.stringify(indices));
+			playlist[index].callback();
 		};
+
+		// playlist[0].callback();
 
 		// using map() function to isolate properties of playlist
 		// which is technically not efficient but it does the job
