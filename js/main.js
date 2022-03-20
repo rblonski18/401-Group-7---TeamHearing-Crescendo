@@ -513,7 +513,7 @@ layout = {
 			// dice
 			var image = document.createElement('img');
 			image.onclick = function () {
-				layout.randomPlaylist('easy', 'music');
+				layout.randomPlaylist('easy', 'speech');
 			};
 			image.src = 'images/die.png';
 			image.style.cssFloat = 'left';
@@ -1543,9 +1543,20 @@ layout = {
 			// that a new day has occurred and reset the playlist
 			// otherwise, do nothing
 			if (currDay !== prevDay || currMonth !== prevMonth || currYear !== prevYear) {
-				window.localStorage.removeItem('easy');
-				window.localStorage.removeItem('medium');
-				window.localStorage.removeItem('hard');
+				const remove = (diff, pm) => {
+					console.log(JSON.stringify({difficulty: diff, playlistMode: pm}));
+					window.localStorage.removeItem(JSON.stringify({difficulty: diff, playlistMode: pm}));
+				}
+				// atrocious, I know...
+				remove('easy', 'speech');
+				remove('medium', 'speech');
+				remove('hard', 'speech');
+				remove('easy', 'music');
+				remove('medium', 'music');
+				remove('hard', 'music');
+				window.localStorage.removeItem('day');
+				window.localStorage.removeItem('month');
+				window.localStorage.removeItem('year');
 			}
 		} else {
 			let date = new Date();
@@ -1553,19 +1564,23 @@ layout = {
 			window.localStorage.setItem('month', JSON.stringify(date.getMonth()));
 			window.localStorage.setItem('year', JSON.stringify(date.getFullYear()));
 		}
+		
+		
 
 		let indices;
-		if (window.localStorage.getItem(difficulty) === null) {
+		let selection = JSON.stringify({difficulty: difficulty, playlistMode: playlistMode});
+		console.log(selection);
+		if (window.localStorage.getItem(selection) === null) {
 			// 
 			indices = [];
 			for (let i = 0; i < playlist.length; ++i) 
 				indices[i] = i;
 			
 			indices = indices.shuffle().slice(0, 6);
-			window.localStorage.setItem(difficulty, JSON.stringify(indices));
+			window.localStorage.setItem(selection, JSON.stringify(indices));
 			console.log(indices);
 		} else {
-			indices = JSON.parse(window.localStorage.getItem(difficulty));
+			indices = JSON.parse(window.localStorage.getItem(selection));
 			console.log(indices);
 		}
 		playlist.forEach((obj, i) => { 
@@ -1621,7 +1636,7 @@ layout = {
 		// easy
 		var button = document.createElement('button');
 		button.innerHTML = 'easy';
-		button.onclick = layout.randomPlaylist.bind(null, 'easy');
+		button.onclick = layout.randomPlaylist.bind(null, 'easy', playlistMode);
 		button.style.cssFloat = 'left';
 		button.style.fontSize = '150%';
 		button.style.height = '100%';
@@ -1633,7 +1648,7 @@ layout = {
 		// medium
 		var button = document.createElement('button');
 		button.innerHTML = 'medium';
-		button.onclick = layout.randomPlaylist.bind(null, 'medium');
+		button.onclick = layout.randomPlaylist.bind(null, 'medium', playlistMode);
 		button.style.cssFloat = 'left';
 		button.style.fontSize = '150%';
 		button.style.height = '100%';
@@ -1645,7 +1660,7 @@ layout = {
 		// hard
 		var button = document.createElement('button');
 		button.innerHTML = 'hard';
-		button.onclick = layout.randomPlaylist.bind(null, 'hard');
+		button.onclick = layout.randomPlaylist.bind(null, 'hard', playlistMode);
 		button.style.cssFloat = 'left';
 		button.style.fontSize = '150%';
 		button.style.height = '100%';
@@ -1659,6 +1674,7 @@ layout = {
 		// speech button
 		var button = document.createElement('button');
 		button.innerHTML = 'speech';
+		button.onclick = layout.randomPlaylist.bind(null, difficulty, 'speech');
 		button.style.cssFloat = 'left';
 		button.style.fontSize = '75%';
 		button.style.height = '50%';
@@ -1671,6 +1687,7 @@ layout = {
 		// music button
 		var button = document.createElement('button');
 		button.innerHTML = 'music';
+		button.onclick = layout.randomPlaylist.bind(null, difficulty, 'music');
 		button.style.cssFloat = 'left';
 		button.style.fontSize = '75%';
 		button.style.height = '50%';
