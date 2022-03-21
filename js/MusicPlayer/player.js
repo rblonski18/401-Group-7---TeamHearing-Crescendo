@@ -24,6 +24,11 @@ let track_list = [
     path: "TwinkleTwinkle.mp3"
   },
   {
+    name: "Happy Birthday",
+    artist: "Patty Hill",
+    path: "HappyBirthday.mp3"
+  },
+  {
     name: "Brandenburg Concerto",
     artist: "Johann Sebastian Bach",
     path: "BrandenBurg-Concerto.mp3"
@@ -89,7 +94,6 @@ function loadTrack(track_index) {
     else track_index = 0;
     
     loadTrack(track_index);
-    playTrack();
   }
     
   function prevTrack() {
@@ -98,7 +102,6 @@ function loadTrack(track_index) {
     else track_index = track_list.length - 1;
       
     loadTrack(track_index);
-    playTrack();
   }
 
   /*
