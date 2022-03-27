@@ -261,16 +261,16 @@ async function writeNotes() {
     if(playpause_btn.innerHTML === '<i class="fa fa-stop-circle fa-5x"></i>') {
         loadNotes();
         let len = notes.length
+        console.log("in play notes with notes length:");
         for(let i = 0; i < len; i++) {
             note = notes.shift();
             if(!note) return;
             const group = context.openGroup();
-            
             visibleNoteGroups.push(group);
-            
             if(!toggleVisibility) break; 
             note.draw();
             context.closeGroup();
+
             group.classList.add('scroll');
             // Force a dom-refresh by asking for the group's bounding box. Why? Most
             // modern browsers are smart enough to realize that adding .scroll class
@@ -299,7 +299,7 @@ async function writeNotes() {
                 } else if(note.duration == '4') {
                     await delay(620);
                 }
-            } else if(track_name == "Happy Birthday") {
+            } /*else if(track_name == "Happy Birthday") {
                 if(note.duration == '4') {
                     await delay(500);
                 } else if(note.duration == '2') {
@@ -307,22 +307,32 @@ async function writeNotes() {
                 } else if(note.duration == '8') {
                     await delay(280);
                 }
-            }
-            
+            } */
         }
-        toggleVisibility = true;
-        loadNotes();
-        
-    } else {
+        //const group = context.openGroup();
+        //context.closeGroup();
+        // toggleVisibility = true;
+        // loadNotes();
 
-        tickContext = new VF.TickContext();
-        tickContext.preFormat().setX(400);
+        //tickContext = new VF.TickContext();
+        //tickContext.preFormat().setX(400);
         // Create a stave of width 10000 at position 10, 40 on the canvas.
         //stave = new VF.Stave(10, 10, 10000)
         //.addClef('treble')
         //.addTimeSignature("4/4");
         // Connect it to the rendering context and draw!
         //stave.setContext(context).draw();
+
+        toggleVisibility = true;
+
+        tickContext.tickables = [];
+        
+    } else {
+        // context.clear(); 
+
+        for(let i = 0; i < visibleNoteGroups.length; i++) {
+            visibleNoteGroups[i].classList.add("deleted")
+        }
 
         toggleVisibility = false;
 

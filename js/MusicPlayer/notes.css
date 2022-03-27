@@ -28,7 +28,7 @@
   }
   
   .correct {
-    opacity: 0;
+    opacity: 0.0;
   }
   
   .too-slow {

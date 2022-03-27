@@ -12,6 +12,13 @@ let curr_time = document.querySelector(".current-time");
 let total_duration = document.querySelector(".total-duration");
   
 let track_index = 0;
+if(track_name.innerHTML == "Twinkle Twinkle Little Star") {
+  console.log("here1")
+  track_index = 0;
+} else if(track_name.innerHTML == "Happy Birthday") {
+  console.log("here2")
+  track_index = 1;
+}
 let isPlaying = false;
 let updateTimer;
   
@@ -45,7 +52,11 @@ let track_list = [
   },
 ];
 
+/*var tickContext = new VF.TickContext();
+tickContext.preFormat().setX(400);*/
+
 function loadTrack(track_index) {
+
     clearInterval(updateTimer);
     resetValues();
     
@@ -54,14 +65,9 @@ function loadTrack(track_index) {
     
     track_name.textContent = track_list[track_index].name;
     track_artist.textContent = track_list[track_index].artist;
-    now_playing.textContent = 
-       "PLAYING " + (track_index + 1) + " OF " + track_list.length;
-    
     
     updateTimer = setInterval(seekUpdate, 1000);
-    
-    curr_track.addEventListener("ended", nextTrack);
-    
+        
   }
 
   function resetValues() {
@@ -92,7 +98,7 @@ function loadTrack(track_index) {
     if (track_index < track_list.length - 1)
       track_index += 1;
     else track_index = 0;
-    
+    loadNotes();
     loadTrack(track_index);
   }
     
@@ -100,7 +106,7 @@ function loadTrack(track_index) {
     if (track_index > 0)
       track_index -= 1;
     else track_index = track_list.length - 1;
-      
+    loadNotes();
     loadTrack(track_index);
   }
 

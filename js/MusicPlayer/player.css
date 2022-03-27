@@ -5,6 +5,10 @@ body {
     transition: background-color .5s;
     font-family: 'Nunito', sans-serif;
   }
+
+nav {
+  padding-left: 1rem;
+}
     
   /* Using flex with the column direction to
      align items in a vertical direction */
