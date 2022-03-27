@@ -32,7 +32,7 @@ var stave = new VF.Stave(10, 10, 10000)
 stave.setContext(context).draw();
 
 var durations = ['8', '4', '2', '1'];
-
+/*
 var notes = [
 	['c', '', '4', '4'],
 	['c', '', '4', '4'],
@@ -97,7 +97,7 @@ var notes = [
   if(acc) note.addAccidental(0, new VF.Accidental(acc));
 	tickContext.addTickable(note)
 	return note;
-});
+}); */
 
 
 // The tickContext.preFormat() call assigns x-values (and other
@@ -153,51 +153,97 @@ async function writeNote() {
     }, 5000);
 } */
 
+var notesOne = [
+    ['c', '', '4', '4'],
+    ['c', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['a', '', '4', '4'],
+    ['a', '', '4', '4'],
+    ['g', '', '4', '2'],
+    ['f', '', '4', '4'],
+    ['f', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['d', '', '4', '4'],
+    ['d', '', '4', '4'],
+    ['c', '', '4', '2'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['f', '', '4', '4'],
+    ['f', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['d', '', '4', '2'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['f', '', '4', '4'],
+    ['f', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['d', '', '4', '2'],
+    ['c', '', '4', '4'],
+    ['c', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['a', '', '4', '4'],
+    ['a', '', '4', '4'],
+    ['g', '', '4', '2'],
+    ['f', '', '4', '4'],
+    ['f', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['e', '', '4', '4'],
+    ['d', '', '4', '4'],
+    ['d', '', '4', '4'],
+    ['c', '', '4', '2'],
+]
+ 
+var notesTwo = [
+    ['g', '', '4', '4'],
+    ['g', '', '4', '8'],
+    ['a', '', '4', '4'], 
+    ['g', '', '4', '4'],
+    ['c', '', '4', '4'],
+    ['b', '', '4', '2'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '8'],
+    ['a', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['d', '', '4', '4'],
+    ['c', '', '4', '2'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['g', '', '4', '8'],
+    ['g', '', '5', '4'],
+    ['e', '', '4', '4'],
+    ['c', '', '4', '4'],
+    ['g', '', '4', '4'],
+    ['b', '', '4', '4'],
+    ['a', '', '4', '8'],
+    ['f', '', '4', '4'],
+    ['f', '', '4', '8'],
+    ['e', '', '4', '4'], 
+    ['c', '', '4', '4'],
+    ['d', '', '4', '4'],
+    ['c', '', '4', '2'],
+]
+
+var notes = [];
+
 function loadNotes() {
-    notes = [
-        ['c', '', '4', '4'],
-        ['c', '', '4', '4'],
-        ['g', '', '4', '4'],
-        ['g', '', '4', '4'],
-        ['a', '', '4', '4'],
-        ['a', '', '4', '4'],
-        ['g', '', '4', '2'],
-        ['f', '', '4', '4'],
-        ['f', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['d', '', '4', '4'],
-        ['d', '', '4', '4'],
-        ['c', '', '4', '2'],
-        ['g', '', '4', '4'],
-        ['g', '', '4', '4'],
-        ['f', '', '4', '4'],
-        ['f', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['d', '', '4', '2'],
-        ['g', '', '4', '4'],
-        ['g', '', '4', '4'],
-        ['f', '', '4', '4'],
-        ['f', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['d', '', '4', '2'],
-        ['c', '', '4', '4'],
-        ['c', '', '4', '4'],
-        ['g', '', '4', '4'],
-        ['g', '', '4', '4'],
-        ['a', '', '4', '4'],
-        ['a', '', '4', '4'],
-        ['g', '', '4', '2'],
-        ['f', '', '4', '4'],
-        ['f', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['e', '', '4', '4'],
-        ['d', '', '4', '4'],
-        ['d', '', '4', '4'],
-        ['c', '', '4', '2'],
-    ].map(([letter, acc, octave, length]) => {
+    let track_name = document.querySelector(".track-name").innerHTML;
+    let noteHolder = [];
+    if(track_name == "Twinkle Twinkle Little Star") {
+        console.log("here");
+        noteHolder = notesOne;
+    } else if(track_name == "Happy Birthday") {
+        console.log("here1");
+        noteHolder = notesTwo;
+    } else {
+        console.log("here2");
+    }
+
+    notes = noteHolder.map(([letter, acc, octave, length]) => {
         const note = new VF.StaveNote({
         clef: 'treble',
         keys: [`${letter}${acc}/${octave}`],
@@ -221,9 +267,14 @@ function loadNotes() {
     });
 }
 
+/// loadNotes();
+
 async function writeNotes() {
+    let track_name = document.querySelector(".track-name").innerHTML;
+
     if(playpause_btn.innerHTML === '<i class="fa fa-stop-circle fa-5x"></i>') {
-        for(let i = 0; i < 42; i++) {
+        loadNotes();
+        for(let i = 0; i < notes.length; i++) {
             note = notes.shift();
             if(!note) return;
             const group = context.openGroup();
@@ -251,13 +302,27 @@ async function writeNotes() {
             visibleNoteGroups.shift();
             }, 5000);
 
-            if(note.duration == '2') {
-                await delay(620);
+            if(track_name == "Twinkle Twinkle Little Star") {
+                if(note.duration == '2') {
+                    await delay(1240);
+                } else if(note.duration == '8') {
+                    await delay(310)
+                } else if(note.duration == '4') {
+                    await delay(620);
+                }
+            } else if(track_name == "Happy Birthday") {
+                if(note.duration == '4') {
+                    await delay(600);
+                } else if(note.duration == '2') {
+                    await delay(1200);
+                } else if(note.duration == '8') {
+                    await delay(300);
+                }
             }
-            await delay(620);
+            
         }
         toggleVisibility = true;
-        loadNotes();
+        // loadNotes();
     } else {
         const group = context.openGroup();
         context.closeGroup();
