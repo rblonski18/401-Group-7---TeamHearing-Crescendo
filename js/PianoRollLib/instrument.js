@@ -6,13 +6,26 @@ export function sample(name, audio){
 export function sampler(samples, audioContext){
     this.notes = samples.map(sample => sample.name);
     this.audioContext = audioContext;
+    this.envelope = new envelope(0, 10, 0);
 
     this.playNote = function(noteIndex, time, audioCtx){
+        const gainNode = audioCtx.createGain();
+        gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0.0;
+
         const sampleSource = audioCtx.createBufferSource();
         sampleSource.buffer = this.audio[noteIndex];
-        sampleSource.connect(audioCtx.destination);
+        sampleSource.connect(gainNode);
+
+        gainNode.gain.linearRampToValueAtTime(1.0, time + this.envelope.attack);
+        gainNode.gain.setTargetAtTime(0, time  + this.envelope.hold, this.envelope.release);
+
         sampleSource.start(time);
     }
+
+    this.setEnvelope = function(attack, hold, release){
+        this.envelope = new envelope(attack, hold, release);
+    }   
 
     this._loadSamples = async function(){
         // For each sample...
@@ -33,4 +46,10 @@ export function sampler(samples, audioContext){
     }
 
     this._loadSamples();
+}
+
+function envelope(attack, hold, release){
+    this.attack = attack;
+    this.hold = hold;
+    this.release = release;
 }

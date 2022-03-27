@@ -68,6 +68,8 @@ export function beatChecker(pianoRoll){
     }
 }
 
+var _numWaveforms = 0;
+
 export function createGamePianoRoll(domParent, instrument, length, audioCtx){
     // TODO: create a custom piano roll controller to control the piano roll.
     // This controller should allow for testing a runthrough of the level or 
@@ -81,19 +83,22 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
 
     const wavesurferContainer = document.createElement("div");
     wavesurferContainer.classList.add("wavesurfContainer");
-    wavesurferContainer.id = "waveform";
+    wavesurferContainer.id = "waveform_" + _numWaveforms;
     wavesurferContainer.style.width = "800px"
     stackContainer.appendChild(wavesurferContainer);
     
     const wavesurfer = WaveSurfer.create({
-        container: '#waveform',
+        container: "#" + wavesurferContainer.id,
         waveColor: 'black',
         progressColor: 'orange',
         height: 100,
-        interact: false
+        interact: false,
+        normalize: true
     });
 
     wavesurfer.on('finish', () => wavesurfer.seekTo(0));
+
+    _numWaveforms += 1;
 
     const pianoRollContainer = document.createElement("div");
     pianoRollContainer.classList.add("pianoRollContainer");
@@ -200,5 +205,9 @@ function level(beat, bpm){
 
 export const levels = [
     new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70),
-    new level(beatFromEncodedState(3, 16, "/j8ICINC"), 70), 
+    new level(beatFromEncodedState(3, 16, "/j8ICINC"), 70)
+]
+
+export const melodicLevels = [
+    new level(beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)
 ]
