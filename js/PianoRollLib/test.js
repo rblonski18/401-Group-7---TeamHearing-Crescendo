@@ -23,8 +23,6 @@ game.onlevelcomplete = () => game.startLevel(levels[++levelIndex]);
 
 smpler.onloadsamples = () => game.startLevel(levels[levelIndex]);
 
-gameRollAndController.game.startLevel(levels[0]);
-
 
 var melodicSamples = [
     new sample("C", "./sounds/Piano.pp.C3.wav"),
@@ -35,10 +33,10 @@ var melodicSamples = [
 ]
 
 var melodicSampler = new sampler(melodicSamples, audioCtx);
+melodicSampler.setEnvelope(0, .5, .1);
 
 const melodicGameRollAndController = createGamePianoRoll(document.getElementById("roll3"), melodicSampler, 16, audioCtx);
 
-melodicGameRollAndController.game.startLevel(melodicLevels[0]);
-
+melodicSampler.onloadsamples = () => melodicGameRollAndController.game.startLevel(melodicLevels[0]);
 
 //createRollWithController(document.getElementById("roll3"), melodicSampler, 16, audioCtx);
