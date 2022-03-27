@@ -92,7 +92,8 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
         waveColor: 'black',
         progressColor: 'orange',
         height: 100,
-        interact: false
+        interact: false,
+        normalize: true
     });
 
     wavesurfer.on('finish', () => wavesurfer.seekTo(0));
