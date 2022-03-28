@@ -1110,36 +1110,45 @@ layout = {
 			console.log(indices);
 		}
 		playlist.forEach((obj, i) => { 
-			//obj.callback = obj.callback.bind(null, i);
 			obj.callback = () => {
 				protocol = new Protocol();
 				protocol.activity = obj.activity;
 				protocol.callback = finishCallback.bind(null, i);
+				obj.settings.trials = 1;
 				protocol.settings.push(obj.settings);
-				// default to 3 if reptitions is null/undefined/0
-				if (!obj.repetitions) obj.repetitions = 3;
-				protocol.start(obj.repetitions);
+				// default to 3 if reptitions is null/undefined/<0
+				protocol.start(obj.repetitions ? obj.repetitions : 3);
 			}
+			// store the index before the playlist gets filtered
 			obj.index = i;
 		});
 		playlist = playlist.filter((obj, i) => indices.includes(i));
 
-		// created this variable to reduce copy/pasting
 		// i will definitely need to clean up my code and document it.... it's a mess, to say the least
 		var finishCallback = (i) => {
 			let indices = JSON.parse(window.localStorage.getItem(selection));
-			const index = indices.indexOf(i);
-			indices.splice(index, 1);
-			window.localStorage.setItem(selection, JSON.stringify(indices));
-			//playlist[index].callback();
-			layout.randomPlaylist(difficulty, playlistMode);
+			indices.splice(indices.indexOf(i), 1);
+			setItem(selection, JSON.stringify(indices));
+			// if there are more exercises, immediately start the next exercise
+			if (indices.length > 0) {
+				const nextExercise = playlist.find(obj => obj.index === indices[0]);
+				console.log(JSON.stringify({index: nextExercise.index, length: playlist.length}))
+				protocol = new Protocol();
+				protocol.activity = nextExercise.activity;
+				protocol.callback = finishCallback.bind(null, nextExercise.index);
+				nextExercise.settings.trials = 1;
+				protocol.settings.push(nextExercise.settings);
+				protocol.start(nextExercise.repetitions ? nextExercise.repetitions : 3);
+			} else {
+				layout.randomPlaylist(difficulty, playlistMode);
+			}
 		};
 
 		// using map() function to isolate properties of playlist
 		// which is technically not efficient but it does the job
 		if (playlist.length > 0) {
 			layout.assignment(
-				`Random Exercise Playlist - ${difficulty}`, 
+				`Random Exercise Playlist - ${difficulty} (${playlistMode})`, 
 				playlist.map(obj => obj.option),
 				playlist.map(obj => obj.callback),
 				{},
@@ -1148,7 +1157,7 @@ layout = {
 			);
 		} else {
 			layout.assignment(
-				`${difficulty} mode complete! See you Tomorrow`, 
+				`${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} mode (${playlistMode}) complete! See you tomorrow.`, 
 				[],
 				[],
 				{},
