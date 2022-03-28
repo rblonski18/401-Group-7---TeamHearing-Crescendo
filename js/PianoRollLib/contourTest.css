@@ -22,6 +22,7 @@
 .pianoRollRow {
     display: flex;
     height: 50px;
+    box-sizing: border-box;
 }
 
 .pianoRollControls {
@@ -49,6 +50,53 @@
     border-style: solid;
     border-color: rgb(0, 0, 0);
     border-width: 1px;
+}
+
+/* CONTOUR */
+.contourBlankSquare {
+    flex-grow: 1;
+    background-color: rgb(255, 255, 255);
+}
+
+.contourSelectedSquare {
+    flex-grow: 1;
+    background-color: rgb(255, 255, 255);
+
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+    border-width: 3px;
+    box-sizing: border-box;
+}
+
+.contourChoiceSquare {
+    flex-grow: 1;
+    background-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+    border-width: 3px;
+    box-sizing: border-box;
+}
+
+.contourChoiceSquare:hover{
+    background-color: rgb(235, 235, 8);
+}
+
+.contourSquare {
+    flex-grow: 1;
+    background-color: rgb(255, 255, 255);
+
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+    border-width: 3px;
+    box-sizing: border-box;
+}
+
+.contourRow {
+    display: flex;
+    height: 50px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .pianoRollSquareHighlighted {

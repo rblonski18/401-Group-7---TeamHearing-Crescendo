@@ -1,4 +1,4 @@
-import {createRoll, createRollWithController} from "./pianoRoll.js";
+import {createRoll, createRollWithContourController, contourGameRoll} from "./pianoRoll.js";
 import {sample, sampler} from "./instrument.js";
 
 var samples = [
@@ -15,4 +15,6 @@ const audioCtx = new AudioContext();
 
 var smpler = new sampler(samples, audioCtx);
 
-createRollWithController(document.getElementById("roll1"), smpler, 8, audioCtx);
+createRollWithContourController(document.getElementById("roll1"), smpler, 5, audioCtx);
+
+contourGameRoll(document.getElementById("roll2"), smpler, 5, audioCtx);
