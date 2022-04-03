@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
   
   <!-- Load the custom CSS style file -->
   <link rel="stylesheet" type="text/css" href="player.css">
@@ -26,62 +25,34 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item active">
-          <a class="nav-link" href="#">Twinkle Twinkle Little Star <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="twinkleplayer.html">Twinkle Twinkle Little Star <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="birthdayplayer.html">Happy Birthday</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="gameplayer.html">Note Guesser Game</a>
+          <a class="nav-link" href="birthdayplayer.html">Happy Birthday</a> 
         </li>
       </ul>
     </div>
   </nav>
-  <div class="player">
-  
-    <!-- Define the section for displaying details -->
-    <div class="details">
-      <div class="track-art"></div>
-      <div id="container">
-        <div id="boo"></div>
-      </div>
-      <div class="track-name">Twinkle Twinkle Little Star</div>
-      <div class="track-artist">Jane Taylor</div>
-    </div>
-  
-    <!-- Define the section for displaying track buttons -->
-    <div class="buttons">
-      
-      <div id="play-pause-button" class="playpause-track" onclick="playpauseTrack()">
-        <i class="fa fa-play-circle fa-5x"></i>
-      </div>
-      
-    </div>
-  
-    <!-- Define the section for displaying the seek slider-->
-    <div class="slider_container">
-      <div class="current-time">00:00</div>
-      <input type="range" min="1" max="100"
-        value="0" class="seek_slider">
-      <div class="total-duration">00:00</div>
-    </div>
-  
-    <!-- Define the section for displaying the volume slider-->
-    <div class="slider_container">
-      <i class="fa fa-volume-down"></i>
-      <input type="range" min="1" max="100"
-        value="99" class="volume_slider" onchange="setVolume()">
-      <i class="fa fa-volume-up"></i>
+
+  <div class='player'>
+    <h2>Note Guesser</h2> 
+    <div class='details'>
+        <div id="container">
+            <div id="output"></div>
+        </div>
+        <div id="controls">
+            <button id='add-note' type="button" class="btn btn-secondary">Add Note</button>
+            <button id='right-answer' type="button" class="btn btn-secondary">Right Answer</button>
+        </div>
     </div>
   </div>
-  
+
   <!-- Load the main script for the player -->
   <script src="https://unpkg.com/vexflow@4.0.0/build/vexflow.js" crossorigin></script>
   <script src="https://unpkg.com/vexflow@4.0.0/build/vexflow-debug.js" crossorigin></script>
 
   <script src = "https://d3js.org/d3.v4.min.js"></script> 
-  <script src="twinklenotes.js"></script>
-  <script src="player.js"></script>
+  <script src="gamenotes.js"></script>
   
 </body>
 </html>
