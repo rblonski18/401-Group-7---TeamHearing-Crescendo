@@ -131,7 +131,8 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
     controls.appendChild(submitBtn);
 
     return {
-        game: newGame
+        game: newGame,
+        wavesurfer: wavesurfer
     }
 }
 
@@ -198,7 +199,7 @@ function game(pianoRoll, wavesurfer){
     }
 }
 
-function level(beat, bpm){
+export function level(beat, bpm){
     this.beat = beat;
     this.bpm = bpm;
 }

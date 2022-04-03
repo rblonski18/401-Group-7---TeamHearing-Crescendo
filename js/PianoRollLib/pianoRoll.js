@@ -51,6 +51,7 @@ export function createRoll(domParent, instrument, length, audioCtx){
         var rowLabel = document.createElement("div");
         rowLabel.classList.add("pianoRollRowLabel");
         rowLabel.innerText = instrument.notes[i];
+        rowLabel.onclick = () => instrument.playNote(i, audioCtx.currentTime, audioCtx);
 
         row.appendChild(rowLabel);
 
@@ -552,6 +553,10 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
     }
 
     this._update = function(timestamp){
+
+        if(!this._isPlaying){
+            return;
+        }
 
         if(this._startTime > performance.now()){
             return;
