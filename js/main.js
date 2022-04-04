@@ -1144,14 +1144,20 @@ layout = {
 			}
 		};
 
+		let extra = {};
+		if (playlistMode == 'speech') {
+			extra.music = layout.randomPlaylist.bind(null, difficulty, 'music');
+		} else {
+			extra.speech = layout.randomPlaylist.bind(null, difficulty, 'speech');
+		}
 		// using map() function to isolate properties of playlist
 		// which is technically not efficient but it does the job
 		if (playlist.length > 0) {
 			layout.assignment(
-				`Random Exercise Playlist - ${difficulty} (${playlistMode})`, 
+				`${playlistMode} - ${difficulty}`, 
 				playlist.map(obj => obj.option),
 				playlist.map(obj => obj.callback),
-				{},
+				extra,
 				mode,
 				back
 			);
@@ -1160,7 +1166,7 @@ layout = {
 				`${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} mode (${playlistMode}) complete! See you tomorrow.`, 
 				[],
 				[],
-				{},
+				extra,
 				mode,
 				back
 			);
@@ -1213,40 +1219,6 @@ layout = {
 		button.style.width = '7em';
 		jQuery(button).button();
 		footer.appendChild(button);
-
-		var div = document.createElement('div');
-
-		// speech button
-		var button = document.createElement('button');
-		button.innerHTML = 'speech';
-		button.onclick = layout.randomPlaylist.bind(null, difficulty, 'speech');
-		button.style.cssFloat = 'left';
-		button.style.fontSize = '75%';
-		button.style.height = '50%';
-		button.style.marginLeft = '.2em';
-		button.style.width = '7em';
-		jQuery(button).button();
-		div.appendChild(button);
-		//document.querySelectorAll('#main > table > tbody > tr')[0].appendChild(button);
-
-		// music button
-		var button = document.createElement('button');
-		button.innerHTML = 'music';
-		button.onclick = layout.randomPlaylist.bind(null, difficulty, 'music');
-		button.style.cssFloat = 'left';
-		button.style.fontSize = '75%';
-		button.style.height = '50%';
-		button.style.marginLeft = '.2em';
-		button.style.width = '7em';
-		jQuery(button).button();
-		div.appendChild(button);
-
-		div.style.display = 'flex';
-		div.style.flexDirection = 'row';
-
-		// TODO: select in a better way
-		document.querySelectorAll('#main > table > tbody > tr')[0].appendChild(div);
-
 
 		// center the buttons on the footer
 		footer.style.display = 'flex';
