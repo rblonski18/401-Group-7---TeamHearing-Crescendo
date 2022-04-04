@@ -1013,16 +1013,14 @@ layout = {
 		main.appendChild(menu);
 		jQuery(menu).menu();
 	},
-	randomPlaylist(difficulty, playlistMode) {
-		if (!difficulty) difficulty = 'easy';
-		if (!playlistMode) playlistMode = 'speech';
-
+	randomPlaylist(difficulty = 'easy', playlistMode = 'speech') {
 		let back = layout.music();//back ? back : () => { layout.dashboard(); };
 
 		// init
 		const mode = 'bel_intervals_training';
 		let a = 0, callbacks = [], options = [];
 
+		// select the playlist based off of the difficulty
 		let playlist;
 		switch (difficulty) {
 		case 'easy':
@@ -1037,6 +1035,7 @@ layout = {
 		default:
 			playlist = easyPlaylist;
 		}
+		// add the neutral playlist and filter the exercises based on mode
 		playlist = playlist.concat(neutralPlaylist).filter(obj => {
 			return playlistMode === 'speech' ? obj.mode === 'speech'
 				: obj.mode !== 'speech';
@@ -1048,15 +1047,61 @@ layout = {
 		let setItem = (key, val) => window.localStorage.setItem(key, val);
 		let removeItem = (key) => window.localStorage.removeItem(key);
 
-		// i will clean this up later
+
+
+		// jQuery.ajax({
+		// 	data: {
+		// 		user: user.ID,
+		// 	},
+		// 	error: function (jqXHR, textStatus, errorThrown) {
+		// 		console.log(jqXHR, textStatus, errorThrown);
+		// 	},
+		// 	success: function (data, status) {
+		// 		console.log(data);
+		// 		var data = JSON.parse(data);
+		// 		console.log(data);
+		// 		if (data == 'dne') {
+		// 			// TODO: log the date
+		// 		} else if (date == 'different') {
+		// 			// TODO: delete the indice rows
+		//			// TODO: log the new date
+		// 		}
+		// 	},
+		// 	type: 'POST',
+		// 	url: 'version/'+version+'/php/last-visit.php'
+		// });
+
+		// jQuery.ajax({
+		// 	data: {
+		// 		user: user.ID,
+		// 	},
+		// 	error: function (jqXHR, textStatus, errorThrown) {
+		// 		console.log(jqXHR, textStatus, errorThrown);
+		// 	},
+		// 	success: function (data, status) {
+		// 		console.log(data);
+		// 		var data = JSON.parse(data);
+		// 		console.log(data);
+		// 		if (data == 'dne') {
+		// 			// TODO: come up with a new list of indices & store it
+		// 		} else {
+		// 			// TODO: read the list of indices
+		// 		}
+		// 	},
+		// 	type: 'POST',
+		// 	url: 'version/'+version+'/php/last-visit.php'
+		// });
+
+		// if there is a day, month, year, check if it's a new day
 		if (getItem('day') !== null &&
 				getItem('month') !== null &&
 				getItem('year') !== null
 		) {
+			// get the date store in local storage
 			let prevDay = JSON.parse(getItem('day'));
 			let prevMonth = JSON.parse(getItem('month'));
 			let prevYear = JSON.parse(getItem('year'));
-
+			// get current date
 			let currDate = new Date();
 			let currDay = currDate.getDate();
 			let currMonth = currDate.getMonth();
@@ -1085,36 +1130,41 @@ layout = {
 				removeItem('year');
 			}
 		} else {
+			// date is null, so create date and store in local storage 
 			let date = new Date();
 			setItem('day', JSON.stringify(date.getDate()));
 			setItem('month', JSON.stringify(date.getMonth()));
 			setItem('year', JSON.stringify(date.getFullYear()));
 		}
 		
-		
-
+		// the idea here is store the indices of the exercises instead of the exercises themselves cuz that would be torture...
 		let indices;
+		// need an entry given a difficulty and a playlistMode
 		let selection = JSON.stringify({difficulty: difficulty, playlistMode: playlistMode});
 		console.log(selection);
-		if (window.localStorage.getItem(selection) === null) {
-			// 
+		// if indices doesn't exist in local storage, create a new random list and store it
+		if (getItem(selection) === null) {
 			indices = [];
+			// populate the array, and then shuffle it, and then grab 6 elements
 			for (let i = 0; i < playlist.length; ++i) 
 				indices[i] = i;
 			
 			indices = indices.shuffle().slice(0, 6);
-			window.localStorage.setItem(selection, JSON.stringify(indices));
+			setItem(selection, JSON.stringify(indices));
 			console.log(indices);
 		} else {
-			indices = JSON.parse(window.localStorage.getItem(selection));
+			// indices exists, so parse it from local storage
+			indices = JSON.parse(getItem(selection));
 			console.log(indices);
 		}
+		// prepare the playlist data so that it can passed as an argument
+		// technically should use map() instead of forEach()
 		playlist.forEach((obj, i) => { 
 			obj.callback = () => {
 				protocol = new Protocol();
 				protocol.activity = obj.activity;
 				protocol.callback = finishCallback.bind(null, i);
-				obj.settings.trials = 1;
+				obj.settings.trials = 15;
 				protocol.settings.push(obj.settings);
 				// default to 3 if reptitions is null/undefined/<0
 				protocol.start(obj.repetitions ? obj.repetitions : 3);
@@ -1122,21 +1172,22 @@ layout = {
 			// store the index before the playlist gets filtered
 			obj.index = i;
 		});
+		// grab the exercises that are in the random list
 		playlist = playlist.filter((obj, i) => indices.includes(i));
 
-		// i will definitely need to clean up my code and document it.... it's a mess, to say the least
 		var finishCallback = (i) => {
+			// get the indices list, remove the desired index, then put it back into local storage
 			let indices = JSON.parse(window.localStorage.getItem(selection));
 			indices.splice(indices.indexOf(i), 1);
 			setItem(selection, JSON.stringify(indices));
-			// if there are more exercises, immediately start the next exercise
+			// if there are more exercises, immediately start the next exercise. otherwise, go back to webpage
 			if (indices.length > 0) {
 				const nextExercise = playlist.find(obj => obj.index === indices[0]);
 				console.log(JSON.stringify({index: nextExercise.index, length: playlist.length}))
 				protocol = new Protocol();
 				protocol.activity = nextExercise.activity;
 				protocol.callback = finishCallback.bind(null, nextExercise.index);
-				nextExercise.settings.trials = 1;
+				nextExercise.settings.trials = 15;
 				protocol.settings.push(nextExercise.settings);
 				protocol.start(nextExercise.repetitions ? nextExercise.repetitions : 3);
 			} else {
@@ -1145,6 +1196,7 @@ layout = {
 		};
 
 		let extra = {};
+		// bind the opposite mode so that user can change modes
 		if (playlistMode == 'speech') {
 			extra.music = layout.randomPlaylist.bind(null, difficulty, 'music');
 		} else {
@@ -1162,6 +1214,7 @@ layout = {
 				back
 			);
 		} else {
+			// no more exercies to play, so let the user know
 			layout.assignment(
 				`${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} mode (${playlistMode}) complete! See you tomorrow.`, 
 				[],
