@@ -46,6 +46,9 @@ function Sequence(settings) {
 	this._numWaveforms = 0;
 	this.levels = [];
 	this.melodicLevels = [];
+    this.gameRollAndController = undefined;
+    this.pianoRoll = undefined;
+    this.wavesurfer = undefined;
 	
 	// overrides
 	for (let key in settings) { this[key]=settings[key]; }
@@ -164,6 +167,8 @@ Sequence.prototype.next = function() {
 // Method used to play the tone that user needs to recreate
 // Method will have cases depending on mode (percussion vs melodic)
 Sequence.prototype.sound = function() {
+        this.pianoRoll.resetPlayProgress();
+        this.pianoRoll.play(this.playGame.currentLevel.bpm, false);
 	//
 	// const A = dsp.gain([...this.A],this.A_gain);
 	// const B = dsp.gain([...this.B],this.B_gain);
@@ -232,10 +237,6 @@ Sequence.prototype.test = function(){
 	// main
 	let main = layout.main();
 
-	// Add script for wavesurfer
-	var wavesurferscript = document.createElement('script');
-	wavesurferscript.setAttribute('src','https://unpkg.com/wavesurfer.js');
-	document.head.appendChild(wavesurferscript);
 	
 	// afc container
     // Unsure yet
@@ -257,15 +258,16 @@ Sequence.prototype.test = function(){
 
 	//TODO: Will include piano roll setup
 
-	var pianoRoll = document.createElement('div');
-	pianoRoll.style.width = '100%';
-	pianoRoll.style.margin = 'auto';
-	container.appendChild(pianoRoll);
+	var pianoRollContainer = document.createElement('div');
+	pianoRollContainer.style.width = '100%';
+	pianoRollContainer.style.margin = 'auto';
+	container.appendChild(pianoRollContainer);
 	
+    // Need to change directories on add
 	this.samples = [
-		new sample("Kick", "./PianoRollLib/sounds/kick.wav"),
-		new sample("Snare", "./PianoRollLib/sounds/snare.wav"),
-		new sample("Hi Hat", "./PianoRollLib/sounds/hihat.wav")
+		new sample("Kick", "./version/crescendo/js/PianoRollLib/sounds/kick.wav"),
+		new sample("Snare", "./version/crescendo/js/PianoRollLib/sounds/snare.wav"),
+		new sample("Hi Hat", "./version/crescendo/js/PianoRollLib/sounds/hihat.wav")
 	];
 	this.levels = [
 		new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70),
@@ -282,9 +284,9 @@ Sequence.prototype.test = function(){
 	var smpler = new sampler(this.samples, audioCtx);
 
 	//const rollAndController = this.createRollWithController(pianoRoll, smpler, 16, audioCtx);
-	const gameRollAndController = this.createGamePianoRoll(pianoRoll,smpler,16,audioCtx);
-	const game = gameRollAndController.game;
-	//game.onlevelcomplete = () => game.startLevel(this.levels[0]);
+	this.gameRollAndController = this.createGamePianoRoll(pianoRollContainer,smpler,16,audioCtx);
+	const game = this.gameRollAndController.game;
+	game.onlevelcomplete = () => game.startLevel(this.levels[1]);
 	smpler.onloadsamples = () => game.startLevel(this.levels[0]);
 	console.log(this.levels[0]);
 
@@ -475,7 +477,7 @@ Sequence.prototype.test = function(){
 	var button = document.createElement('button');
 	button.id = 'repeat';
 	button.innerHTML = 'repeat';
-	button.onclick = () => { if(this.disabled){return} this.sound(); };
+	button.onclick = () => { if(this.disabled){return} this.wavesurfer.play(0); };
 	button.style.cssFloat = 'right';
 	button.style.display = 'inline';
 	button.style.height = '100%';
@@ -572,7 +574,7 @@ Sequence.prototype.test = function(){
 		'Listen to the notes played and recreate the sequence.',
 		{	Start: function () {
 				jQuery(this).dialog('destroy').remove();
-				setTimeout(()=>{ that.disabled = false; that.sound(); }, 1e3);
+				setTimeout(()=>{ that.disabled = false; that.wavesurfer.play(0); }, 1e3);
 		}}
 	);
 
@@ -607,7 +609,7 @@ Sequence.prototype.createRoll = function(domParent, instrument, length, audioCtx
     var dom = {};
     dom.squares = rollSquares;
 
-    var roll = new pianoRoll(instrument, length, dom, audioCtx);
+    var roll = new pianoRoll(instrument, length, dom, audioCtx,this);
 
     // rollHolder allows for absolute positioning of the playhead over the pianoroll
     var rollHolder = document.createElement("div");
@@ -890,7 +892,7 @@ let = base64ToBoolArray = function(string) {
 /*
     Returns a promise of an audio buffer containing the rendered beat.
 */
-game.renderBeat = function(beat, instrument, bpm){
+let renderBeat = function(beat, instrument, bpm){
     const beatLength = 60 / bpm / 4;
     const sampleRate = 44100;
     const offlineCtx = new OfflineAudioContext(1, beat.length() * beatLength * sampleRate, sampleRate);
@@ -913,7 +915,7 @@ game.renderBeat = function(beat, instrument, bpm){
 }
 
 
-function pianoRoll(instrument, length, dom, audioCtx){
+function pianoRoll(instrument, length, dom, audioCtx,proto){
     this.instrument = instrument;
     this.audioCtx = audioCtx;
     this.length = length;
@@ -922,10 +924,9 @@ function pianoRoll(instrument, length, dom, audioCtx){
     this._dom = dom;
     this._beatStates = new beat(instrument.notes.length, length);
     this._isPlaying = false;
-    this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
+    this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx,proto);
     this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
     this._bpm = 70;
-
     this._beatListeners = []
 
     this.clickSquare = function(noteIndex, beatIndex){
@@ -1079,7 +1080,7 @@ function pianoRoll(instrument, length, dom, audioCtx){
     1. Animating the UI playhead to show the user where in the beat is being played
     2. Trigger the beat play callback to play beats in time (using a lookahead) 
 */
-function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
+function playHeadAnimator(dom, numBeats, beatCallback, audioCtx,proto){
     this._dom = dom;
     this._numBeats = numBeats;
     this._audioCtx = audioCtx;
@@ -1099,6 +1100,8 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
     this._startBeat;
     this._endBeat;
+
+    this._proto = proto;
 
     this.play = function(bpm, loop, startBeat, endBeat){
         if(this._isPlaying){
@@ -1142,7 +1145,6 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
     }
 
     this._update = function(timestamp){
-
         if(this._startTime > performance.now()){
             return;
         }
@@ -1155,7 +1157,7 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
             this._pos = this._pos % this._getPlayingGridLength();
         }
 
-        while(this._nextNoteTime < this._audioCtx.currentTime + this.LOOK_AHEAD){
+        while(this._nextNoteTime < this._audioCtx.currentTime + this._proto.LOOK_AHEAD){
             beatCallback(this._nextUnplayedNote, this._nextNoteTime);
             this._nextNoteTime += (60 / this._bpm) / 4;
 
@@ -1304,7 +1306,7 @@ Sequence.prototype.createGamePianoRoll = function(domParent, instrument, length,
     wavesurferContainer.style.width = "800px"
     stackContainer.appendChild(wavesurferContainer);
     
-    const wavesurfer = WaveSurfer.create({
+    this.wavesurfer = WaveSurfer.create({
         container: "#" + wavesurferContainer.id,
         waveColor: 'black',
         progressColor: 'orange',
@@ -1313,7 +1315,7 @@ Sequence.prototype.createGamePianoRoll = function(domParent, instrument, length,
         normalize: true
     });
 
-    wavesurfer.on('finish', () => wavesurfer.seekTo(0));
+    this.wavesurfer.on('finish', () => this.wavesurfer.seekTo(0));
 
     this._numWaveforms += 1;
 
@@ -1321,9 +1323,9 @@ Sequence.prototype.createGamePianoRoll = function(domParent, instrument, length,
     pianoRollContainer.classList.add("pianoRollContainer");
     stackContainer.appendChild(pianoRollContainer);
 
-    const pianoRoll = this.createRoll(pianoRollContainer, instrument, length, audioCtx);
+    this.pianoRoll = this.createRoll(pianoRollContainer, instrument, length, audioCtx);
     
-    const newGame = new game(pianoRoll, wavesurfer);
+    this.playGame = new game(this.pianoRoll, this.wavesurfer);
 
     const controls = document.createElement("div");
     controls.classList.add("pianoRollRow");
@@ -1331,25 +1333,23 @@ Sequence.prototype.createGamePianoRoll = function(domParent, instrument, length,
     pianoRollContainer.appendChild(controls);
 
     const listenBtn = this.createControllerButton("Listen", () => {
-        wavesurfer.play(0);
+        this.wavesurfer.play(0);
     });
 
     controls.appendChild(listenBtn);
 
     const playBtn = this.createControllerButton("Play", () => {
-        pianoRoll.resetPlayProgress();
-		console.log(newGame);
-        pianoRoll.play(newGame.currentLevel.bpm, false);
+        this.sound();
     });
 
     controls.appendChild(playBtn);
 
-    const submitBtn = this.createControllerButton("Submit", () => newGame.submitSolution());
+    const submitBtn = this.createControllerButton("Submit", () => this.playGame.submitSolution());
 
     controls.appendChild(submitBtn);
 
     return {
-        game: newGame
+        game: this.playGame
     }
 }
 
@@ -1377,7 +1377,7 @@ function game(pianoRoll, wavesurfer){
         this.currentLevel = level;
         this._beatChecker.setExpectedBeat(level.beat);
 		console.log("bpm "+ level.bpm);
-        this.renderBeat(level.beat, pianoRoll.instrument, level.bpm)
+        renderBeat(level.beat, pianoRoll.instrument, level.bpm)
         .then(audioBuffer => {
             wavesurfer.loadDecodedBuffer(audioBuffer);
         });
@@ -1552,6 +1552,18 @@ Sequence.prototype.createClasses = function(){
 		"height: 100%;"+
 		"background-color: white;"+
 	"}";
+    style.innerHTML += ".gameSpace{"+
+        "display: flex;"+
+        "flex-direction: column;"+
+    "}";
+    style.innerHTML += ".wavesurfContainer{"+
+        "width: 800px;"+
+       "height: 100px;"+
+        "margin: 10px 0px 10px 100px;"+
+   "}";
+    style.innerHTML += ".pianoRollContainer{"+
+        "width: 100%;"+
+    "}";
 
 	document.getElementsByTagName('head')[0].appendChild(style);
 }

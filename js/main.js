@@ -51,6 +51,7 @@ loadscripts([
 	'playlists/easy',
 	'playlists/medium',
 	'playlists/hard',
+	'PianoRollLib/importPianoRoll',
 ]);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 window.onerror = function(msg, url, linenumber) {
