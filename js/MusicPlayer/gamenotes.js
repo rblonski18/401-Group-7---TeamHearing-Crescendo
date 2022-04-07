@@ -17,21 +17,19 @@ const stave = new Stave(10, 10, 10000).addClef("treble");
 // Connect it to the rendering context and draw!
 stave.setContext(context).draw();
 
-const durations = ["8", "4", "2", "1"];
-
 const notes = [
-    ["c", "#", "4"],
-    ["e", "b", "5"],
-    ["g", "", "5"],
-    ["d", "b", "4"],
-    ["b", "bb", "3"],
-    ["a", "b", "4"],
-    ["f", "b", "5"],
+    ["a", "", "4"],
+    ["b", "", "4"],
+    ["c", "", "5"],
+    ["d", "", "5"],
+    ["e", "", "4"],
+    ["f", "", "4"],
+    ["g", "", "4"],
 ].map(([letter, accidental, octave]) => {
     const note = new StaveNote({
         clef: "treble",
         keys: [`${letter}${accidental}/${octave}`],
-        duration: durations[Math.floor(Math.random() * durations.length)],
+        duration: 4,
     });
     note.setContext(context).setStave(stave);
 
@@ -54,60 +52,89 @@ const notes = [
 tickContext.preFormat().setX(400)
 
 const visibleNoteGroups = [];
+const playedNotes = [];
 
-// Add a note to the staff from the notes array (if there are any left).
-document.getElementById("add-note").addEventListener("click", (e) => {
-    note = notes.shift();
-    if (!note) {
-        console.log("DONE!");
-        return;
-    }
+function addNote() {
+    let noteIndex = Math.floor(Math.random() * 7); // number 0 - 6
+    note = notes[noteIndex];
     const group = context.openGroup();
     visibleNoteGroups.push(group);
     note.draw();
+    playedNotes.push(note);
     context.closeGroup();
     group.classList.add("scroll");
-
-    // Force a DOM-refresh by asking for the group's bounding box. Why? Most
-    // modern browsers are smart enough to realize that adding .scroll class
-    // hasn't changed anything about the rendering, so they wait to apply it
-    // at the next dom refresh, when they can apply any other changes at the
-    // same time for optimization. However, if we allow that to happen,
-    // then sometimes the note will immediately jump to its fully transformed
-    // position -- because the transform will be applied before the class with
-    // its transition rule.
     const box = group.getBoundingClientRect();
     group.classList.add("scrolling");
+}
 
-    // If a user doesn't answer in time, make the note fall below the staff.
-    window.setTimeout(() => {
-        const index = visibleNoteGroups.indexOf(group);
-        if (index === -1) return;
+let playing = false;
+
+function playGame() {
+    if(!playing) {
+        addNote();
+        playing = true;
+        document.getElementById("add-note").innerHTML = "Reset";
+    } else {
+        if (visibleNoteGroups.length === 0) return;
+        group = visibleNoteGroups.shift();
         group.classList.add("too-slow");
-        visibleNoteGroups.shift();
-    }, 5000);
+        playing = false;
+        document.getElementById("add-note").innerHTML = "Play"
+    }
+}
+
+// Add a note to the staff from the notes array (if there are any left).
+document.getElementById("add-note").addEventListener("click", (e) => {
+    playGame();
 });
 
-// If a user plays/identifies the note in time, send it up to note heaven.
-document.getElementById("right-answer").addEventListener("click", (e) => {
+function answerQuestion(button, octave) {
     if (visibleNoteGroups.length === 0) return;
     group = visibleNoteGroups.shift();
-    group.classList.add("correct");
+    note = playedNotes.shift();
+    if(note.keys[0] == `${button}/${octave}`) {
+        group.classList.add("correct");
+        const transformMatrix = window.getComputedStyle(group).transform;
+        const x = transformMatrix.split(",")[4].trim();
+        group.style.transform = `translate(${x}px, -800px)`;
+        document.getElementById("answer").classList.remove("answerHeader");
+        document.getElementById("answer").innerHTML = `${button.toUpperCase()} is correct!`
+    } else {
+        group.classList.add("too-slow");
+        document.getElementById("answer").classList.remove("answerHeader");
+        document.getElementById("answer").innerHTML = `Almost!`
+    }
+    addNote();
+}
 
-    // Coding challenge! Try adding a sound effect here (see: Tone.js).
-
-    // The note will be somewhere in the middle of its move to the left -- by
-    // getting its computed style we find its x-position, freeze it there, and
-    // then send it straight up to note heaven with no horizontal motion.
-    const transformMatrix = window.getComputedStyle(group).transform;
-    // transformMatrix will be something like 'matrix(1, 0, 0, 1, -118, 0)'
-    // where, since we're only translating in x, the 4th property will be
-    // the current x-translation. You can dive into the gory details of
-    // CSS3 transform matrices (along with matrix multiplication) if you want
-    // at http://www.useragentman.com/blog/2011/01/07/css3-matrix-transform-for-the-mathematically-challenged/
-    const x = transformMatrix.split(",")[4].trim();
-    // And, finally, we set the note's style.transform property to send it skyward.
-    group.style.transform = `translate(${x}px, -800px)`;
+// If a user plays/identifies the note in time, send it up to note heaven.
+document.getElementById("a-button").addEventListener("click", (e) => {
+    answerQuestion("a", "4")
 });
+document.getElementById("b-button").addEventListener("click", (e) => {
+    answerQuestion("b", "4")
+});
+document.getElementById("c-button").addEventListener("click", (e) => {
+    answerQuestion("c", "5")
+});
+document.getElementById("d-button").addEventListener("click", (e) => {
+    answerQuestion("d", "5")
+});
+document.getElementById("e-button").addEventListener("click", (e) => {
+    answerQuestion("e", '4')
+});
+document.getElementById("f-button").addEventListener("click", (e) => {
+    answerQuestion("f", "4")
+});
+document.getElementById("g-button").addEventListener("click", (e) => {
+    answerQuestion("g", "4")
+});
+
+
+
+
+
+
+
 
 

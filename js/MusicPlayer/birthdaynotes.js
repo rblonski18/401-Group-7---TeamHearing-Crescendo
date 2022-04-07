@@ -236,16 +236,16 @@ function loadNotes() {
 
 }
 
-/// loadNotes();
+loadNotes();
 
 async function writeNotes() {
     let track_name = document.querySelector(".track-name").innerHTML;
 
     if(playpause_btn.innerHTML === '<i class="fa fa-stop-circle fa-5x"></i>') {
-        loadNotes();
+        toggleVisibility = true;
         let len = notes.length
         for(let i = 0; i < len; i++) {
-            note = notes.shift();
+            note = notes[i];
             if(!note) return;
             const group = context.openGroup();
             
@@ -271,7 +271,7 @@ async function writeNotes() {
                 const index = visibleNoteGroups.indexOf(group);
                 if(index === -1) return;
                 group.classList.add('too-slow');
-            visibleNoteGroups.shift();
+                visibleNoteGroups.shift();
             }, 5000);
 
             if(track_name == "Twinkle Twinkle Little Star") {
@@ -293,10 +293,9 @@ async function writeNotes() {
             } 
             
         }
-        toggleVisibility = true;
         // loadNotes();
-        tickContext = new VF.TickContext();
-        tickContext.preFormat().setX(400);
+        // tickContext = new VF.TickContext();
+        // tickContext.preFormat().setX(400);
         
     } else {
 
@@ -304,8 +303,8 @@ async function writeNotes() {
             visibleNoteGroups[i].classList.add("deleted")
         }
 
-        tickContext = new VF.TickContext();
-        tickContext.preFormat().setX(400);
+        // tickContext = new VF.TickContext();
+        // tickContext.preFormat().setX(400);
         // Create a stave of width 10000 at position 10, 40 on the canvas.
         //stave = new VF.Stave(10, 10, 10000)
         //.addClef('treble')

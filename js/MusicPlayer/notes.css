@@ -35,6 +35,14 @@
     transform: translate(-400px, 2000px);
   }
 
+  .stopped {
+    transform: translate(0px, 0);
+  }
+
+  .answerHeader {
+    opacity: 0.0
+  }
+
   .deleted {
       opacity: 0.0
   }
