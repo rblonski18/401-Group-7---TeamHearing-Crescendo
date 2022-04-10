@@ -1042,56 +1042,160 @@ layout = {
 				: obj.mode !== 'speech';
 		});
 		
+
+		// TODO: ask stakeholder to look over the sql queries to make sure i'm not doing anything too crazy
+		// TODO: have stakeholder insert the table into the db
+		
+		// /*
+		// NOTE: need to set async to false because this data HAS to load before anything happens,
+		// but that means the webpage will have to block :( 
+		// */
+
+		// // could use jQuery.ajax.bind() here but w/e 
+		// let logDate = () => {
+		// 	jQuery.ajax({
+		// 		data: {
+		// 			user: user.ID,
+		// 		},
+		// 		error: function (jqXHR, textStatus, errorThrown) {
+		// 			console.log(jqXHR, textStatus, errorThrown);
+		// 		},
+		// 		success: function (data, status) {},
+		// 		type: 'POST',
+		// 		url: 'version/'+version+'/php/last-visit.php',
+		// 		async: false,
+		// 	});
+		// };
+
+		// let removeDate = () => {
+		// 	jQuery.ajax({
+		// 		data: {
+		// 			user: user.ID,
+		// 		},
+		// 		error: function (jqXHR, textStatus, errorThrown) {
+		// 			console.log(jqXHR, textStatus, errorThrown);
+		// 		},
+		// 		success: function (data, status) {},
+		// 		type: 'DELETE',
+		// 		url: 'version/'+version+'/php/last-visit.php',
+		// 		async: false,
+		// 	});
+		// };
+
+		// let logIndices = (indices) => {
+		// 	jQuery.ajax({
+		// 		data: {
+		// 			user: user.ID,
+		// 			indices: indices,
+		// 		},
+		// 		error: function (jqXHR, textStatus, errorThrown) {
+		// 			console.log(jqXHR, textStatus, errorThrown);
+		// 		},
+		// 		success: function (data, status) {},
+		// 		type: 'POST',
+		// 		url: 'version/'+version+'/php/indices.php',
+		// 		async: false,
+		// 	});
+		// };
+
+		// let removeIndices = () => {
+		// 	// log the new date
+		// 	jQuery.ajax({
+		// 		data: {
+		// 			user: user.ID,
+		// 		},
+		// 		error: function (jqXHR, textStatus, errorThrown) {
+		// 			console.log(jqXHR, textStatus, errorThrown);
+		// 		},
+		// 		success: function (data, status) {},
+		// 		type: 'DELETE',
+		// 		url: 'version/'+version+'/php/indices.php',
+		// 		async: false,
+		// 	});
+		// };
+
+		// let readIndices = () => {
+		// 	let indices;
+		// 	jQuery.ajax({
+		// 		data: {
+		// 			user: user.ID,
+		// 		},
+		// 		error: function (jqXHR, textStatus, errorThrown) {
+		// 			console.log(jqXHR, textStatus, errorThrown);
+		// 		},
+		// 		success: function (data, status) {
+		// 			console.log(data);
+		// 			var data = JSON.parse(data);
+		// 			console.log(data);
+		// 			indices = data;
+		// 		},
+		// 		type: 'POST',
+		// 		url: 'version/'+version+'/php/indices.php',
+		// 		async: false,
+		// 	});
+		// 	return indices;
+		// };
+
+		// // check if user logged in a new day
+		// // if user hasn't logged in, log the date
+		// // if user logged in on a new day, remove indices and log the date
+		// // if it's not a new day, do nothing
+		// let indices = [];
+		// jQuery.ajax({
+		// 	data: {
+		// 		user: user.ID,
+		// 	},
+		// 	error: function (jqXHR, textStatus, errorThrown) {
+		// 		console.log(jqXHR, textStatus, errorThrown);
+		// 	},
+		// 	success: function (data, status) {
+		// 		console.log(data);
+		// 		var data = JSON.parse(data);
+		// 		console.log(data);
+		// 		// if does not exists, log date and indices
+		// 		if (data == 'dne') {
+		// 			// populate the array, and then shuffle it, and then grab 6 elements
+		// 			for (let i = 0; i < playlist.length; ++i) 
+		// 				indices[i] = i;
+					
+		// 			indices = indices.shuffle().slice(0, 6);
+
+		// 			// log new data
+		// 			logDate();
+		// 			logIndices(indices);
+		// 		// if it's a different day, clear data, then log new data
+		// 		} else if (data == 'different') {
+		// 			// clear data
+		// 			removeDate();
+		// 			removeIndices();
+					
+		// 			let indices = [];
+		// 			// populate the array, and then shuffle it, and then grab 6 elements
+		// 			for (let i = 0; i < playlist.length; ++i) 
+		// 				indices[i] = i;
+					
+		// 			indices = indices.shuffle().slice(0, 6);
+
+		// 			// log new data
+		// 			logDate();
+		// 			logIndices(indices);
+		// 		// if it's the same day, just read the data
+		// 		} else if (data == 'same') {
+		// 			indices = readIndices();
+		// 		} else {
+		// 			console.log('oooooooooooooooooooops');
+		// 		}
+		// 	},
+		// 	type: 'GET',
+		// 	url: 'version/'+version+'/php/last-visit.php',
+		// 	async: false,
+		// });
+
 		// these are just aliases 
 		// won't work when I do getItem = window.localStorage.getItem.bind(window), not sure why
 		let getItem = (key) => window.localStorage.getItem(key);
 		let setItem = (key, val) => window.localStorage.setItem(key, val);
 		let removeItem = (key) => window.localStorage.removeItem(key);
-
-
-
-		// jQuery.ajax({
-		// 	data: {
-		// 		user: user.ID,
-		// 	},
-		// 	error: function (jqXHR, textStatus, errorThrown) {
-		// 		console.log(jqXHR, textStatus, errorThrown);
-		// 	},
-		// 	success: function (data, status) {
-		// 		console.log(data);
-		// 		var data = JSON.parse(data);
-		// 		console.log(data);
-		// 		if (data == 'dne') {
-		// 			// TODO: log the date
-		// 		} else if (date == 'different') {
-		// 			// TODO: delete the indice rows
-		//			// TODO: log the new date
-		// 		}
-		// 	},
-		// 	type: 'POST',
-		// 	url: 'version/'+version+'/php/last-visit.php'
-		// });
-
-		// jQuery.ajax({
-		// 	data: {
-		// 		user: user.ID,
-		// 	},
-		// 	error: function (jqXHR, textStatus, errorThrown) {
-		// 		console.log(jqXHR, textStatus, errorThrown);
-		// 	},
-		// 	success: function (data, status) {
-		// 		console.log(data);
-		// 		var data = JSON.parse(data);
-		// 		console.log(data);
-		// 		if (data == 'dne') {
-		// 			// TODO: come up with a new list of indices & store it
-		// 		} else {
-		// 			// TODO: read the list of indices
-		// 		}
-		// 	},
-		// 	type: 'POST',
-		// 	url: 'version/'+version+'/php/last-visit.php'
-		// });
 
 		// if there is a day, month, year, check if it's a new day
 		if (getItem('day') !== null &&
@@ -1129,6 +1233,12 @@ layout = {
 				removeItem('day');
 				removeItem('month');
 				removeItem('year');
+
+				// record today's new date
+				let date = new Date();
+				setItem('day', JSON.stringify(date.getDate()));
+				setItem('month', JSON.stringify(date.getMonth()));
+				setItem('year', JSON.stringify(date.getFullYear()));
 			}
 		} else {
 			// date is null, so create date and store in local storage 

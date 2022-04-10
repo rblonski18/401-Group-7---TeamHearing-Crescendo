@@ -13,10 +13,18 @@ switch($_SERVER['REQUEST_METHOD']){
 		$currDate = date("Y-m-d");
 		$result = (strcmp($prevDate, $currDate) == 0) ? 'same' : 'different';
 		echo json_encode($result); break;
+	// log the current date
 	case "POST":
 		// have to do date here because MySQL doesn't support CURRENT_DATE as default value in the table
 		$query = $conn->prepare("INSERT INTO LastVisit (date,user) VALUES (?,?)");
 		$query->bind_param('ss',date("Y-m-d"),$_POST['user']);
+		$query->execute();
+		$query->close();
+		break;
+	case "DELETE":
+		// remove indices from the table
+		$query = $conn->prepare("DELETE FROM LastVisit WHERE user = ?");
+		$query->bind_param('i',$_DELETE['user']);
 		$query->execute();
 		$query->close();
 }
