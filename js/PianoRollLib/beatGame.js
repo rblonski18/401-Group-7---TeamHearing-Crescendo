@@ -1,6 +1,5 @@
-import { beatFromEncodedState, createRoll, renderBeat } from "./pianoRoll.js";
-
-export function beatChecker(pianoRoll){
+const BeatGame = (function(){
+function beatChecker(pianoRoll){
     pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
 
     this._isCurrentlyChecking = false;
@@ -70,7 +69,7 @@ export function beatChecker(pianoRoll){
 
 var _numWaveforms = 0;
 
-export function createGamePianoRoll(domParent, instrument, length, audioCtx){
+function createGamePianoRoll(domParent, instrument, length, audioCtx){
     // TODO: create a custom piano roll controller to control the piano roll.
     // This controller should allow for testing a runthrough of the level or 
     // submitting a sequence. Input should be disabled when the piano roll is
@@ -104,7 +103,7 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
     pianoRollContainer.classList.add("pianoRollContainer");
     stackContainer.appendChild(pianoRollContainer);
 
-    const pianoRoll = createRoll(pianoRollContainer, instrument, length, audioCtx);
+    const pianoRoll = PianoRoll.createRoll(pianoRollContainer, instrument, length, audioCtx);
     
     const newGame = new game(pianoRoll, wavesurfer);
 
@@ -160,7 +159,7 @@ function game(pianoRoll, wavesurfer){
         this.currentLevel = level;
         this._beatChecker.setExpectedBeat(level.beat);
 
-        renderBeat(level.beat, pianoRoll.instrument, level.bpm)
+        PianoRoll.renderBeat(level.beat, pianoRoll.instrument, level.bpm)
         .then(audioBuffer => {
             wavesurfer.loadDecodedBuffer(audioBuffer);
         });
@@ -199,16 +198,27 @@ function game(pianoRoll, wavesurfer){
     }
 }
 
-export function level(beat, bpm){
+function level(beat, bpm){
     this.beat = beat;
     this.bpm = bpm;
 }
 
-export const levels = [
-    new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70),
-    new level(beatFromEncodedState(3, 16, "/j8ICINC"), 70)
+const levels = [
+    new level(PianoRoll.beatFromEncodedState(3, 16, "qqoICIGC"), 70),
+    new level(PianoRoll.beatFromEncodedState(3, 16, "/j8ICINC"), 70)
 ]
 
-export const melodicLevels = [
-    new level(beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)
+const melodicLevels = [
+    new level(PianoRoll.beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)
 ]
+
+
+return {
+    beatChecker: beatChecker,
+    createGamePianoRoll: createGamePianoRoll,
+    level: level,
+    levels: levels,
+    melodicLevels: melodicLevels
+};
+
+})();

@@ -1,7 +1,9 @@
+const PianoRoll = (function () {
+
 var numRollSquares = 0;
 const LOOK_AHEAD = .1;
 
-export function createRollWithController(domParent, instrument, length, audioCtx){
+function createRollWithController(domParent, instrument, length, audioCtx){
     const controls = createRollController(domParent);
     const pianoRoll = createRoll(domParent, instrument, length, audioCtx);
 
@@ -13,7 +15,7 @@ export function createRollWithController(domParent, instrument, length, audioCtx
     }
 }
 
-export function createRoll(domParent, instrument, length, audioCtx){
+function createRoll(domParent, instrument, length, audioCtx){
     var rollSquares = [];
 
     var dom = {};
@@ -77,7 +79,7 @@ export function createRoll(domParent, instrument, length, audioCtx){
     return roll;
 }
 
-export function createRollController(domParent){
+function createRollController(domParent){
     var dom = {};
 
     // Create controls row
@@ -235,7 +237,7 @@ function beat(numNotes, length){
     }
 }
 
-export function beatFromEncodedState(numNotes, length, state){
+function beatFromEncodedState(numNotes, length, state){
     const newBeat = new beat(numNotes, length);
     const decoded = base64ToBoolArray(state);
 
@@ -301,7 +303,7 @@ function base64ToBoolArray(string) {
 /*
     Returns a promise of an audio buffer containing the rendered beat.
 */
-export function renderBeat(beat, instrument, bpm){
+function renderBeat(beat, instrument, bpm){
     const beatLength = 60 / bpm / 4;
     const sampleRate = 44100;
     const offlineCtx = new OfflineAudioContext(1, beat.length() * beatLength * sampleRate, sampleRate);
@@ -630,8 +632,18 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
     }
 }
 
+
+return{
+    createRollWithController: createRollWithController,
+    createRoll: createRoll,
+    createRollController: createRollController,
+    beatFromEncodedState: beatFromEncodedState,
+    renderBeat: renderBeat,
+}
+
+
 // Piano Roll For Melodic Contour Game
-export function createRollWithContourController(domParent, instrument, length, audioCtx){
+function createRollWithContourController(domParent, instrument, length, audioCtx){
     const controls = createContourController(domParent);
     const pianoRoll = createRoll(domParent, instrument, length, audioCtx);
 
@@ -801,7 +813,7 @@ function createControllerButton(text, onClick){
     return btn;
 }
 
-export function contourGameRoll(domParent, instrument, length, audioCtx) {
+function contourGameRoll(domParent, instrument, length, audioCtx) {
     const controls = createContourController(domParent);
     const pianoRoll = createContourGameRoll(domParent, instrument, length, audioCtx);
 
@@ -813,7 +825,7 @@ export function contourGameRoll(domParent, instrument, length, audioCtx) {
     }
 }
 
-export function createContourGameRoll(domParent, instrument, length, audioCtx){
+function createContourGameRoll(domParent, instrument, length, audioCtx){
     var rollSquares = [];
 
     var dom = {};
@@ -1094,3 +1106,5 @@ function nextNotes(startIndex, rollSquares) {
         x.classList.add("contourChoiceSquare");
     }
 }
+
+})();
