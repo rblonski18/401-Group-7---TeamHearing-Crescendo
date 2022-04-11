@@ -110,5 +110,43 @@ let easyPlaylist = [
 		},
 		repetitions: 3,
 	},
+	{
+		mode: 'speech',
+		option: 'Sentence Completion in Background Noise',
+		activity: 'spin',
+		settings: {
+			adaptive: 'snr',
+		//	behavior: 'Adaptive',
+			chances: Infinity,
+			noise: 'Two Talker Masker (English)',
+			step0: 2,
+			trials: 15,
+			value0 : 20,
+			valueMax: 20,
+			volume: true
+		},
+		repetitions: 3,
+	},
+	{
+		mode: 'speech',
+		option: 'Sentence Completion',
+		activity: 'spin',
+		settings: {
+			adaptive: 'snr',
+			/*
+			NOTE: adaptive sounds like a great idea, if there is a way to do trials + adaptive
+			then that would be preferable.
+			*/
+			//behavior: 'Adaptive',
+			chances: Infinity,
+			noise: 'Two Talker Masker (English)',
+			step0: 2,
+			trials: 15,
+			value0 : 25,
+			valueMax: 25,
+			volume: true
+		},
+		repetitions: 3,
+	},
 ];
 

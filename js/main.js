@@ -1276,6 +1276,7 @@ layout = {
 				protocol.activity = obj.activity;
 				protocol.callback = finishCallback.bind(null, i);
 				obj.settings.trials = 15;
+				
 				protocol.settings.push(obj.settings);
 				// default to 3 if reptitions is null/undefined/<0
 				protocol.start(obj.repetitions ? obj.repetitions : 3);
