@@ -1,12 +1,12 @@
 -- SQL does not support DEFAULT(CURRENT_DATE)... makes no sense
-CREATE TABLE `LastVisit` (
-  `ID` int(11) DEFAULT NULL,
+CREATE TABLE LastVisit (
+  ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `date` DATE NOT NULL,
-  `user` int(11) DEFAULT NULL,
-) ENGINE=MyISAM DEFAULT CHARSET=latin1; 
+  `user` INT NOT NULL
+); 
 
 CREATE TABLE `Indices` (
-  `ID` int(11) DEFAULT NULL,
-  `user` int(11) DEFAULT NULL,
-  `index` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1; 
+  ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `user` INT NOT NULL,
+  `index` INT NOT NULL
+); 
