@@ -18,7 +18,12 @@ if(track_name.innerHTML == "Twinkle Twinkle Little Star") {
 } else if(track_name.innerHTML == "Happy Birthday") {
   console.log("here2")
   track_index = 1;
+} else if(track_name.innerHTML == "Fur Elise") {
+  track_index = 2;
+} else if(track_name.innerHTML == "Prelude in C Major") {
+  track_index = 3;
 }
+
 let isPlaying = false;
 let updateTimer;
   
@@ -36,20 +41,15 @@ let track_list = [
     path: "HappyBirthday.mp3"
   },
   {
-    name: "Brandenburg Concerto",
+    name: "Fur Elise",
+    artist: "Ludwig van Beethoven",
+    path: "furelise.mp3"
+  },
+  {
+    name: "Prelude in C Major",
     artist: "Johann Sebastian Bach",
-    path: "BrandenBurg-Concerto.mp3"
-  },
-  {
-    name: "Piano Concerto no. 21 in C Major",
-    artist: "Wolfgang Amadeus Mozart",
-    path: "Concerto-21-in-C-major.mp3"
-  },
-  {
-    name: "Spring",
-    artist: "Antonio Vivaldi",
-    path: "Spring-Vivaldi.mp3",
-  },
+    path: "prelude.mp3"
+  }
 ];
 
 /*var tickContext = new VF.TickContext();

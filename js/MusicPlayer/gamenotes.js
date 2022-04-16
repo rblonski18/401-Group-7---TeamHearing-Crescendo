@@ -5,6 +5,8 @@ const { Renderer, TickContext, Stave, StaveNote, Accidental } = Vex.Flow;
 const div = document.getElementById("output");
 const renderer = new Renderer(div, Renderer.Backends.SVG);
 
+let curr_track = document.createElement('audio');
+
 // Configure the rendering context.
 renderer.resize(500, 300);
 const context = renderer.getContext();
@@ -50,16 +52,38 @@ const notes = [
 });
 
 tickContext.preFormat().setX(400)
-
+let isTrackPlaying = false;
 const visibleNoteGroups = [];
-const playedNotes = [];
+let playedNotes = [];
 
 function addNote() {
     let noteIndex = Math.floor(Math.random() * 7); // number 0 - 6
     note = notes[noteIndex];
+    console.log(note.keys[0][0]);
+
+    if(isTrackPlaying) curr_track.pause();
+
+    if(note.keys[0][0] == 'a') {
+        curr_track.src = 'A.mp3';
+    } else if(note.keys[0][0] == 'b') {
+        curr_track.src = 'B.mp3';
+    }  else if(note.keys[0][0] == 'c') {
+        curr_track.src = 'C.mp3';
+    } else if(note.keys[0][0] == 'd') {
+        curr_track.src = 'D.mp3';
+    } else if(note.keys[0][0] == 'e') {
+        curr_track.src = 'E.mp3';
+    } else if(note.keys[0][0] == 'f') {
+        curr_track.src = 'F.mp3';
+    } else if(note.keys[0][0] == 'g') {
+        curr_track.src = 'G.mp3';
+    }
+    curr_track.load();
     const group = context.openGroup();
     visibleNoteGroups.push(group);
     note.draw();
+    curr_track.play();
+    isTrackPlaying = true;
     playedNotes.push(note);
     context.closeGroup();
     group.classList.add("scroll");
@@ -75,11 +99,14 @@ function playGame() {
         playing = true;
         document.getElementById("add-note").innerHTML = "Reset";
     } else {
+        isTrackPlaying = false;
+        curr_track.pause();
         if (visibleNoteGroups.length === 0) return;
         group = visibleNoteGroups.shift();
         group.classList.add("too-slow");
         playing = false;
         document.getElementById("add-note").innerHTML = "Play"
+        playedNotes = [];
     }
 }
 
@@ -104,6 +131,7 @@ function answerQuestion(button, octave) {
         document.getElementById("answer").classList.remove("answerHeader");
         document.getElementById("answer").innerHTML = `Almost!`
     }
+    if(isTrackPlaying) curr_track.pause();
     addNote();
 }
 
