@@ -1,9 +1,11 @@
-export function sample(name, audio){
+const InstrumentJS = (function () {
+
+function sample(name, audio){
     this.name = name;
     this.audio = audio;
 }
 
-export function sampler(samples, audioContext){
+function sampler(samples, audioContext){
     this.notes = samples.map(sample => sample.name);
     this.audioContext = audioContext;
     this.envelope = new envelope(0, 10, 0);
@@ -53,3 +55,11 @@ function envelope(attack, hold, release){
     this.hold = hold;
     this.release = release;
 }
+
+return {
+    sample: sample,
+    sampler: sampler,
+    envelope: envelope
+};
+
+})();
