@@ -9,14 +9,6 @@ function sequence(settings) {
 }
 function Sequence(settings) {
 	// most of these will be removed, but still need to distinguish what can be used
-	this.A = [];
-	this.A_frequency = 1000;
-	this.A_fm = 0;
-	this.A_gain = 0;
-	this.B = [];
-	this.B_frequency = 2000;
-	this.B_fm = 0;
-	this.B_gain = 0;
 	this.calls = [];
 	this.chance = undefined;
 	this.chances = 4;
@@ -37,32 +29,56 @@ function Sequence(settings) {
 
 	this.playSequence = [];
 	this.trial = 0;
-	this.trials = Infinity;
-	this.mode = 0;
+	this.trials = 0;
 
+	this.mode = 0;
 	this.numRollSquares = 0;
 	this.LOOK_AHEAD = .1;
 	this.samples = [];
 	this._numWaveforms = 0;
-	this.levels = [];
-	this.melodicLevels = [];
+	this.levels = {};
+    this.level = 0;
     this.gameRollAndController = undefined;
     this.pianoRoll = undefined;
     this.wavesurfer = undefined;
+    this.score = 0;
 	
 	// overrides
 	for (let key in settings) { this[key]=settings[key]; }
-	
-	// Unnecessary?
-	switch(this.method){
-		case 'Complex Tone':
-			this.A = dsp.ramp(dsp.complex(this.duration,this.A_fm));
-			this.B = dsp.ramp(dsp.complex(this.duration,this.B_fm));
-			break;
-		case 'SAM Tone':
-			this.A = dsp.ramp(dsp.modulation(dsp.tone(this.duration, this.A_frequency),this.A_fm));
-			this.B = dsp.ramp(dsp.modulation(dsp.tone(this.duration, this.B_frequency),this.B_fm));
-	}
+
+    switch(this.mode){
+        // mode = 0 percussive, mode = 1 melodic
+        case 0:
+            this.levels = [
+                new level(beatFromEncodedState(1, 8, "jg"), 70),
+                new level(beatFromEncodedState(2, 8, "Iow"), 60),
+                new level(beatFromEncodedState(3, 16, "qqoICIGg"), 70),
+                new level(beatFromEncodedState(4, 16, "qqoIAiAUhUA"), 70),
+                new level(beatFromEncodedState(3, 16, "//8iIpyM"), 80),
+                new level(beatFromEncodedState(3, 16, "7u4QEKKG"), 70),
+                new level(beatFromEncodedState(5, 8, "CBQiQYA"), 60),
+                new level(beatFromEncodedState(5, 16, "AKgABAICBAGoAA"), 70)
+            ];
+            this.samples = [
+                new sample("Kick", "./version/crescendo/js/PianoRollLib/sounds/kick.wav"),
+                new sample("Snare", "./version/crescendo/js/PianoRollLib/sounds/snare.wav"),
+                new sample("Hi Hat", "./version/crescendo/js/PianoRollLib/sounds/hihat.wav"),
+                new sample("Clap", "./version/crescendo/js/PianoRollLib/sounds/clap.wav"),
+                new sample("Crash","./version/crescendo/js/PianoRollLib/sounds/crash.wav")
+            ];
+            break;
+        case 1:
+            this.levels = [new level(beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)];
+            this.samples = [
+                new sample("C", "./version/crescendo/js/PianoRollLib/sounds/Piano.pp.C3.wav"),
+                new sample("D", "./version/crescendo/js/PianoRollLib/sounds/Piano.pp.D3.wav"),
+                new sample("E", "./version/crescendo/js/PianoRollLib/sounds/Piano.pp.E3.wav"),
+                new sample("F", "./version/crescendo/js/PianoRollLib/sounds/Piano.pp.F3.wav"),
+                new sample("G", "./version/crescendo/js/PianoRollLib/sounds/Piano.pp.G3.wav")
+            ];
+            break;
+
+    }
 	
 	// keypress
 	// Unnecessary?
@@ -80,35 +96,55 @@ function Sequence(settings) {
 
 // Method for playing the next round
 // Need to replace to increase difficulty using piano roll library
-Sequence.prototype.next = function() {
+Sequence.prototype.next = function(success) {
 	let that = this;
 	
+    if(success){
+        console.log("success");
+       // this.gameRollAndController.game.startLevel(this.levels[++this.level]);
+        this.level++;
+        this.score++;
+        this.trials++;
+        if(this.level == this.levels.length){
+            // need to do something here for max level count
+            return;
+        }
+        this.test();
+    }
+    else{
+        console.log("failure");
+        if (this.chances != Infinity) {
+            document.getElementById('chance'+this.chance).src = 'images/score-nay.png';
+            this.chance++;
+        }
+        if(this.chance == this.chances){
+            //this.gameRollAndController.game.startLevel(this.levels[++this.level]);
+            this.level++;
+            this.trials++
+            if(this.level == this.levels.length){
+                // need to do something here for max level count
+                return;
+            }
+            this.test();
+        }
+    }
 	//
-	this.trial++;
+	// this.trial++;
 		
-	// last chance
+	// // last chance
 	if (this.chance == this.chances) {
 		// data
 		let data = {
-			behavior: undefined,
-			calls: this.calls.join(','),
-			ear: undefined,
-			gain: MASTERGAIN,
-			noise: undefined,
-			practice: undefined,
-			responses: this.responses.join(','),
-			score: undefined,
-			series: this.delay.history.join(','),
-			setting: this.setting,
-			settings: 'f1:'+this.f1+',f2:'+this.f2+'fm1:'+this.fm1+',fm2:'+this.fm2,
-			snr: undefined,
+			mode: this.mode,
+			score: this.score,
 			subuser: subuser.ID,
-			user: user.ID
+			user: user.ID,
+            level: this.level,
 		};
 		
 		// save to database
 		// currently off
-		// let message = 'Delay detection: '+String(1e3*this.delay.value.toFixed(3))+' ms';
+		//let message = 'Delay detection: '+String(1e3*this.delay.value.toFixed(3))+' ms';
 		// jQuery.ajax({
 		// 	data: data,
 		// 	error: function(jqXHR,textStatus,errorThrown){alert(errorThrown)},
@@ -121,47 +157,46 @@ Sequence.prototype.next = function() {
 		// 		}
 		// 	},
 		// 	type: 'POST',
-		// 	url: 'version/'+version+'/php/stream.php'
+		// 	url: 'version/'+version+'/php/sequence.php'
 		// });
-		// return;
+		return;
 	}
 	
-	// enable buttons
-	this.disabled = false;
-	for (let a = 0; a < 2; a++) {
-		jQuery('#afc'+a).button('option','disabled',false);
-	}
+	// // enable buttons
+	// this.disabled = false;
+	// for (let a = 0; a < 2; a++) {
+	// 	jQuery('#afc'+a).button('option','disabled',false);
+	// }
 	
-	// adaptive logic
-	if (this.correct) {
-		if (this.A_gain == 0) {
-			this.delay.logic(this.correct);
-		} else if (this.A_gain == -Infinity){
-			this.delay.logic(this.correct);
-		} else {
-			this.A_gain = Math.min(this.A_gain+12,0);
-		}
-	} else {
-		if (this.delay.value == this.delay.valueMax) {
-			this.A_gain -= 12;
-		} else {
-			this.delay.logic(this.correct);
-		}
-	}
+	// // adaptive logic
+	// if (this.correct) {
+	// 	if (this.A_gain == 0) {
+	// 		this.delay.logic(this.correct);
+	// 	} else if (this.A_gain == -Infinity){
+	// 		this.delay.logic(this.correct);
+	// 	} else {
+	// 		this.A_gain = Math.min(this.A_gain+12,0);
+	// 	}
+	// } else {
+	// 	if (this.delay.value == this.delay.valueMax) {
+	// 		this.A_gain -= 12;
+	// 	} else {
+	// 		this.delay.logic(this.correct);
+	// 	}
+	// }
 	
-	//
-	try {
-		document.getElementById('adaptive').innerHTML = 'Delay: '+String(1e3*this.delay.value.toFixed(3))+' ms';
-	} catch (error) {
-		console.error(error);
-	}
+	// //
+	// try {
+	// 	document.getElementById('adaptive').innerHTML = 'Delay: '+String(1e3*this.delay.value.toFixed(3))+' ms';
+	// } catch (error) {
+	// 	console.error(error);
+	// }
 	
-	// update call and log
-	this.call = Math.round(Math.random());
-	this.calls.push(this.call);
+	// // update call and log
+	// this.call = Math.round(Math.random());
+	// this.calls.push(this.call);
 	
 	// stimulus
-	this.sound();
 }
 
 // Method used to play the tone that user needs to recreate
@@ -169,37 +204,6 @@ Sequence.prototype.next = function() {
 Sequence.prototype.sound = function() {
         this.pianoRoll.resetPlayProgress();
         this.pianoRoll.play(this.playGame.currentLevel.bpm, false);
-	//
-	// const A = dsp.gain([...this.A],this.A_gain);
-	// const B = dsp.gain([...this.B],this.B_gain);
-	// const delayAdaptive = this.call ? this.delay.value : -this.delay.value;
-	// let bias, delay = 0, delayA, delayB, stream = [];
-	// for (let a = 0; a < this.cycles; a++) {
-	// 	bias = delayAdaptive*((a+1)/this.cycles)/2;
-	// 	delayA = delay+(this.jitter-Math.abs(bias))*(2*Math.random()-1)+bias;
-	// 	delayB = delay+this.period/2;
-		
-	// 	//
-	// 	if (a == this.cycle) {
-	// 		delayB = delay+this.period/2+delayAdaptive;
-	// 	}
-
-	// 	//
-	// 	stream = dsp.add(A,stream,delayA);
-	// 	stream = dsp.add(B,stream,delayB);
-	// 	delay += this.period;
-	// }
-	
-	// //
-	// if (this.extra) {
-	// 	stream = dsp.add(A,stream,delay+(this.jitter-Math.abs(bias))*(2*Math.random()-1)+bias);
-	// }
-	
-	// //
-	// processor.play(stream);
-	// return stream;
-	
-
 }
 
 // Page layout code
@@ -237,7 +241,6 @@ Sequence.prototype.test = function(){
 	// main
 	let main = layout.main();
 
-	
 	// afc container
     // Unsure yet
 	var container = document.createElement('div');
@@ -247,14 +250,7 @@ Sequence.prototype.test = function(){
 	container.style.width = '90%';
 	container.style.left = '5%';
 	main.appendChild(container);
-	
-	// button table
-    // Remove (table for main buttons, replace with piano roll)
-	// var table = document.createElement('table');
-	// table.id = 'response_table';
-	// table.style.height = '100%';
-	// table.style.width = '100%';
-	// container.appendChild(table);
+
 
 	//TODO: Will include piano roll setup
 
@@ -263,173 +259,22 @@ Sequence.prototype.test = function(){
 	pianoRollContainer.style.margin = 'auto';
 	container.appendChild(pianoRollContainer);
 	
-    // Need to change directories on add
-	this.samples = [
-		new sample("Kick", "./version/crescendo/js/PianoRollLib/sounds/kick.wav"),
-		new sample("Snare", "./version/crescendo/js/PianoRollLib/sounds/snare.wav"),
-		new sample("Hi Hat", "./version/crescendo/js/PianoRollLib/sounds/hihat.wav")
-	];
-	this.levels = [
-		new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70),
-		new level(beatFromEncodedState(3, 16, "/j8ICINC"), 70)
-	];
-
-	this.melodicLevels = [
-		new level(beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)
-	];
 	
 
+    // Game Creation *************************
 	const audioCtx = new AudioContext();
 
-	var smpler = new sampler(this.samples, audioCtx);
+	var smpler = new sampler(this.samples.slice(0,this.levels[this.level].beat.notes()), audioCtx);
 
 	//const rollAndController = this.createRollWithController(pianoRoll, smpler, 16, audioCtx);
-	this.gameRollAndController = this.createGamePianoRoll(pianoRollContainer,smpler,16,audioCtx);
+	this.gameRollAndController = this.createGamePianoRoll(pianoRollContainer,smpler,this.levels[this.level].beat.length(),audioCtx);
 	const game = this.gameRollAndController.game;
-	game.onlevelcomplete = () => game.startLevel(this.levels[1]);
-	smpler.onloadsamples = () => game.startLevel(this.levels[0]);
-	console.log(this.levels[0]);
+	game.onlevelcomplete = () => this.next(true);
+    game.onlevelfail = () => this.next(false);
+	smpler.onloadsamples = () => game.startLevel(this.levels[this.level]);
+
 
 	// TODO: Add logic for checking if sequence is correct
-
-
-	// may add method
-
-	// response buttons
-    // Remove, actually creates the buttons(to be replaced)
-	// const words = ['Early','Late'];
-	// var cells = words.length;
-	// for (let a = 0; a < words.length; a++) {				
-	// 	// insert cell into table
-	// 	if (a%cells == 0) {
-	// 		var row = table.insertRow(a/cells);
-	// 		row.style.height = '100%';
-	// 		row.style.width = '100%';
-	// 	}
-	// 	var cell = row.insertCell(a%cells);
-	// 	cell.style.width = '25%';
-
-	// 	// response buttons
-	// 	var button = document.createElement('button');
-	// 	button.className = 'response';
-	// 	button.id = 'afc'+a;
-	// 	button.index = a;
-	// 	button.innerHTML = words[a];
-	// 	button.onclick = () => {
-	// 		// disable buttons
-	// 		if (this.disabled) { return; } 
-	// 		else { 
-	// 			this.disabled = true;
-	// 			for (let a = 0; a < 2; a++) {
-	// 				jQuery('#afc'+a).button('option','disabled',true);
-	// 			}
-	// 		}
-			
-	// 		// check if correct
-	// 		this.correct = (a == this.call);
-			
-	// 		// response log
-	// 		this.responses.push(a);
-			
-	// 		// feedback
-	// 		if (this.feedback) {
-	// 			if (this.correct) {
-	// 				// feedback
-	// 				var img = document.createElement('img');
-	// 				img.src = 'images/check.png';
-	// 				img.style.bottom = '10%';
-	// 				img.style.height = '40%';
-	// 				img.style.position = 'absolute';
-	// 				img.style.right = '10%';
-	// 				img.style.zIndex = '10';
-	// 				document.getElementById('afc'+a).appendChild(img);
-	// 				jQuery(img).fadeOut();
-					
-	// 				// score indicator
-	// 				if (this.trials == Infinity) {
-	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%';
-	// 				} else if (that.trials < 20 && windowwidth > 4) {
-	// 					document.getElementById('score'+this.trial).src = 'images/score-yay.png';
-	// 				} else {
-	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%'+', remaining: '+String(this.trials-this.trial-1);
-	// 				}
-	// 			} else {
-	// 				// chance indicator
-	// 				if (this.chances != Infinity) {
-	// 					document.getElementById('chance'+this.chance).src = 'images/score-nay.png';
-	// 				}
-					
-	// 				// score indicator
-	// 				if (this.trials == Infinity) {
-	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(0)+'%';
-	// 				} else if (this.trials < 20 && windowwidth > 4) {
-	// 					document.getElementById('score'+this.trial).src = 'images/score-nay.png';
-	// 				} else if (this.trials != Infinity) {
-	// 					score.innerHTML = 'Score: '+percentCorrect(this.calls,this.responses).toFixed(1)+'%'+', remaining:'+String(this.trials-this.trial-1);
-	// 				}						
-				
-	// 				// feedback
-	// 				var img = document.createElement('img');
-	// 				img.src = 'images/X.png';
-	// 				img.style.bottom = '10%';
-	// 				img.style.height = '40%';
-	// 				img.style.position = 'absolute';
-	// 				img.style.right = '10%';
-	// 				img.style.zIndex = '10';
-	// 				document.getElementById('afc'+a).appendChild(img);
-	// 				jQuery(img).fadeOut();
-				
-	// 				// practice
-	// 				if (this.practice) {
-	// 					// message
-	// 					var item = that.material.words
-	// 							? that.material.active
-	// 								? that.material.words[that.material.active[that.call]]
-	// 								: that.material.words[that.call]
-	// 							: that.call+1,
-	// 						message = that.mode == 'oddball'
-	// 							? 'Repeat for practice.'
-	// 							: 'Click on any item to practice.';
-	// 					document.getElementById('message').innerHTML 
-	// 					= 'The correct answer was "'
-	// 					+'<span style=\'color:blue\'>'+item+'</span>'+'".<br>'
-	// 					+message;
-	// 					//document.getElementById('repeat').style.visibility = 'hidden';
-	// 					document.getElementById('next').style.display = '';
-	// 					that.modeHold = that.mode;
-	// 					that.mode = 'practice';
-						
-	// 					// enable buttons
-	// 					that.disabled = false;
-	// 					for (let a = 0; a < that.alternatives; a++) {
-	// 						jQuery('#afc'+a).button('option','disabled',false);
-	// 					}
-	// 					return;
-	// 				}
-	// 			}
-	// 		}
-			
-	// 		// lost chance
-	// 		if (!this.correct) { this.chance++; }
-			
-	// 		// next
-	// 		setTimeout(()=>{this.next()},1e3);
-	// 	};
-	// 	button.style.fontSize = '400%';
-	// 	button.style.height = '100%';
-	// 	button.style.marginLeft = '5%';
-	// 	button.style.width = '90%';
-	// 	button.value = 0;
-	// 	jQuery(button).button();
-
-	// 	// button in cell
-	// 	cell.appendChild(button);
-	// 	if(iOS){FastClick(button)}
-	// }
-	
-    // bottom rectangle div, unsure yet
-	// controls
-	
 	
 	var controls = document.createElement('div');
 	controls.className = 'ui-widget-content';
@@ -440,7 +285,7 @@ Sequence.prototype.test = function(){
 	controls.style.left = '5%';
 	controls.style.padding = '8px';
 	main.appendChild(controls);
-	
+
 	// message
     // actual message inside above div, can be changed or removed
 	var message = document.createElement('span');
@@ -476,7 +321,7 @@ Sequence.prototype.test = function(){
     // probably unneeded will be replaced
 	var button = document.createElement('button');
 	button.id = 'repeat';
-	button.innerHTML = 'repeat';
+	button.innerHTML = 'Repeat';
 	button.onclick = () => { if(this.disabled){return} this.wavesurfer.play(0); };
 	button.style.cssFloat = 'right';
 	button.style.display = 'inline';
@@ -485,25 +330,19 @@ Sequence.prototype.test = function(){
 	jQuery(button).button();
 	if(iOS){FastClick(button)}
 	controls.appendChild(button);
-	
-	// controls: plot
-    // also unneeded, will likely have waveform instead
-	// if (debug) {
-	// 	var button = document.createElement('button');
-	// 	button.id = 'plot';
-	// 	button.innerHTML = 'plot';
-	// 	button.onclick = function () {
-	// 		x = that.sound();
-	// 		dsp.plot(x);
-	// 	};
-	// 	button.style.cssFloat = 'right';
-	// 	button.style.height = '100%';
-	// 	button.style.visibility = 'visible';
-	// 	jQuery(button).button();
-	// 	controls.appendChild(button);
-	// 	if (iOS) { FastClick(button); }
-	// }
-	
+
+    var submitB = document.createElement('button');
+	submitB.id = 'submit';
+	submitB.innerHTML = 'Submit';
+	submitB.onclick = () => { if(this.disabled){return} this.playGame.submitSolution(); };
+	submitB.style.cssFloat = 'right';
+	submitB.style.display = 'inline';
+	submitB.style.height = '100%';
+	submitB.style.marginLeft = '8px';
+	jQuery(submitB).button();
+	if(iOS){FastClick(submitB)}
+	controls.appendChild(submitB);
+		
     // ***** Below here is footer stuff (chances, delay, score, etc)
 	// footer
 	var footer = layout.footer();
@@ -538,17 +377,7 @@ Sequence.prototype.test = function(){
 	score.id = 'score';
 	score.insertAdjacentHTML('beforeend',' Score: ');
 	if (this.trials != Infinity) {
-		if (this.trials < 20) {
-			for (let a = 0; a < this.trials; a++) {
-				var img = document.createElement('img');
-				img.id = 'score'+a;
-				img.src = 'images/score-nan.png';
-				jQuery(img).addClass('score');
-				score.appendChild(img);
-			}
-		} else {
-			score.innerHTML = 'Score: '+0+', remaining: '+String(this.trials-this.trial-1);
-		}
+		score.innerHTML = 'Score: '+this.score+'/'+this.trials + ' out of '+this.levels.length +' levels';
 	}
 	score.style.paddingLeft = '16px';
 	score.style.verticalAlign = 'bottom';
@@ -557,15 +386,6 @@ Sequence.prototype.test = function(){
 	// break
 	var br = document.createElement('br');
 	footer.appendChild(br);
-	
-	// adaptive variable
-	// Unnecessary, might replace with other metric
-	// var label = document.createElement('span');
-	// label.id = 'adaptive';
-	// label.innerHTML = 'Delay: '+String(1e3*this.delay.value.toFixed(3))+' ms';
-	// label.style.paddingLeft = '16px';
-	// label.style.verticalAlign = 'bottom';
-	// footer.appendChild(label);
 
 	// start dialog
     // initial start dialogue, kept, but changed
@@ -823,6 +643,9 @@ function beat(numNotes, length){
 
     this.setState = function(state){
         this._state = Array.from(state);
+    }
+    this.notes = function(){
+        return numNotes;
     }
 }
 
@@ -1406,6 +1229,8 @@ function game(pianoRoll, wavesurfer){
     this._onFail = function(){
         this._beatChecker.setCurrentlyChecking(false);
         pianoRoll.isInteractionEnabled = true;
+
+        this.onlevelfail?.();
     }
 
     this._onSuccess = function(){
@@ -1478,6 +1303,16 @@ function envelope(attack, hold, release){
     this.attack = attack;
     this.hold = hold;
     this.release = release;
+}
+
+function createSingleLevelGame(containerId, samples, level){
+    const s = new sampler(samples, audioCtx);
+    s.setEnvelope(0, .5, .1);
+
+    const game = createGamePianoRoll(document.getElementById(containerId), s, level.beat.length(), audioCtx);
+    s.onloadsamples = () => game.game.startLevel(level);
+
+    return game;
 }
 
 // This method sets up CSS classes for piano roll
@@ -1555,6 +1390,7 @@ Sequence.prototype.createClasses = function(){
     style.innerHTML += ".gameSpace{"+
         "display: flex;"+
         "flex-direction: column;"+
+        "align-items: center"+
     "}";
     style.innerHTML += ".wavesurfContainer{"+
         "width: 800px;"+
@@ -1562,7 +1398,7 @@ Sequence.prototype.createClasses = function(){
         "margin: 10px 0px 10px 100px;"+
    "}";
     style.innerHTML += ".pianoRollContainer{"+
-        "width: 100%;"+
+        "width: 900px;"+
     "}";
 
 	document.getElementsByTagName('head')[0].appendChild(style);
