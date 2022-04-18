@@ -1,8 +1,18 @@
+/** Represents a Piano Roll */
 const PianoRoll = (function () {
 
 var numRollSquares = 0;
 const LOOK_AHEAD = .1;
 
+/**
+    Creates PianoRoll Object with a Controller Object binded to it
+    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
+    @param      { sampler }             instrument          A sampler with the desired sounds
+    @param      { int }                 length              Number of beats in roll
+    @param      { AudioContext }        audioCtx            Audio Processing Graph
+    @return     { pianoRollController } controller
+    @return     { pianoRoll }           roll
+*/
 function createRollWithController(domParent, instrument, length, audioCtx){
     const controls = createRollController(domParent);
     const pianoRoll = createRoll(domParent, instrument, length, audioCtx);
@@ -15,6 +25,14 @@ function createRollWithController(domParent, instrument, length, audioCtx){
     }
 }
 
+/**
+    Creates the HTML of the piano roll, including the playhead
+    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
+    @param      { sampler }             instrument          A sampler with the desired sounds
+    @param      { int }                 length              Number of beats in roll
+    @param      { AudioContext }        audioCtx            Audio Processing Graph
+    @return     { pianoRoll }           roll
+*/
 function createRoll(domParent, instrument, length, audioCtx){
     var rollSquares = [];
 
@@ -79,6 +97,11 @@ function createRoll(domParent, instrument, length, audioCtx){
     return roll;
 }
 
+/**
+    Creates the PianoRoll Controller
+    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
+    @return     { pianoRollController } controller
+*/
 function createRollController(domParent){
     var dom = {};
 
@@ -132,6 +155,11 @@ function createRollController(domParent){
 
     return new pianoRollController(dom);
 } 
+
+/**
+    Binds controller buttons to corresponding event handlers of the Piano Roll Controller
+    @param  { any[] }   dom    array of controller HTMLElements
+*/
 
 function pianoRollController(dom){
     this.pianoRoll;
@@ -202,6 +230,12 @@ function pianoRollController(dom){
     }
 }
 
+/**
+    Beat object with array that maintains the states of each of the beats on the roll
+    @param  { int }   numNotes      number of notes in instrument
+    @param  { int }   length        number of beats on roll
+*/
+
 function beat(numNotes, length){
     this._state = new Array(numNotes * length).fill(false);
 
@@ -237,6 +271,14 @@ function beat(numNotes, length){
     }
 }
 
+/**
+    Beat object with array that maintains the states of each of the beats on the roll
+    @param  { int }   numNotes      number of notes in instrument
+    @param  { int }   length        number of beats on roll
+    @param  { int }   state         encoded state of beat
+    @return { beat }  newBeat       new beat object with encoded state
+*/
+
 function beatFromEncodedState(numNotes, length, state){
     const newBeat = new beat(numNotes, length);
     const decoded = base64ToBoolArray(state);
@@ -246,7 +288,12 @@ function beatFromEncodedState(numNotes, length, state){
     return newBeat;
 }
 
-// From https://stackoverflow.com/a/67039932/10184960
+/**
+    Converts an array booleans to a base64 string
+    @source https://stackoverflow.com/a/67039932/10184960
+    @param  { any[] }   arr          array of booleans
+    @return { string }  string       base64 string
+*/
 function boolArrayToBase64(arr){
     // Base64 character set
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -272,7 +319,12 @@ function boolArrayToBase64(arr){
     return string;
 }
 
-// From https://stackoverflow.com/a/67039932/10184960
+/**
+    Converts an array booleans to a base64 string
+    @source https://stackoverflow.com/a/67039932/10184960
+    @param   { string }  string       base64 string
+    @return  { any[] }   arr          array of booleans
+*/
 function base64ToBoolArray(string) {
     // Base64 character set
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -300,8 +352,12 @@ function base64ToBoolArray(string) {
     return array;
 }
 
-/*
-    Returns a promise of an audio buffer containing the rendered beat.
+/**
+    Returns a promise of an audio buffer containing the rendered beat
+    @param      { beat }          beat          
+    @param      { sampler }       instrument    A sampler with the desired sounds
+    @param      { int }           bpm           
+    @return     { Promise }       renderBeat    
 */
 function renderBeat(beat, instrument, bpm){
     const beatLength = 60 / bpm / 4;
@@ -325,7 +381,14 @@ function renderBeat(beat, instrument, bpm){
     });
 }
 
-
+/**
+    PianoRoll Object 
+    @param      { sampler }         instrument          A sampler with the desired sounds
+    @param      { length }          length              Number of beats in roll
+    @param      { any[] }           dom                 array of HTML Elements
+    @param      { AudioContext }    audioCtx            Audio Processing Graph
+    @return     { pianoRoll }       roll
+*/
 function pianoRoll(instrument, length, dom, audioCtx){
     this.instrument = instrument;
     this.audioCtx = audioCtx;
@@ -487,10 +550,15 @@ function pianoRoll(instrument, length, dom, audioCtx){
 }
 
 
-/*
+/**
     The playHeadAnimator serves two purposes:
     1. Animating the UI playhead to show the user where in the beat is being played
-    2. Trigger the beat play callback to play beats in time (using a lookahead) 
+    2. Trigger the beat play callback to play beats in time (using a lookahead)
+    
+    @param { any[] }            dom             array of HTMLElements
+    @param { int }              numBeats        Number of beats in roll 
+    @param { any }              beatCallback    TODO
+    @param { AudioContext }     audioCtx 
 */
 function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
     this._dom = dom;
@@ -639,472 +707,10 @@ return{
     createRollController: createRollController,
     beatFromEncodedState: beatFromEncodedState,
     renderBeat: renderBeat,
+    beat: beat,
+    playHeadAnimator: playHeadAnimator,
 }
 
 
 // Piano Roll For Melodic Contour Game
-function createRollWithContourController(domParent, instrument, length, audioCtx){
-    const controls = createContourController(domParent);
-    const pianoRoll = createRoll(domParent, instrument, length, audioCtx);
-
-    controls.bindToPianoRoll(pianoRoll);
-
-    return {
-        controller: controls,
-        roll: pianoRoll
-    }
-}
-
-function createContourController(domParent){
-    var dom = {};
-
-    const controls = document.createElement("div");
-    controls.classList.add("pianoRollRow");
-    controls.classList.add("pianoRollControls");
-    domParent.appendChild(controls);
-
-    var controller = new pianoContourController(dom);
-
-    const listenBtn = createControllerButton("Listen", () => {
-        console.log("listen");
-        controller.onClickListen();
-    });
-
-    controls.appendChild(listenBtn);
-
-    const playBtn = createControllerButton("Play", () => {
-        console.log("play")
-        controller.onClickPlayButtom();
-    });
-
-    controls.appendChild(playBtn);
-
-    const submitBtn = createControllerButton("Submit", () => console.log("submit"));
-
-    controls.appendChild(submitBtn);
-    
-    var bpmSlider = document.createElement("div");
-    var slider = document.createElement("input");
-    var text = document.createElement("div");
-    
-    slider.setAttribute("type", "range");
-
-    var bpmBtn = createControllerButton("BPM", () =>{
-        console.log("bpm");
-        controller.onClickBPM();
-    });
-
-    text.innerText = slider.value;
-    text.style.display = "inline";
-
-    slider.onchange = function(){
-        text.innerText = slider.value;
-    }
-    
-    bpmSlider.appendChild(bpmBtn);
-    bpmSlider.appendChild(slider);
-    bpmSlider.appendChild(text);
-    controls.appendChild(bpmSlider);
-    
-    dom.listenBtn = listenBtn;
-    dom.playBtn = playBtn;
-    dom.submitBtn = submitBtn;
-    dom.bpmBtn = bpmBtn;
-    dom.slider = slider;
-
-    return controller;
-} 
-
-function pianoContourController(dom){
-    this.pianoRoll;
-    this._dom = dom;
-
-    this.bindToPianoRoll = function(pianoRoll){
-        this.pianoRoll = pianoRoll;
-    }
-
-    this.onClickPlayButtom = function(){
-        if(this.pianoRoll === undefined){
-            return;
-        }
-
-        if(this.pianoRoll.isPlaying()){
-            this.pianoRoll.stop();
-            this._dom.playBtn.innerText = "Play";
-        }
-        else{
-            this.pianoRoll.play(70, true);
-            this._dom.playBtn.innerText = "Stop";
-        }
-    }
-
-    this.onClickReset = function(){
-        if(this.pianoRoll === undefined){
-            return;
-        }
-
-        if(this.pianoRoll.isPlaying()){
-            this.pianoRoll.stop();
-        }
-
-        this.pianoRoll.reset();
-        this._dom.playButton.innerText = "Play";
-    }
-
-    this.onClickBPM = function(){
-        var display = this._dom.slider.style.display
-        if (display == "none") {
-            this._dom.slider.style.display = "inline"
-        } else {
-            this._dom.slider.style.display = "none"
-        }
-
-    }
-
-    this.onClickExport = function(){
-        const notes = this.pianoRoll.instrument.notes.length;
-        const length = this.pianoRoll.length;
-        const state = boolArrayToBase64(this.pianoRoll.getBeatStates().getState());
-        
-        console.log(`beatFromEncodedState(${notes}, ${length}, \"${state}\")`);
-    }
-
-    this.onClickSave = function(){
-        const beatState = this.pianoRoll.getBeatStates().getState();
-        const encoded = boolArrayToBase64(beatState);
-        navigator.clipboard.writeText(encoded);
-    }
-
-    this.onClickLoad = function(){
-        const beatState = navigator.clipboard.readText().then(
-            text => {
-                const decoded = base64ToBoolArray(text);
-
-                const stateCopy = this.pianoRoll.getBeatStates();
-                stateCopy.setState(decoded);
-
-                this.pianoRoll.loadBeatStates(stateCopy);
-        });
-    }
-
-    this.onClickListen = function(){
-        var text = "AAACKi"
-        const decoded = base64ToBoolArray(text);
-
-        const stateCopy = this.pianoRoll.getBeatStates();
-        stateCopy.setState(decoded);
-
-        this.pianoRoll.loadBeatStates(stateCopy);
-
-        // this.onClickReset();
-        console.log(this);
-        this.pianoRoll.play(this._dom.slider.value, false);
-        // console.log("RESET");
-        // this.onClickReset();
-    }
-}
-
-function createControllerButton(text, onClick){
-    const btn = document.createElement("button");
-    btn.classList.add("pianoRollButton");
-    btn.innerText = text;
-    btn.onclick = onClick;
-
-    return btn;
-}
-
-function contourGameRoll(domParent, instrument, length, audioCtx) {
-    const controls = createContourController(domParent);
-    const pianoRoll = createContourGameRoll(domParent, instrument, length, audioCtx);
-
-    controls.bindToPianoRoll(pianoRoll);
-
-    return {
-        controller: controls,
-        roll: pianoRoll
-    }
-}
-
-function createContourGameRoll(domParent, instrument, length, audioCtx){
-    var rollSquares = [];
-
-    var dom = {};
-    dom.squares = rollSquares;
-
-    var roll = new pianoContourGameRoll(instrument, length, dom, audioCtx);
-
-    // rollHolder allows for absolute positioning of the playhead over the pianoroll
-    var rollHolder = document.createElement("div");
-    rollHolder.classList.add("pianoRollHolder");
-    dom.root = rollHolder;
-
-    // rollDom is the parent of the entire piano roll
-    var rollDom = document.createElement("div");
-    rollDom.classList.add("pianoRoll");
-    rollHolder.appendChild(rollDom);
-
-    // Create playhead
-    var playHeadHolder = document.createElement("div");
-    playHeadHolder.classList.add("pianoRollPlayHeadHolder");
-    rollHolder.appendChild(playHeadHolder);
-    dom.playHeadHolder = playHeadHolder;
-
-    var playHead = document.createElement("div");
-    playHead.classList.add("pianoRollPlayHead");
-    playHeadHolder.appendChild(playHead);
-    dom.playHead = playHead;
-
-        for (let i = 0; i < 11; i++) {
-            if (i == 5) {
-                var row = createPianoRollRow(roll, instrument, rollSquares, i);
-            } else {
-                var row = createBlankPianoRollRow(roll, instrument, rollSquares, i);
-            }
-            rollDom.appendChild(row);
-        }
-
-        nextNotes(90, rollSquares);
-
-        domParent.appendChild(rollHolder);
-
-        return roll;
-}
-
-function createPianoRollRow(roll, instrument, rollSquares, row) {
-    var row = document.createElement("div");
-    row.classList.add("contourRow");
-
-    row.id = row;
-
-    for(let j = 0; j < 11; j++){
-        var square = document.createElement("div");
-        if (j == 0) {
-            square.classList.add("contourSelectedSquare");
-        } else {
-            square.classList.add("contourBlankSquare");
-        }
-
-        square.id = "pianoRollSquare_" + numRollSquares;
-        square.value = numRollSquares;
-        numRollSquares += 1;
-
-        // square.onmouseenter = () => roll.hoverSquare(instrument.notes.length - 1 - row, j);
-        square.onclick = () => roll.clickSquare(square.id);
-
-        rollSquares.push(square);
-
-        row.appendChild(square);
-    }
-
-    return row;
-}
-
-function createBlankPianoRollRow(roll, instrument, rollSquares, id) {
-    var row = document.createElement("div");
-    row.classList.add("pianoRollRow");
-    row.id = id;
-
-    for(let j = 0; j < 11; j++){
-        var square = document.createElement("div");
-        square.classList.add("contourBlankSquare");
-        
-        square.id = "pianoRollSquare_" + numRollSquares;
-        square.value = numRollSquares;
-        numRollSquares += 1;
-
-        // square.onmouseenter = () => roll.hoverSquare(instrument.notes.length - 1 - id, j);
-        square.onclick = () => roll.clickSquare();
-        
-        rollSquares.push(square);
-
-        row.appendChild(square);
-    }
-
-    return row;
-}
-
-function pianoContourGameRoll(instrument, length, dom, audioCtx){
-    this.instrument = instrument;
-    this.audioCtx = audioCtx;
-    this.length = length;
-    this.isInteractionEnabled = true;
-
-    this._dom = dom;
-    this._beatStates = new beat(instrument.notes.length, length);
-    this._isPlaying = false;
-    this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
-    this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
-    this._bpm = 70;
-
-    this._beatListeners = []
-
-    this.clickSquare = function(squareId){
-        console.log(squareId);
-        const something = (element) => element.getAttribute('id') == (squareId);
-        var square = this._dom.squares.find(something);
-        console.log(square);
-        if(square.classList.contains("contourChoiceSquare")){
-            nextNotes(square)
-        }
-    }
-
-    this.hoverSquare = function(noteIndex, beatIndex){
-        var square = this._dom.squares[beatIndex + noteIndex * length];
-        if(square.classList.contains("contourChoiceSquare")){
-            console.log("yeehaw");
-            // this.playBeat(beatIndex, 5);
-            // this.clearSquareStyles(beatIndex, noteIndex);
-            // this.toggleSquare(noteIndex, beatIndex);
-        }
-    }
-
-    this.toggleSquare = function(noteIndex, beatIndex){
-        let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
-
-        if(isToggled){
-            this._dom.squares[beatIndex + noteIndex * length].classList.remove("pianoRollSquareHighlighted");
-        }
-        else {
-            this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
-        }
-
-        this._beatStates.setBeat(beatIndex, noteIndex, !isToggled)
-    };
-
-    this.isBeatToggled = function(beatIndex, noteIndex){
-        return this._beatStates.isBeatToggled(beatIndex, noteIndex);
-    };
-
-    this.play = function(bpm, loop, startBeat, endBeat){
-        if(this.audioCtx.state === 'suspended'){
-            this.audioCtx.resume().then(()=>this.play(bpm, loop, startBeat, endBeat));
-            return;
-        }
-
-        if(startBeat === undefined){
-            startBeat = 0;
-        }
-
-        if(endBeat === undefined){
-            endBeat = length;
-        }
-
-        this._playHeadAnimator.play(bpm, loop, startBeat, endBeat);
-
-        this._isPlaying = true;
-    }
-
-    this.resetPlayProgress = function(){
-        this.stop();
-        this._playHeadAnimator.reset();
-    }
-
-    this.stop = function(){
-        this._playHeadAnimator.stop();
-
-        this._isPlaying = false;
-    }
-
-    this.togglePlay = function(){
-        if(this._isPlaying){
-            this.stop();
-        }
-        else{
-            this.play(this._bpm, true);
-        }
-    }
-
-    this.isPlaying = function(){
-        return this._isPlaying;
-    }
-
-    this.reset = function(){
-        for(let i = 0; i < this._dom.squares.length; i++){
-            this._dom.squares[i].classList.remove("pianoRollSquareHighlighted");
-        }
-
-        this._beatStates.setAll(false);
-
-        this._playHeadAnimator.reset();
-    };
-
-    this.playBeat = function(beatIndex, time){
-        if(time === undefined){
-            time = this.audioCtx.currentTime;
-        }
-
-        for(let i = 0; i < this.instrument.notes.length; i++){
-            if(this._beatStates.isBeatToggled(beatIndex, i)){
-                this.instrument.playNote(this.instrument.notes.length - 1 - i, time, this.audioCtx);
-            }
-        }
-
-        for(const listener of this._beatListeners){
-            listener(beatIndex, time);
-        }
-    }
-
-    this.addBeatListener = function(listener){
-        this._beatListeners.push(listener);
-    }
-
-    this.addSquareStyle = function(beatIndex, noteIndex, styleClass){
-        this._dom.squares[beatIndex + noteIndex * length].classList.add(styleClass);
-    }
-
-    this.removeSquareStyle = function(beatIndex, noteIndex, styleClass){
-        this._dom.squares[beatIndex + noteIndex * length].classList.remove(styleClass);
-    }
-
-    this.clearSquareStyles = function(beatIndex, noteIndex){
-        this._dom.squares[beatIndex + noteIndex * length].className = "";
-
-        this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquare");
-
-        if(this._beatStates.isBeatToggled(beatIndex, noteIndex)){
-            this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
-        }
-    }
-
-    this.clearAllSquareStyles = function(){
-        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
-            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
-                this.clearSquareStyles(beatIndex, noteIndex);
-            }
-        }
-    }
-
-    this.getBeatStates = function(){
-        return this._beatStates.getCopy();
-    }
-
-    this.loadBeatStates = function(beatStates){
-        this._beatStates = beatStates;
-
-        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
-            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
-                let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
-
-                if(isToggled){
-                    this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
-                }
-                else {
-                    this._dom.squares[beatIndex + noteIndex * length].classList.remove("pianoRollSquareHighlighted");
-                }
-            }
-        }
-    }
-}
-
-function nextNotes(startIndex, rollSquares) {
-    for (var i = -1; i <= 1; i++) {
-        // Change the next squares
-        var nextSquare = startIndex + i*11 + 2;
-        const something = (element) => element.getAttribute('id') == ("pianoRollSquare_" + nextSquare);
-        var x = rollSquares.find(something);
-        x.classList.remove("contourBlankSquare");
-        x.classList.add("contourChoiceSquare");
-    }
-}
-
 })();

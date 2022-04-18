@@ -1,20 +1,17 @@
-import {createRoll, createRollWithContourController, contourGameRoll} from "./pianoRoll.js";
-import {sample, sampler} from "./instrument.js";
-
 var samples = [
-    new sample("C", "./sounds/Piano.pp.C3.wav"),
-    new sample("D", "./sounds/Piano.pp.D3.wav"),
-    new sample("E", "./sounds/Piano.pp.E3.wav"),
-    new sample("F", "./sounds/Piano.pp.F3.wav"),
-    new sample("G", "./sounds/Piano.pp.G3.wav"),
-    new sample("A", "./sounds/Piano.pp.A3.wav"),
-    new sample("B", "./sounds/Piano.pp.B3.wav"),
+    new InstrumentJS.sample("C", "./sounds/Piano.pp.C3.wav"),
+    new InstrumentJS.sample("D", "./sounds/Piano.pp.D3.wav"),
+    new InstrumentJS.sample("E", "./sounds/Piano.pp.E3.wav"),
+    new InstrumentJS.sample("F", "./sounds/Piano.pp.F3.wav"),
+    new InstrumentJS.sample("G", "./sounds/Piano.pp.G3.wav"),
+    new InstrumentJS.sample("A", "./sounds/Piano.pp.A3.wav"),
+    new InstrumentJS.sample("B", "./sounds/Piano.pp.B3.wav"),
 ]
 
 const audioCtx = new AudioContext();
 
-var smpler = new sampler(samples, audioCtx);
+var smpler = new InstrumentJS.sampler(samples, audioCtx);
 
-createRollWithContourController(document.getElementById("roll1"), smpler, 5, audioCtx);
+const sample = new ContourPianoRoll.createContourSampleRoll(document.getElementById("roll1"), smpler, 5, audioCtx);
 
-contourGameRoll(document.getElementById("roll2"), smpler, 5, audioCtx);
+const game = new ContourPianoRoll.createContourGameRoll(document.getElementById("roll2"), smpler, 5, audioCtx);
