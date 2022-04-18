@@ -5,14 +5,13 @@ var numRollSquares = 0;
 const LOOK_AHEAD = .1;
 
 /**
-    Creates PianoRoll Object with a Controller Object binded to it
-    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
-    @param      { sampler }             instrument          A sampler with the desired sounds
-    @param      { int }                 length              Number of beats in roll
-    @param      { AudioContext }        audioCtx            Audio Processing Graph
-    @return     { pianoRollController } controller
-    @return     { pianoRoll }           roll
-*/
+ * Creates a piano roll with a linked set of control buttons
+ * @param {HTMLElement} domParent - The desired parent of the piano roll and controls
+ * @param {Instrument} instrument - The instrument to be sequenced with the piano roll
+ * @param {Number} length - The length of the piano roll in 16th notes
+ * @param {AudioContext} audioCtx - The AudioContext to be used for piano roll playback
+ * @returns References to both the piano roll and controller
+ */
 function createRollWithController(domParent, instrument, length, audioCtx){
     const controls = createRollController(domParent);
     const pianoRoll = createRoll(domParent, instrument, length, audioCtx);
@@ -26,13 +25,13 @@ function createRollWithController(domParent, instrument, length, audioCtx){
 }
 
 /**
-    Creates the HTML of the piano roll, including the playhead
-    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
-    @param      { sampler }             instrument          A sampler with the desired sounds
-    @param      { int }                 length              Number of beats in roll
-    @param      { AudioContext }        audioCtx            Audio Processing Graph
-    @return     { pianoRoll }           roll
-*/
+ * Creates a piano roll
+ * @param {HTMLElement} domParent - The desired parent of the piano roll and controls
+ * @param {Instrument} instrument - The instrument to be sequenced with the piano roll
+ * @param {Number} length - The length of the piano roll in 16th notes
+ * @param {AudioContext} audioCtx - The AudioContext to be used for piano roll playback
+ * @returns The created piano roll object
+ */
 function createRoll(domParent, instrument, length, audioCtx){
     var rollSquares = [];
 
@@ -98,10 +97,10 @@ function createRoll(domParent, instrument, length, audioCtx){
 }
 
 /**
-    Creates the PianoRoll Controller
-    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
-    @return     { pianoRollController } controller
-*/
+ * Creates a piano roll controller to be later linked to a piano roll
+ * @param {HTMLElement} domParent - The desired parent of the controls
+ * @returns The created piano roll controls
+ */
 function createRollController(domParent){
     var dom = {};
 
@@ -153,49 +152,57 @@ function createRollController(domParent){
     dom.bpmSlider = bpmSlider;
     */
 
-    return new pianoRollController(dom);
+    return new PianoRollController(dom);
 } 
 
 /**
-    Binds controller buttons to corresponding event handlers of the Piano Roll Controller
-    @param  { any[] }   dom    array of controller HTMLElements
-*/
+ * Class routing user interactions with the piano roll controller dom elements to the piano roll
+ */
+class PianoRollController {
+    /**
+     * 
+     * @param dom References to the piano roll controller's dom elements (created by createRollController)
+     */
+    constructor(dom) {
+        this.pianoRoll;
+        this._dom = dom;
 
-function pianoRollController(dom){
-    this.pianoRoll;
-    this._dom = dom;
+        dom.playButton.onclick = () => this.onClickPlayButtom();
+        dom.resetButton.onclick = () => this.onClickReset();
+        dom.exportButton.onclick = () => this.onClickExport();
+        dom.saveButton.onclick = () => this.onClickSave();
+        dom.loadButton.onclick = () => this.onClickLoad();
+    }
 
-    dom.playButton.onclick = () => this.onClickPlayButtom();
-    dom.resetButton.onclick = () => this.onClickReset();
-    dom.exportButton.onclick = () => this.onClickExport();
-    dom.saveButton.onclick = () => this.onClickSave();
-    dom.loadButton.onclick = () => this.onClickLoad();
-
-    this.bindToPianoRoll = function(pianoRoll){
+    /**
+     * Binds the controller to a piano roll instance
+     * @param {PianoRoll} pianoRoll - The piano roll to route input to
+     */
+    bindToPianoRoll(pianoRoll) {
         this.pianoRoll = pianoRoll;
     }
 
-    this.onClickPlayButtom = function(){
-        if(this.pianoRoll === undefined){
+    onClickPlayButtom() {
+        if (this.pianoRoll === undefined) {
             return;
         }
 
-        if(this.pianoRoll.isPlaying()){
+        if (this.pianoRoll.isPlaying()) {
             this.pianoRoll.stop();
             this._dom.playButton.innerText = "Play";
         }
-        else{
+        else {
             this.pianoRoll.play(70, true);
             this._dom.playButton.innerText = "Stop";
         }
     }
 
-    this.onClickReset = function(){
-        if(this.pianoRoll === undefined){
+    onClickReset() {
+        if (this.pianoRoll === undefined) {
             return;
         }
 
-        if(this.pianoRoll.isPlaying()){
+        if (this.pianoRoll.isPlaying()) {
             this.pianoRoll.stop();
         }
 
@@ -203,21 +210,21 @@ function pianoRollController(dom){
         this._dom.playButton.innerText = "Play";
     }
 
-    this.onClickExport = function(){
+    onClickExport() {
         const notes = this.pianoRoll.instrument.notes.length;
         const length = this.pianoRoll.length;
         const state = boolArrayToBase64(this.pianoRoll.getBeatStates().getState());
-        
+
         console.log(`beatFromEncodedState(${notes}, ${length}, \"${state}\")`);
     }
 
-    this.onClickSave = function(){
+    onClickSave() {
         const beatState = this.pianoRoll.getBeatStates().getState();
         const encoded = boolArrayToBase64(beatState);
         navigator.clipboard.writeText(encoded);
     }
 
-    this.onClickLoad = function(){
+    onClickLoad() {
         const beatState = navigator.clipboard.readText().then(
             text => {
                 const decoded = base64ToBoolArray(text);
@@ -226,47 +233,60 @@ function pianoRollController(dom){
                 stateCopy.setState(decoded);
 
                 this.pianoRoll.loadBeatStates(stateCopy);
-        });
+            });
     }
 }
 
 /**
-    Beat object with array that maintains the states of each of the beats on the roll
-    @param  { int }   numNotes      number of notes in instrument
-    @param  { int }   length        number of beats on roll
-*/
+ * An object representing a sequenced beat
+ */
+class Beat {
+    /**
+     * 
+     * @param {Number} numNotes - The number of distinct notes or elements usable in the beat
+     * @param {Number} length - The length of the beat in 16th notes
+     */
+    constructor(numNotes, length) {
+        this.numNotes = numNotes;
+        this.length = length;
 
-function beat(numNotes, length){
-    this._state = new Array(numNotes * length).fill(false);
-
-    this.isBeatToggled = function(beatIndex, noteIndex){
-        return this._state[beatIndex + noteIndex * length];
+        this._state = new Array(numNotes * length).fill(false);
     }
 
-    this.setBeat = function(beatIndex, noteIndex, value){
-        this._state[beatIndex + noteIndex * length] = value;
+    /**
+     *
+     * @param {Number} beatIndex - The index of the 16th note
+     * @param {*} noteIndex - The index of the note or element
+     * @returns {Boolean} Whether the note on the specified beat is toggled
+     */
+    isBeatToggled(beatIndex, noteIndex) {
+        return this._state[beatIndex + noteIndex * this.length];
     }
 
-    this.getCopy = function(){
-        let copy = new beat(numNotes, length);
+    setBeat(beatIndex, noteIndex, value) {
+        this._state[beatIndex + noteIndex * this.length] = value;
+    }
+
+    getCopy() {
+        let copy = new Beat(this.numNotes, this.length);
         copy._state = Array.from(this._state);
 
         return copy;
     }
 
-    this.length = function(){
-        return length;
+    getLength() {
+        return this.length;
     }
 
-    this.setAll = function(value){
+    setAll(value) {
         this._state.fill(value);
     }
 
-    this.getState = function(){
+    getState() {
         return Array.from(this._state);
     }
 
-    this.setState = function(state){
+    setState(state) {
         this._state = Array.from(state);
     }
 }
@@ -280,7 +300,7 @@ function beat(numNotes, length){
 */
 
 function beatFromEncodedState(numNotes, length, state){
-    const newBeat = new beat(numNotes, length);
+    const newBeat = new Beat(numNotes, length);
     const decoded = base64ToBoolArray(state);
 
     newBeat.setState(decoded);
@@ -362,9 +382,9 @@ function base64ToBoolArray(string) {
 function renderBeat(beat, instrument, bpm){
     const beatLength = 60 / bpm / 4;
     const sampleRate = 44100;
-    const offlineCtx = new OfflineAudioContext(1, beat.length() * beatLength * sampleRate, sampleRate);
+    const offlineCtx = new OfflineAudioContext(1, beat.getLength() * beatLength * sampleRate, sampleRate);
 
-    for(let beatIndex = 0; beatIndex < beat.length(); beatIndex++){
+    for(let beatIndex = 0; beatIndex < beat.getLength(); beatIndex++){
         for(let i = 0; i < instrument.notes.length; i++){
             if(beat.isBeatToggled(beatIndex, i)){
                 instrument.playNote(instrument.notes.length - 1 - i, beatIndex * beatLength, offlineCtx);
@@ -372,7 +392,7 @@ function renderBeat(beat, instrument, bpm){
         }
     }
 
-    return new Promise(resolve => {
+    return new Promise(resolve => { 
         offlineCtx.oncomplete = function(e) {
             resolve(e.renderedBuffer);
         }
@@ -381,65 +401,68 @@ function renderBeat(beat, instrument, bpm){
     });
 }
 
-/**
+
+class pianoRoll {
+    /**
     PianoRoll Object 
     @param      { sampler }         instrument          A sampler with the desired sounds
     @param      { length }          length              Number of beats in roll
     @param      { any[] }           dom                 array of HTML Elements
     @param      { AudioContext }    audioCtx            Audio Processing Graph
     @return     { pianoRoll }       roll
-*/
-function pianoRoll(instrument, length, dom, audioCtx){
-    this.instrument = instrument;
-    this.audioCtx = audioCtx;
-    this.length = length;
-    this.isInteractionEnabled = true;
+    */
+    constructor(instrument, length, dom, audioCtx) {
+        this.instrument = instrument;
+        this.audioCtx = audioCtx;
+        this.length = length;
+        this.isInteractionEnabled = true;
 
-    this._dom = dom;
-    this._beatStates = new beat(instrument.notes.length, length);
-    this._isPlaying = false;
-    this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
-    this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
-    this._bpm = 70;
+        this._dom = dom;
+        this._beatStates = new Beat(instrument.notes.length, length);
+        this._isPlaying = false;
+        this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
+        this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
+        this._bpm = 70;
 
-    this._beatListeners = []
+        this._beatListeners = [];
+    }
 
-    this.clickSquare = function(noteIndex, beatIndex){
-        if(this.isInteractionEnabled){
+    clickSquare(noteIndex, beatIndex) {
+        if (this.isInteractionEnabled) {
             this.clearSquareStyles(beatIndex, noteIndex);
             this.toggleSquare(noteIndex, beatIndex);
         }
     }
 
-    this.toggleSquare = function(noteIndex, beatIndex){
+    toggleSquare(noteIndex, beatIndex) {
         let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
 
-        if(isToggled){
-            this._dom.squares[beatIndex + noteIndex * length].classList.remove("pianoRollSquareHighlighted");
+        if (isToggled) {
+            this._dom.squares[beatIndex + noteIndex * this.length].classList.remove("pianoRollSquareHighlighted");
         }
         else {
-            this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
+            this._dom.squares[beatIndex + noteIndex * this.length].classList.add("pianoRollSquareHighlighted");
         }
 
-        this._beatStates.setBeat(beatIndex, noteIndex, !isToggled)
-    };
+        this._beatStates.setBeat(beatIndex, noteIndex, !isToggled);
+    }
 
-    this.isBeatToggled = function(beatIndex, noteIndex){
+    isBeatToggled(beatIndex, noteIndex) {
         return this._beatStates.isBeatToggled(beatIndex, noteIndex);
-    };
+    }
 
-    this.play = function(bpm, loop, startBeat, endBeat){
-        if(this.audioCtx.state === 'suspended'){
-            this.audioCtx.resume().then(()=>this.play(bpm, loop, startBeat, endBeat));
+    play(bpm, loop, startBeat, endBeat) {
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().then(() => this.play(bpm, loop, startBeat, endBeat));
             return;
         }
 
-        if(startBeat === undefined){
+        if (startBeat === undefined) {
             startBeat = 0;
         }
 
-        if(endBeat === undefined){
-            endBeat = length;
+        if (endBeat === undefined) {
+            endBeat = this.length;
         }
 
         this._playHeadAnimator.play(bpm, loop, startBeat, endBeat);
@@ -447,98 +470,98 @@ function pianoRoll(instrument, length, dom, audioCtx){
         this._isPlaying = true;
     }
 
-    this.resetPlayProgress = function(){
+    resetPlayProgress() {
         this.stop();
         this._playHeadAnimator.reset();
     }
 
-    this.stop = function(){
+    stop() {
         this._playHeadAnimator.stop();
 
         this._isPlaying = false;
     }
 
-    this.togglePlay = function(){
-        if(this._isPlaying){
+    togglePlay() {
+        if (this._isPlaying) {
             this.stop();
         }
-        else{
+        else {
             this.play(this._bpm, true);
         }
     }
 
-    this.isPlaying = function(){
+    isPlaying() {
         return this._isPlaying;
     }
 
-    this.reset = function(){
-        for(let i = 0; i < this._dom.squares.length; i++){
+    reset() {
+        for (let i = 0; i < this._dom.squares.length; i++) {
             this._dom.squares[i].classList.remove("pianoRollSquareHighlighted");
         }
 
         this._beatStates.setAll(false);
 
         this._playHeadAnimator.reset();
-    };
+    }
 
-    this.playBeat = function(beatIndex, time){
-        if(time === undefined){
+    playBeat(beatIndex, time) {
+        if (time === undefined) {
             time = this.audioCtx.currentTime;
         }
 
-        for(let i = 0; i < this.instrument.notes.length; i++){
-            if(this._beatStates.isBeatToggled(beatIndex, i)){
+        for (let i = 0; i < this.instrument.notes.length; i++) {
+            if (this._beatStates.isBeatToggled(beatIndex, i)) {
                 this.instrument.playNote(this.instrument.notes.length - 1 - i, time, this.audioCtx);
             }
         }
 
-        for(const listener of this._beatListeners){
+        for (const listener of this._beatListeners) {
             listener(beatIndex, time);
         }
     }
 
-    this.addBeatListener = function(listener){
+    addBeatListener(listener) {
         this._beatListeners.push(listener);
     }
 
-    this.addSquareStyle = function(beatIndex, noteIndex, styleClass){
-        this._dom.squares[beatIndex + noteIndex * length].classList.add(styleClass);
+    addSquareStyle(beatIndex, noteIndex, styleClass) {
+        this._dom.squares[beatIndex + noteIndex * this.length].classList.add(styleClass);
     }
 
-    this.removeSquareStyle = function(beatIndex, noteIndex, styleClass){
-        this._dom.squares[beatIndex + noteIndex * length].classList.remove(styleClass);
+    removeSquareStyle(beatIndex, noteIndex, styleClass) {
+        this._dom.squares[beatIndex + noteIndex * this.length].classList.remove(styleClass);
     }
 
-    this.clearSquareStyles = function(beatIndex, noteIndex){
-        this._dom.squares[beatIndex + noteIndex * length].className = "";
+    clearSquareStyles(beatIndex, noteIndex) {
+        this._dom.squares[beatIndex + noteIndex * this.length].className = "";
 
-        this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquare");
+        this._dom.squares[beatIndex + noteIndex * this.length].classList.add("pianoRollSquare");
 
-        if(this._beatStates.isBeatToggled(beatIndex, noteIndex)){
-            this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
+        if (this._beatStates.isBeatToggled(beatIndex, noteIndex)) {
+            this._dom.squares[beatIndex + noteIndex * this. length].classList.add("pianoRollSquareHighlighted");
         }
     }
 
-    this.clearAllSquareStyles = function(){
-        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
-            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
+    clearAllSquareStyles() {
+        for (let beatIndex = 0; beatIndex < this.length; beatIndex++) {
+            for (let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++) {
                 this.clearSquareStyles(beatIndex, noteIndex);
             }
         }
     }
 
-    this.getBeatStates = function(){
+    getBeatStates() {
         return this._beatStates.getCopy();
     }
 
-    this.loadBeatStates = function(beatStates){
+    loadBeatStates(beatStates) {
         this._beatStates = beatStates;
 
-        for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
-            for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
+        for (let beatIndex = 0; beatIndex < this.length; beatIndex++) {
+            for (let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++) {
                 let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
 
-                if(isToggled){
+                if (isToggled) {
                     this._dom.squares[beatIndex + noteIndex * length].classList.add("pianoRollSquareHighlighted");
                 }
                 else {
@@ -560,29 +583,31 @@ function pianoRoll(instrument, length, dom, audioCtx){
     @param { any }              beatCallback    TODO
     @param { AudioContext }     audioCtx 
 */
-function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
-    this._dom = dom;
-    this._numBeats = numBeats;
-    this._audioCtx = audioCtx;
-    this._pos = 0;
-    this._animationId;
+class playHeadAnimator {
+    constructor(dom, numBeats, beatCallback, audioCtx) {
+        this._dom = dom;
+        this._numBeats = numBeats;
+        this._audioCtx = audioCtx;
+        this._pos = 0;
+        this._animationId;
 
-    this._isPlaying = false;
-    this._bpm = 0;
-    this._isLooping = false;
-    this._beatCallback = beatCallback;
+        this._isPlaying = false;
+        this._bpm = 0;
+        this._isLooping = false;
+        this._beatCallback = beatCallback;
 
-    this._nextNoteTime = 0;
-    this._nextUnplayedNote = 0;
+        this._nextNoteTime = 0;
+        this._nextUnplayedNote = 0;
 
-    this._startPos;
-    this._startTime;
+        this._startPos;
+        this._startTime;
 
-    this._startBeat;
-    this._endBeat;
+        this._startBeat;
+        this._endBeat;
+    }
 
-    this.play = function(bpm, loop, startBeat, endBeat){
-        if(this._isPlaying){
+    play(bpm, loop, startBeat, endBeat) {
+        if (this._isPlaying) {
             this.reset();
         }
 
@@ -607,48 +632,48 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
         this._animationId = window.requestAnimationFrame((t) => this._update(t));
         this._isPlaying = true;
-    }
+    };
 
-    this.stop = function(){
+    stop() {
         window.cancelAnimationFrame(this._animationId);
         this._isPlaying = false;
-    }
+    };
 
-    this.reset = function(){
+    reset() {
         window.cancelAnimationFrame(this._animationId);
 
         this._setPlayHeadPosition(0);
 
         this._isPlaying = false;
-    }
+    };
 
-    this._update = function(timestamp){
+    _update(timestamp) {
 
-        if(!this._isPlaying){
+        if (!this._isPlaying) {
             return;
         }
 
-        if(this._startTime > performance.now()){
+        if (this._startTime > performance.now()) {
             return;
         }
 
         const elapsedTime = performance.now() - this._startTime;
-        
+
         this._pos = (this._startPos + elapsedTime / 1000 * this._getPxPerSecond());
-        if(this._isLooping){
+        if (this._isLooping) {
             const playingGridLengthDebug = this._getPlayingGridLength();
             this._pos = this._pos % this._getPlayingGridLength();
         }
 
-        while(this._nextNoteTime < this._audioCtx.currentTime + LOOK_AHEAD){
-            beatCallback(this._nextUnplayedNote, this._nextNoteTime);
+        while (this._nextNoteTime < this._audioCtx.currentTime + LOOK_AHEAD) {
+            this._beatCallback(this._nextUnplayedNote, this._nextNoteTime);
             this._nextNoteTime += (60 / this._bpm) / 4;
 
-            if(this._nextUnplayedNote + 1 >= this._getNumBeatsPlaying() && !this._isLooping){
+            if (this._nextUnplayedNote + 1 >= this._getNumBeatsPlaying() && !this._isLooping) {
                 break;
             }
 
-            this._nextUnplayedNote = (this._nextUnplayedNote + 1) % this._getNumBeatsPlaying();            
+            this._nextUnplayedNote = (this._nextUnplayedNote + 1) % this._getNumBeatsPlaying();
         }
 
         const x = this._pos;
@@ -657,47 +682,47 @@ function playHeadAnimator(dom, numBeats, beatCallback, audioCtx){
 
         this._animationId = window.requestAnimationFrame((t) => this._update(t));
 
-        if(this._pos >= this._getPlayingGridLength() && !this._isLooping){
+        if (this._pos >= this._getPlayingGridLength() && !this._isLooping) {
             this.stop();
             this.onFinishPlaying?.();
         }
 
         this._lastFrameTime = this._audioCtx.currentTime;
-    }
+    };
 
-    this._setPlayHeadPosition = function(pos){
+    _setPlayHeadPosition(pos) {
         this._dom.playHead.style.left = "" + pos + "px";
         this._pos = pos;
-    }
+    };
 
-    this._getGridLength = function(){
+    _getGridLength() {
         return this._dom.playHeadHolder.clientWidth;
-    }
+    };
 
-    this._getPlayingGridLength = function(){
+    _getPlayingGridLength() {
         return this._getGridLength() * (this._getNumBeatsPlaying() / this._numBeats);
-    }
+    };
 
-    this._getBeatWidth = function(){
+    _getBeatWidth() {
         return this._getGridLength() / this._numBeats;
-    }
+    };
 
-    this._getPxPerSecond = function(){
+    _getPxPerSecond() {
         const bps = this._bpm / 60;
         return bps * this._getBeatWidth() * 4;
-    }
+    };
 
-    this._getSecondsPerPx = function(){
+    _getSecondsPerPx() {
         return 1 / this._getPxPerSecond();
-    }
+    };
 
-    this._getCurrentBeat = function(){
+    _getCurrentBeat() {
         return Math.floor(Math.round(this._pos) / this._getBeatWidth());
-    }
+    };
 
-    this._getNumBeatsPlaying = function(){
+    _getNumBeatsPlaying() {
         return this._endBeat - this._startBeat;
-    }
+    };
 }
 
 

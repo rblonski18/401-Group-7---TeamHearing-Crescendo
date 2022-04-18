@@ -65,7 +65,7 @@ function createSingleLevelGame(containerId, samples, level){
     const s = new InstrumentJS.sampler(samples, audioCtx);
     s.setEnvelope(0, .5, .1);
 
-    const game = BeatGame.createGamePianoRoll(document.getElementById(containerId), s, level.beat.length(), audioCtx);
+    const game = BeatGame.createGamePianoRoll(document.getElementById(containerId), s, level.beat.getLength(), audioCtx);
     s.onloadsamples = () => game.game.startLevel(level);
 
     return game;
