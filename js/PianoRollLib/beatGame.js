@@ -1,21 +1,23 @@
-import { beatFromEncodedState, createRoll, renderBeat } from "./pianoRoll.js";
+const BeatGame = (function(){
 
-export function beatChecker(pianoRoll){
-    pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
+class BeatChecker {
+    constructor(pianoRoll) {
+        pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
 
-    this._isCurrentlyChecking = false;
-    this._expectedBeat = undefined;
+        this._isCurrentlyChecking = false;
+        this._expectedBeat = undefined;   
+    }
 
-    this.setCurrentlyChecking = function(value){
+    setCurrentlyChecking(value) {
         this._isCurrentlyChecking = value;
     }
 
-    this.setExpectedBeat = function(expectedBeat){
+    setExpectedBeat(expectedBeat) {
         this._expectedBeat = expectedBeat;
     }
 
-    this._onBeatPlay = function(beatIndex, time){
-        if(!this._isCurrentlyChecking){
+    _onBeatPlay(beatIndex, time) {
+        if (!this._isCurrentlyChecking) {
             return;
         }
 
@@ -25,52 +27,52 @@ export function beatChecker(pianoRoll){
 
         var isCorrect = true;
 
-        for(let i = 0; i < pianoRoll.instrument.notes.length; i++){
-            if(this._expectedBeat.isBeatToggled(beatIndex, i) != pianoRoll.isBeatToggled(beatIndex, i)){
+        for (let i = 0; i < pianoRoll.instrument.notes.length; i++) {
+            if (this._expectedBeat.isBeatToggled(beatIndex, i) != pianoRoll.isBeatToggled(beatIndex, i)) {
                 isCorrect = false;
 
                 this._callDelayed(() => this.onIncorrectNote?.(beatIndex, i), delay);
             }
-            else{
+            else {
 
                 this._callDelayed(() => this.onCorrectNote?.(beatIndex, i), delay);
             }
         }
 
         // If correct but the beat is not finished
-        if(isCorrect && beatIndex < pianoRoll.length - 1)
+        if (isCorrect && beatIndex < pianoRoll.length - 1)
             return;
 
-        if(isCorrect){
+        if (isCorrect) {
             this._callDelayed(() => this._onBeatSucceed(), delay);
         }
-        else{
+        else {
             this._callDelayed(() => this._onBeatFailed(), delay);
         }
     }
 
-    this._callDelayed = function(f, delay){
-        if(delay < 10){
+    _callDelayed(f, delay) {
+        if (delay < 10) {
             f();
         }
-        else{
+        else {
             setTimeout(f, delay);
         }
     }
 
-    this._onBeatFailed = function(){
+    _onBeatFailed() {
         pianoRoll.stop();
         this.onFail?.();
     }
 
-    this._onBeatSucceed = function(){
+    _onBeatSucceed() {
         this.onSuccess?.();
     }
 }
 
 var _numWaveforms = 0;
 
-export function createGamePianoRoll(domParent, instrument, length, audioCtx){
+function createGamePianoRoll(domParent, instrument, length, audioCtx){
     // TODO: create a custom piano roll controller to control the piano roll.
     // This controller should allow for testing a runthrough of the level or 
     // submitting a sequence. Input should be disabled when the piano roll is
@@ -104,9 +106,9 @@ export function createGamePianoRoll(domParent, instrument, length, audioCtx){
     pianoRollContainer.classList.add("pianoRollContainer");
     stackContainer.appendChild(pianoRollContainer);
 
-    const pianoRoll = createRoll(pianoRollContainer, instrument, length, audioCtx);
+    const pianoRoll = PianoRoll.createRoll(pianoRollContainer, instrument, length, audioCtx);
     
-    const newGame = new game(pianoRoll, wavesurfer);
+    const newGame = new Game(pianoRoll, wavesurfer);
 
     const controls = document.createElement("div");
     controls.classList.add("pianoRollRow");
@@ -146,52 +148,57 @@ function createControllerButton(text, onClick){
 }
 
 
-function game(pianoRoll, wavesurfer){
-    this._beatChecker = new beatChecker(pianoRoll);
+class Game {
+    constructor(pianoRoll, wavesurfer) {
+        this.pianoRoll = pianoRoll;
+        this.wavesurfer = wavesurfer;
 
-    this._beatChecker.onCorrectNote = (i, j) => this._onCorrectNote(i, j);
-    this._beatChecker.onIncorrectNote = (i, j) => this._onIncorrectNote(i, j);
-    this._beatChecker.onFail = () => this._onFail();
-    this._beatChecker.onSuccess = () => this._onSuccess();
+        this._beatChecker = new BeatChecker(pianoRoll);
 
-    this.currentLevel = undefined;
+        this._beatChecker.onCorrectNote = (i, j) => this._onCorrectNote(i, j);
+        this._beatChecker.onIncorrectNote = (i, j) => this._onIncorrectNote(i, j);
+        this._beatChecker.onFail = () => this._onFail();
+        this._beatChecker.onSuccess = () => this._onSuccess();
 
-    this.startLevel = function(level){
+        this.currentLevel = undefined;
+    }
+
+    startLevel(level) {
         this.currentLevel = level;
         this._beatChecker.setExpectedBeat(level.beat);
 
-        renderBeat(level.beat, pianoRoll.instrument, level.bpm)
-        .then(audioBuffer => {
-            wavesurfer.loadDecodedBuffer(audioBuffer);
-        });
+        PianoRoll.renderBeat(level.beat, this.pianoRoll.instrument, level.bpm)
+            .then(audioBuffer => {
+                this.wavesurfer.loadDecodedBuffer(audioBuffer);
+            });
     }
 
-    this.submitSolution = function(){
+    submitSolution() {
         this._beatChecker.setCurrentlyChecking(true);
         pianoRoll.isInteractionEnabled = false;
-        
+
         pianoRoll.resetPlayProgress();
         pianoRoll.play(this.currentLevel.bpm, false);
     }
 
-    this._onCorrectNote = function(beatIndex, noteIndex){
-        if(this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)){
+    _onCorrectNote(beatIndex, noteIndex) {
+        if (this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)) {
             pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareSucceeded");
         }
-    };
+    }
 
-    this._onIncorrectNote = function(beatIndex, noteIndex){
-        if(!this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)){
+    _onIncorrectNote(beatIndex, noteIndex) {
+        if (!this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)) {
             pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareFailed");
         }
     }
 
-    this._onFail = function(){
+    _onFail() {
         this._beatChecker.setCurrentlyChecking(false);
         pianoRoll.isInteractionEnabled = true;
     }
 
-    this._onSuccess = function(){
+    _onSuccess() {
         this._beatChecker.setCurrentlyChecking(false);
         pianoRoll.isInteractionEnabled = true;
 
@@ -199,16 +206,27 @@ function game(pianoRoll, wavesurfer){
     }
 }
 
-export function level(beat, bpm){
+function level(beat, bpm){
     this.beat = beat;
     this.bpm = bpm;
 }
 
-export const levels = [
-    new level(beatFromEncodedState(3, 16, "qqoICIGC"), 70),
-    new level(beatFromEncodedState(3, 16, "/j8ICINC"), 70)
+const levels = [
+    new level(PianoRoll.beatFromEncodedState(3, 16, "qqoICIGC"), 70),
+    new level(PianoRoll.beatFromEncodedState(3, 16, "/j8ICINC"), 70)
 ]
 
-export const melodicLevels = [
-    new level(beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)
+const melodicLevels = [
+    new level(PianoRoll.beatFromEncodedState(5, 16, "CIAAACAgAACACA"), 70)
 ]
+
+
+return {
+    BeatChecker: BeatChecker,
+    createGamePianoRoll: createGamePianoRoll,
+    level: level,
+    levels: levels,
+    melodicLevels: melodicLevels
+};
+
+})();
