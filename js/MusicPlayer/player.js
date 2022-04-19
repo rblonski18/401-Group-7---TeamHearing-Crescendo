@@ -20,7 +20,7 @@ if(track_name.innerHTML == "Twinkle Twinkle Little Star") {
   track_index = 1;
 } else if(track_name.innerHTML == "Fur Elise") {
   track_index = 2;
-} else if(track_name.innerHTML == "Prelude in C Major") {
+} else if(track_name.innerHTML == "Amazing Grace") {
   track_index = 3;
 }
 
@@ -46,9 +46,9 @@ let track_list = [
     path: "furelise.mp3"
   },
   {
-    name: "Prelude in C Major",
-    artist: "Johann Sebastian Bach",
-    path: "prelude.mp3"
+    name: "Amazing Grace",
+    artist: "John Newton",
+    path: "grace.mp3"
   }
 ];
 

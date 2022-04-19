@@ -32,126 +32,26 @@ var stave = new VF.Stave(10, 10, 10000)
 // Connect it to the rendering context and draw!
 stave.setContext(context).draw();
 
-var durations = ['8', '4', '2', '1'];
-
-var notes = [
-	['c', '', '4', '4'],
-	['c', '', '4', '4'],
-	['g', '', '4', '4'],
-	['g', '', '4', '4'],
-	['a', '', '4', '4'],
-	['a', '', '4', '4'],
-	['g', '', '4', '2'],
-    ['f', '', '4', '4'],
-	['f', '', '4', '4'],
-	['e', '', '4', '4'],
-	['e', '', '4', '4'],
-	['d', '', '4', '4'],
-	['d', '', '4', '4'],
-	['c', '', '4', '2'],
-    ['g', '', '4', '4'],
-	['g', '', '4', '4'],
-	['f', '', '4', '4'],
-	['f', '', '4', '4'],
-	['e', '', '4', '4'],
-	['e', '', '4', '4'],
-	['d', '', '4', '2'],
-    ['g', '', '4', '4'],
-	['g', '', '4', '4'],
-	['f', '', '4', '4'],
-	['f', '', '4', '4'],
-	['e', '', '4', '4'],
-	['e', '', '4', '4'],
-	['d', '', '4', '2'],
-    ['c', '', '4', '4'],
-	['c', '', '4', '4'],
-	['g', '', '4', '4'],
-	['g', '', '4', '4'],
-	['a', '', '4', '4'],
-	['a', '', '4', '4'],
-	['g', '', '4', '2'],
-    ['f', '', '4', '4'],
-	['f', '', '4', '4'],
-	['e', '', '4', '4'],
-	['e', '', '4', '4'],
-	['d', '', '4', '4'],
-	['d', '', '4', '4'],
-	['c', '', '4', '2'],
-].map(([letter, acc, octave, length]) => {
-	const note = new VF.StaveNote({
-    clef: 'treble',
-    keys: [`${letter}${acc}/${octave}`],
-    duration: length,
-  })
-  .setContext(context)
-  .setStave(stave);
-  // If a StaveNote has an accidental, we must render it manually.
-  // This is so that you get full control over whether to render
-  // an accidental depending on the musical context. Here, if we
-  // have one, we want to render it. (Theoretically, we might
-  // add logic to render a natural sign if we had the same letter
-  // name previously with an accidental. Or, perhaps every twelfth
-  // note or so we might render a natural sign randomly, just to be
-  // sure our user who's learning to read accidentals learns
-  // what the natural symbol means.)
-  if(acc) note.addAccidental(0, new VF.Accidental(acc));
-	tickContext.addTickable(note)
-	return note;
-}); 
-
-
-// The tickContext.preFormat() call assigns x-values (and other
-// formatting values) to notes. It must be called after we've 
-// created the notes and added them to the tickContext. Or, it
-// can be called each time a note is added, if the number of 
-// notes needed is not known at the time of bootstrapping.
-//
-// To see what happens if you put it in the wrong place, try moving
-// this line up to where the TickContext is initialized, and check
-// out the error message you get.
-//
-// tickContext.setX() establishes the left-most x position for all
-// of the 'tickables' (notes, etc...) in a context.
-
-
 // This will contain any notes that are currently visible on the staff,
 // before they've either been answered correctly, or plumetted off
 // the staff when a user fails to answer them correctly in time.
-// TODO: Add sound effects.
 const visibleNoteGroups = [];
 
+/**
+ * This is a function that just delays for a certain amount of time. Think 
+ * of it as a sleep function. 
+ * @param {string} time - The time in milliseconds you want program to wait. 
+ */
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-/*
-async function writeNote() {
-    note = notes.shift();
-    if(!note) return;
-    const group = context.openGroup();
-    visibleNoteGroups.push(group);
-    note.draw();
-    context.closeGroup();
-    group.classList.add('scroll');
-    // Force a dom-refresh by asking for the group's bounding box. Why? Most
-// modern browsers are smart enough to realize that adding .scroll class
-// hasn't changed anything about the rendering, so they wait to apply it
-// at the next dom refresh, when they can apply any other changes at the
-// same time for optimization. However, if we allow that to happen,
-// then sometimes the note will immediately jump to its fully transformed
-// position -- because the transform will be applied before the class with
-// its transition rule. 
-    const box = group.getBoundingClientRect();
-    group.classList.add('scrolling');
-    // If a user doesn't answer in time make the note fall below the staff
-    window.setTimeout(() => {
-        const index = visibleNoteGroups.indexOf(group);
-        if(index === -1) return;
-        group.classList.add('too-slow');
-    visibleNoteGroups.shift();
-    }, 5000);
-} */
 
+/**
+ * These are the notes to the song 'Twinkle Twinkle Little Star' in the following format: 
+ * [{note}, {accidental}, {octave}, {duration}]
+ * It's a sort of 'holder' that I can use in loadNotes() to refresh the note list. 
+ */
 var notesOne = [
     ['c', '', '4', '4'],
     ['c', '', '4', '4'],
@@ -196,36 +96,12 @@ var notesOne = [
     ['d', '', '4', '4'],
     ['c', '', '4', '2'],
 ]
- /*
-var notesTwo = [
-    ['c', '', '4', '4'],
-    ['c', '', '4', '8'],
-    ['d', '', '4', '4'], 
-    ['c', '', '4', '4'],
-    ['f', '', '4', '4'],
-    ['e', '', '4', '2'],
-    ['c', '', '4', '4'],
-    ['c', '', '4', '8'],
-    ['d', '', '4', '4'],
-    ['c', '', '4', '4'],
-    ['g', '', '4', '4'],
-    ['f', '', '4', '2'],
-    ['c', '', '4', '4'],
-    ['c', '', '4', '8'],
-    ['c', '', '5', '4'],
-    ['a', '', '4', '4'],
-    ['f', '', '4', '4'],
-    ['e', '', '4', '4'],
-    ['d', '', '4', '4'],
-    ['b', '', '4', '4'],
-    ['b', '', '4', '8'],
-    ['a', '', '4', '4'],
-    ['f', '', '4', '4'], 
-    ['g', '', '4', '4'],
-    ['f', '', '4', '2'],
-] */
- 
 
+/**
+ * Used to load the notes back into the list when restarting the song or
+ * playing it for the first time. 
+ * Converts list of notes above to VF.StaveNote objects. 
+ */
 function loadNotes() {
 
     notes = notesOne.map(([letter, acc, octave, length]) => {
@@ -255,6 +131,17 @@ function loadNotes() {
 
 loadNotes();
 
+/**
+ * Main function that writes notes to the page. Loops over the notes list
+ * and opens context group, draws the notes, and closes. Adds to visibleNoteGroups list, 
+ * and adds "scroll" and "scrolling" classes to group. These move the note to the left 
+ * across the stave on the screen. 
+ * I then call the delay function depending on the note duration to see how long
+ * I should wait before sending out the next note. If you're having difficulty 
+ * getting the notes to sync up with the song, you'll want to adjust these values.
+ * If the use presses stop, the class "deleted" is added to all visible notes, and
+ * they fade away. 
+ */
 async function writeNotes() {
     let track_name = document.querySelector(".track-name").innerHTML;
 
@@ -282,14 +169,12 @@ async function writeNotes() {
             visibleNoteGroups.shift();
             }, 5000);
 
-            if(track_name == "Twinkle Twinkle Little Star") {
-                if(note.duration == '2') {
-                    await delay(1240);
-                } else if(note.duration == '8') {
-                    await delay(310)
-                } else if(note.duration == '4') {
-                    await delay(620);
-                }
+            if(note.duration == '2') {
+                await delay(1240);
+            } else if(note.duration == '8') {
+                await delay(310)
+            } else if(note.duration == '4') {
+                await delay(620);
             }
         }
         
@@ -306,5 +191,4 @@ async function writeNotes() {
     }
 }
 
-// Add a note to the staff from the notes array (if there are any left).
 document.getElementById('play-pause-button').addEventListener('click', writeNotes);

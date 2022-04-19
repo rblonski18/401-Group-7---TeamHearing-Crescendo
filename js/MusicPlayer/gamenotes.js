@@ -19,6 +19,17 @@ const stave = new Stave(10, 10, 10000).addClef("treble");
 // Connect it to the rendering context and draw!
 stave.setContext(context).draw();
 
+/*
+ * Variables holding the number of notes guessed right, and number of total guesses. 
+ */
+let right = 0;
+let total = 0;
+
+/*
+ * I add the possible note guesses to a list that I can randomly pull from. They are in the format:
+ * [{note}, {accidental}, {octave}]. All are quarter notes. To change, change duration value. 
+ * They are then added to the tickContext. 
+ */
 const notes = [
     ["a", "", "4"],
     ["b", "", "4"],
@@ -52,14 +63,28 @@ const notes = [
 });
 
 tickContext.preFormat().setX(400)
+/* 
+ * Variable to hold whether track is playing. 
+ */
 let isTrackPlaying = false;
+/* 
+ * Variable to holding played notes (as svg objects)
+ */
 const visibleNoteGroups = [];
+/* 
+ * Variable to holding played notes (as VF.StaveNote objects)
+ */
 let playedNotes = [];
 
+/* 
+ * This function selects a note at random and displays it to screen, 
+ * also playing the associated audio file. 
+ * Adds scroll and scrolling classes to make note move to the left across the screen. 
+ */
 function addNote() {
+    total += 1;
     let noteIndex = Math.floor(Math.random() * 7); // number 0 - 6
     note = notes[noteIndex];
-    console.log(note.keys[0][0]);
 
     if(isTrackPlaying) curr_track.pause();
 
@@ -91,6 +116,11 @@ function addNote() {
     group.classList.add("scrolling");
 }
 
+/* 
+ * Variable to determine whether the user is playing the game or it is stopped. 
+ * I add the "answerHeader" class when resetting because it clears the label above
+ * the stave that displays assessment measures and tells you if you got it right. 
+ */
 let playing = false;
 
 function playGame() {
@@ -99,6 +129,9 @@ function playGame() {
         playing = true;
         document.getElementById("add-note").innerHTML = "Reset";
     } else {
+        total = 0;
+        right = 0;
+        document.getElementById("answer").classList.add("answerHeader");
         isTrackPlaying = false;
         curr_track.pause();
         if (visibleNoteGroups.length === 0) return;
@@ -110,32 +143,45 @@ function playGame() {
     }
 }
 
-// Add a note to the staff from the notes array (if there are any left).
+// Play game. 
 document.getElementById("add-note").addEventListener("click", (e) => {
     playGame();
 });
 
+/* 
+ * Function determins whether user answered question correctly or not. 
+ * If correct, display that their answer was correct and assessment measures. 
+ * If not, just say 'Almost' and still display assessment measures. 
+ * @param {string} button - The note on the button that the user pressed. 
+ * @param {string} octave - The octave that the note would be in. 
+ */
 function answerQuestion(button, octave) {
     if (visibleNoteGroups.length === 0) return;
     group = visibleNoteGroups.shift();
     note = playedNotes.shift();
     if(note.keys[0] == `${button}/${octave}`) {
+        right += 1
         group.classList.add("correct");
         const transformMatrix = window.getComputedStyle(group).transform;
         const x = transformMatrix.split(",")[4].trim();
         group.style.transform = `translate(${x}px, -800px)`;
         document.getElementById("answer").classList.remove("answerHeader");
-        document.getElementById("answer").innerHTML = `${button.toUpperCase()} is correct!`
+        let percent = Math.round((right / total) * 100);
+        document.getElementById("answer").innerHTML = `${button.toUpperCase()} is correct! - ${right}/${total} - ${percent}%`
     } else {
         group.classList.add("too-slow");
         document.getElementById("answer").classList.remove("answerHeader");
-        document.getElementById("answer").innerHTML = `Almost!`
+        let percent = 0;
+        if(right != 0) percent = Math.round((right / total) * 100);
+        document.getElementById("answer").innerHTML = `Almost! - ${right}/${total} - ${percent}%`
     }
     if(isTrackPlaying) curr_track.pause();
     addNote();
 }
 
-// If a user plays/identifies the note in time, send it up to note heaven.
+/*
+ * Event listeners for buttons. 
+ */
 document.getElementById("a-button").addEventListener("click", (e) => {
     answerQuestion("a", "4")
 });
