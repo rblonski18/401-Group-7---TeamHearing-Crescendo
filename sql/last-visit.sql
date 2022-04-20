@@ -1,12 +1,7 @@
 -- SQL does not support DEFAULT(CURRENT_DATE)... makes no sense
 CREATE TABLE LastVisit (
   ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `date` DATE NOT NULL,
-  `user` INT NOT NULL
-); 
-
-CREATE TABLE `Indices` (
-  ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `user` INT NOT NULL,
-  `index` INT NOT NULL
+  day DATE NOT NULL,
+  user INT NOT NULL UNIQUE,
+  ind TEXT NOT NULL
 ); 
