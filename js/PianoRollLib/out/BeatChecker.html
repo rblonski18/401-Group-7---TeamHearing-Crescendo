@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: PianoRollController</title>
+    <title>JSDoc: Class: BeatChecker</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: PianoRollController</h1>
+    <h1 class="page-title">Class: BeatChecker</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>PianoRollController<span class="signature">(dom)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>BeatChecker<span class="signature">(pianoRoll)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Class routing user interactions with the piano roll controller dom elements to the piano roll</div>
+            <div class="class-description">Compares the playback of a beat to an expected beat</div>
         
     
 </header>
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="PianoRollController"><span class="type-signature"></span>new PianoRollController<span class="signature">(dom)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="BeatChecker"><span class="type-signature"></span>new BeatChecker<span class="signature">(pianoRoll)</span><span class="type-signature"></span></h4>
     
 
     
@@ -85,10 +85,15 @@
 
         <tr>
             
-                <td class="name"><code>dom</code></td>
+                <td class="name"><code>pianoRoll</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type"><a href="PianoRoll.html">PianoRoll</a></span>
+
+
             
             </td>
 
@@ -96,7 +101,7 @@
 
             
 
-            <td class="description last">References to the piano roll controller's dom elements (created by createRollController)</td>
+            <td class="description last">The piano roll to validate</td>
         </tr>
 
     
@@ -137,7 +142,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pianoRoll.js.html">pianoRoll.js</a>, <a href="pianoRoll.js.html#line160">line 160</a>
+        <a href="beatGame.js.html">beatGame.js</a>, <a href="beatGame.js.html#line6">line 6</a>
     </li></ul></dd>
     
 
@@ -193,7 +198,7 @@
     
 
     
-    <h4 class="name" id="bindToPianoRoll"><span class="type-signature"></span>bindToPianoRoll<span class="signature">(pianoRoll)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setCurrentlyChecking"><span class="type-signature"></span>setCurrentlyChecking<span class="signature">(value)</span><span class="type-signature"></span></h4>
     
 
     
@@ -201,7 +206,7 @@
 
 
 <div class="description">
-    Bind the controller to a piano roll instance
+    Enable or disable checking of beat playback
 </div>
 
 
@@ -237,13 +242,13 @@
 
         <tr>
             
-                <td class="name"><code>pianoRoll</code></td>
+                <td class="name"><code>value</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="PianoRoll.html">PianoRoll</a></span>
+<span class="param-type">Boolean</span>
 
 
             
@@ -253,7 +258,7 @@
 
             
 
-            <td class="description last">The piano roll to route input to</td>
+            <td class="description last">Whether the beat should be checked on playback</td>
         </tr>
 
     
@@ -294,7 +299,144 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pianoRoll.js.html">pianoRoll.js</a>, <a href="pianoRoll.js.html#line180">line 180</a>
+        <a href="beatGame.js.html">beatGame.js</a>, <a href="beatGame.js.html#line24">line 24</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setExpectedBeat"><span class="type-signature"></span>setExpectedBeat<span class="signature">(expectedBeat)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the expected beat to compare playback to
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>expectedBeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Beat.html">Beat</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The expected beat</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="beatGame.js.html">beatGame.js</a>, <a href="beatGame.js.html#line32">line 32</a>
     </li></ul></dd>
     
 
