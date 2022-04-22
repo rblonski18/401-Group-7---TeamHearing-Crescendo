@@ -1,7 +1,7 @@
 -- SQL does not support DEFAULT(CURRENT_DATE)... makes no sense
-CREATE TABLE LastVisit (
+CREATE TABLE playlist (
   ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  day DATE NOT NULL,
+  entry DATE NOT NULL,
   user INT NOT NULL UNIQUE,
-  ind TEXT NOT NULL
+  playlist VARCHAR(64) NOT NULL
 ); 
