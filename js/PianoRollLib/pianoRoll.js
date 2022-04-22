@@ -732,7 +732,7 @@ return{
     createRollController: createRollController,
     beatFromEncodedState: beatFromEncodedState,
     renderBeat: renderBeat,
-    beat: Beat,
+    Beat: Beat,
     playHeadAnimator: playHeadAnimator,
 }
 

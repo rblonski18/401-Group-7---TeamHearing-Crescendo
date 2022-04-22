@@ -2,9 +2,10 @@ const BeatGame = (function(){
 
 class BeatChecker {
     constructor(pianoRoll) {
+        this.pianoRoll = pianoRoll;
+
         pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
 
-        this.pianoRoll = pianoRoll;
         this._isCurrentlyChecking = false;
         this._expectedBeat = undefined;   
     }
