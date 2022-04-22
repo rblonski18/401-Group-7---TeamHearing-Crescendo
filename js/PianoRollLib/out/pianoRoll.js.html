@@ -1,4 +1,32 @@
-const PianoRoll = (function () {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pianoRoll.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pianoRoll.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const PianoRoll = (function () {
 
 var numRollSquares = 0;
 const LOOK_AHEAD = .1;
@@ -73,7 +101,7 @@ function createRoll(domParent, instrument, length, audioCtx){
 
         row.appendChild(rowLabel);
 
-        for(let j = 0; j < length; j++){
+        for(let j = 0; j &lt; length; j++){
             var square = document.createElement("div");
             square.classList.add("pianoRollSquare");
 
@@ -301,7 +329,7 @@ class Beat {
 
     /**
      * Get a copy of the internal beat state, useful for serialization
-     * @returns {Array<Boolean>} - The internal state of the beat
+     * @returns {Array&lt;Boolean>} - The internal state of the beat
      */
     getState() {
         return Array.from(this._state);
@@ -309,7 +337,7 @@ class Beat {
 
     /**
      * Set the internal beat state, useful when deserializing
-     * @param {Array<Boolean>} state - The desired internal state of the beat
+     * @param {Array&lt;Boolean>} state - The desired internal state of the beat
      */
     setState(state) {
         this._state = Array.from(state);
@@ -337,7 +365,7 @@ function beatFromEncodedState(numNotes, length, state){
 
 /**
  * Convert an array of booleans to a base64 string
- * @param {Array<Boolean>} arr - An array of booleans
+ * @param {Array&lt;Boolean>} arr - An array of booleans
  * @returns {String} - The boolean array encoded to base64
  */
 function boolArrayToBase64(arr){
@@ -351,11 +379,11 @@ function boolArrayToBase64(arr){
     let string = "";
 
     // Loop through the bool array (six bools at a time)
-    for (let charIndex = 0; charIndex < arr.length / bitsInChar; charIndex++) {
+    for (let charIndex = 0; charIndex &lt; arr.length / bitsInChar; charIndex++) {
         let number = 0;
 
         // Convert these six bools to a number (think of them as bits of the number) 
-        for (let bit = 0; bit < bitsInChar; bit++)
+        for (let bit = 0; bit &lt; bitsInChar; bit++)
             number = number * 2 + (arr[charIndex*bitsInChar + bit] ? 1 : 0);
 
         // Convert the number to a Base64 character and add it to output
@@ -369,7 +397,7 @@ function boolArrayToBase64(arr){
 /**
  * Convert a base64 string to an array of booleans
  * @param {String} string 
- * @returns {Array<Boolean>} - The decoded boolean array
+ * @returns {Array&lt;Boolean>} - The decoded boolean array
  */
 function base64ToBoolArray(string) {
     // Base64 character set
@@ -382,7 +410,7 @@ function base64ToBoolArray(string) {
     const array = [];
 
     // Loop through the input string one character at a time
-    for (let charIndex = 0; charIndex < string.length; charIndex++) {
+    for (let charIndex = 0; charIndex &lt; string.length; charIndex++) {
         
         // Convert the Base64 char to a number 
         let number = characters.indexOf(string.charAt(charIndex));
@@ -404,15 +432,15 @@ function base64ToBoolArray(string) {
  * @param {Beat} beat - The beat to render
  * @param {Instrument} instrument - The instrument to be played by the beat
  * @param {Number} bpm - The desired bpm of the rendered beat
- * @returns {Promise<AudioBuffer>} - a promise of an audio buffer containing the rendered beat
+ * @returns {Promise&lt;AudioBuffer>} - a promise of an audio buffer containing the rendered beat
  */
 function renderBeat(beat, instrument, bpm){
     const beatLength = 60 / bpm / 4;
     const sampleRate = 44100;
     const offlineCtx = new OfflineAudioContext(1, beat.getLength() * beatLength * sampleRate, sampleRate);
 
-    for(let beatIndex = 0; beatIndex < beat.getLength(); beatIndex++){
-        for(let i = 0; i < instrument.notes.length; i++){
+    for(let beatIndex = 0; beatIndex &lt; beat.getLength(); beatIndex++){
+        for(let i = 0; i &lt; instrument.notes.length; i++){
             if(beat.isBeatToggled(beatIndex, i)){
                 instrument.playNote(instrument.notes.length - 1 - i, beatIndex * beatLength, offlineCtx);
             }
@@ -562,7 +590,7 @@ class PianoRoll {
      * Untoggle all beats
      */
     reset() {
-        for (let i = 0; i < this._dom.squares.length; i++) {
+        for (let i = 0; i &lt; this._dom.squares.length; i++) {
             this._dom.squares[i].classList.remove("pianoRollSquareHighlighted");
         }
 
@@ -581,7 +609,7 @@ class PianoRoll {
             time = this.audioCtx.currentTime;
         }
 
-        for (let i = 0; i < this.instrument.notes.length; i++) {
+        for (let i = 0; i &lt; this.instrument.notes.length; i++) {
             if (this._beatStates.isBeatToggled(beatIndex, i)) {
                 this.instrument.playNote(this.instrument.notes.length - 1 - i, time, this.audioCtx);
             }
@@ -639,8 +667,8 @@ class PianoRoll {
      * Remove all added css classes from all beats on the piano roll
      */
     clearAllSquareStyles() {
-        for (let beatIndex = 0; beatIndex < this.length; beatIndex++) {
-            for (let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++) {
+        for (let beatIndex = 0; beatIndex &lt; this.length; beatIndex++) {
+            for (let noteIndex = 0; noteIndex &lt; this.instrument.notes.length; noteIndex++) {
                 this.clearSquareStyles(beatIndex, noteIndex);
             }
         }
@@ -661,8 +689,8 @@ class PianoRoll {
     loadBeatStates(beatStates) {
         this._beatStates = beatStates;
 
-        for (let beatIndex = 0; beatIndex < this.length; beatIndex++) {
-            for (let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++) {
+        for (let beatIndex = 0; beatIndex &lt; this.length; beatIndex++) {
+            for (let noteIndex = 0; noteIndex &lt; this.instrument.notes.length; noteIndex++) {
                 let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
 
                 if (isToggled) {
@@ -784,11 +812,11 @@ class PlayHeadAnimator {
             this._pos = this._pos % this._getPlayingGridLength();
         }
 
-        while (this._nextNoteTime < this._audioCtx.currentTime + LOOK_AHEAD) {
+        while (this._nextNoteTime &lt; this._audioCtx.currentTime + LOOK_AHEAD) {
             this._beatCallback(this._nextUnplayedNote, this._nextNoteTime);
             this._nextNoteTime += (60 / this._bpm) / 4;
 
-            if (this._nextUnplayedNote + 1 >= this._getNumBeatsPlaying() && !this._isLooping) {
+            if (this._nextUnplayedNote + 1 >= this._getNumBeatsPlaying() &amp;&amp; !this._isLooping) {
                 break;
             }
 
@@ -801,7 +829,7 @@ class PlayHeadAnimator {
 
         this._animationId = window.requestAnimationFrame((t) => this._update(t));
 
-        if (this._pos >= this._getPlayingGridLength() && !this._isLooping) {
+        if (this._pos >= this._getPlayingGridLength() &amp;&amp; !this._isLooping) {
             this.stop();
             this.onFinishPlaying?.();
         }
@@ -854,4 +882,26 @@ return{
     Beat: Beat,
     PlayHeadAnimator: PlayHeadAnimator,
 }
-})();
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Beat.html">Beat</a></li><li><a href="PianoRoll.html">PianoRoll</a></li><li><a href="PianoRollController.html">PianoRollController</a></li><li><a href="PlayHeadAnimator.html">PlayHeadAnimator</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Fri Apr 22 2022 16:23:20 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
