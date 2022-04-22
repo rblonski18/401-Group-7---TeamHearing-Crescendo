@@ -1,11 +1,10 @@
-/** Represents a Piano Roll */
 const PianoRoll = (function () {
 
 var numRollSquares = 0;
 const LOOK_AHEAD = .1;
 
 /**
- * Creates a piano roll with a linked set of control buttons
+ * Create a piano roll with a linked set of control buttons
  * @param {HTMLElement} domParent - The desired parent of the piano roll and controls
  * @param {Instrument} instrument - The instrument to be sequenced with the piano roll
  * @param {Number} length - The length of the piano roll in 16th notes
@@ -25,7 +24,7 @@ function createRollWithController(domParent, instrument, length, audioCtx){
 }
 
 /**
- * Creates a piano roll
+ * Create a piano roll
  * @param {HTMLElement} domParent - The desired parent of the piano roll and controls
  * @param {Instrument} instrument - The instrument to be sequenced with the piano roll
  * @param {Number} length - The length of the piano roll in 16th notes
@@ -38,7 +37,7 @@ function createRoll(domParent, instrument, length, audioCtx){
     var dom = {};
     dom.squares = rollSquares;
 
-    var roll = new pianoRoll(instrument, length, dom, audioCtx);
+    var roll = new PianoRoll(instrument, length, dom, audioCtx);
 
     // rollHolder allows for absolute positioning of the playhead over the pianoroll
     var rollHolder = document.createElement("div");
@@ -97,7 +96,7 @@ function createRoll(domParent, instrument, length, audioCtx){
 }
 
 /**
- * Creates a piano roll controller to be later linked to a piano roll
+ * Create a piano roll controller to be later linked to a piano roll
  * @param {HTMLElement} domParent - The desired parent of the controls
  * @returns The created piano roll controls
  */
@@ -175,7 +174,7 @@ class PianoRollController {
     }
 
     /**
-     * Binds the controller to a piano roll instance
+     * Bind the controller to a piano roll instance
      * @param {PianoRoll} pianoRoll - The piano roll to route input to
      */
     bindToPianoRoll(pianoRoll) {
@@ -256,17 +255,27 @@ class Beat {
     /**
      *
      * @param {Number} beatIndex - The index of the 16th note
-     * @param {*} noteIndex - The index of the note or element
+     * @param {Number} noteIndex - The index of the note or element
      * @returns {Boolean} Whether the note on the specified beat is toggled
      */
     isBeatToggled(beatIndex, noteIndex) {
         return this._state[beatIndex + noteIndex * this.length];
     }
 
+    /**
+     * Set the value of a specified beat
+     * @param {Number} beatIndex - The index of the 16th note
+     * @param {Number} noteIndex - The index of the note or element
+     * @param {Boolean} value - The desired value of the specified beat
+     */
     setBeat(beatIndex, noteIndex, value) {
         this._state[beatIndex + noteIndex * this.length] = value;
     }
 
+    /**
+     * Create a copy of the beat, used to avoid exposing internal state by reference
+     * @returns {Beat} - A new beat object containing the same values
+     */
     getCopy() {
         let copy = new Beat(this.numNotes, this.length);
         copy._state = Array.from(this._state);
@@ -274,31 +283,47 @@ class Beat {
         return copy;
     }
 
+    /**
+     * Return the length of the beat
+     * @returns {Number} The length of the beat in 16th notes
+     */
     getLength() {
         return this.length;
     }
 
+    /**
+     * Set the value of all beat states, often used to clear the current state
+     * @param {Boolean} value - The desired value of all beats
+     */
     setAll(value) {
         this._state.fill(value);
     }
 
+    /**
+     * Get a copy of the internal beat state, useful for serialization
+     * @returns {Array<Boolean>} - The internal state of the beat
+     */
     getState() {
         return Array.from(this._state);
     }
 
+    /**
+     * Set the internal beat state, useful when deserializing
+     * @param {Array<Boolean>} state - The desired internal state of the beat
+     */
     setState(state) {
         this._state = Array.from(state);
     }
 }
 
-/**
-    Beat object with array that maintains the states of each of the beats on the roll
-    @param  { int }   numNotes      number of notes in instrument
-    @param  { int }   length        number of beats on roll
-    @param  { int }   state         encoded state of beat
-    @return { beat }  newBeat       new beat object with encoded state
-*/
 
+/**
+ * Create a beat object from a base64 encoded state
+ * @param {Number} numNotes - The number of notes used by the instrument
+ * @param {Number} length - The number of 16th notes in the beat
+ * @param {String} state - The encoded state of the beat
+ * @returns 
+ */
 function beatFromEncodedState(numNotes, length, state){
     const newBeat = new Beat(numNotes, length);
     const decoded = base64ToBoolArray(state);
@@ -308,12 +333,13 @@ function beatFromEncodedState(numNotes, length, state){
     return newBeat;
 }
 
+// Base64 encoding and decoding from https://stackoverflow.com/a/67039932/10184960
+
 /**
-    Converts an array booleans to a base64 string
-    @source https://stackoverflow.com/a/67039932/10184960
-    @param  { any[] }   arr          array of booleans
-    @return { string }  string       base64 string
-*/
+ * Convert an array of booleans to a base64 string
+ * @param {Array<Boolean>} arr - An array of booleans
+ * @returns {String} - The boolean array encoded to base64
+ */
 function boolArrayToBase64(arr){
     // Base64 character set
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -339,12 +365,12 @@ function boolArrayToBase64(arr){
     return string;
 }
 
+
 /**
-    Converts an array booleans to a base64 string
-    @source https://stackoverflow.com/a/67039932/10184960
-    @param   { string }  string       base64 string
-    @return  { any[] }   arr          array of booleans
-*/
+ * Convert a base64 string to an array of booleans
+ * @param {String} string 
+ * @returns {Array<Boolean>} - The decoded boolean array
+ */
 function base64ToBoolArray(string) {
     // Base64 character set
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -372,13 +398,14 @@ function base64ToBoolArray(string) {
     return array;
 }
 
+
 /**
-    Returns a promise of an audio buffer containing the rendered beat
-    @param      { beat }          beat          
-    @param      { sampler }       instrument    A sampler with the desired sounds
-    @param      { int }           bpm           
-    @return     { Promise }       renderBeat    
-*/
+ * Render a beat and instrument to an audio buffer
+ * @param {Beat} beat - The beat to render
+ * @param {Instrument} instrument - The instrument to be played by the beat
+ * @param {Number} bpm - The desired bpm of the rendered beat
+ * @returns {Promise<AudioBuffer>} - a promise of an audio buffer containing the rendered beat
+ */
 function renderBeat(beat, instrument, bpm){
     const beatLength = 60 / bpm / 4;
     const sampleRate = 44100;
@@ -401,16 +428,17 @@ function renderBeat(beat, instrument, bpm){
     });
 }
 
-
-class pianoRoll {
+/**
+ * Handles input and playback with html piano roll
+ */
+class PianoRoll {
     /**
-    PianoRoll Object 
-    @param      { sampler }         instrument          A sampler with the desired sounds
-    @param      { length }          length              Number of beats in roll
-    @param      { any[] }           dom                 array of HTML Elements
-    @param      { AudioContext }    audioCtx            Audio Processing Graph
-    @return     { pianoRoll }       roll
-    */
+     * 
+     * @param {Instrument} instrument - The instrument to be played via the piano roll
+     * @param {Number} length - The length of the piano roll in 16th notes
+     * @param {*} dom - The dom elements of the piano roll
+     * @param {AudioContext} audioCtx 
+     */
     constructor(instrument, length, dom, audioCtx) {
         this.instrument = instrument;
         this.audioCtx = audioCtx;
@@ -420,13 +448,18 @@ class pianoRoll {
         this._dom = dom;
         this._beatStates = new Beat(instrument.notes.length, length);
         this._isPlaying = false;
-        this._playHeadAnimator = new playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
+        this._playHeadAnimator = new PlayHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
         this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
         this._bpm = 70;
 
         this._beatListeners = [];
     }
 
+    /**
+     * Responds to the user clicking on a specific beat
+     * @param {Number} noteIndex - The index of the note clicked
+     * @param {Number} beatIndex - The index of the beat clicked
+     */
     clickSquare(noteIndex, beatIndex) {
         if (this.isInteractionEnabled) {
             this.clearSquareStyles(beatIndex, noteIndex);
@@ -434,6 +467,11 @@ class pianoRoll {
         }
     }
 
+    /**
+     * Toggle the value of a specified beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {Number} beatIndex - The index of the beat
+     */
     toggleSquare(noteIndex, beatIndex) {
         let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
 
@@ -447,10 +485,24 @@ class pianoRoll {
         this._beatStates.setBeat(beatIndex, noteIndex, !isToggled);
     }
 
+    /**
+     * Get the value of a specified beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {Number} beatIndex - The index of the beat
+     * @returns {Boolean} - The value of the beat
+     */
     isBeatToggled(beatIndex, noteIndex) {
         return this._beatStates.isBeatToggled(beatIndex, noteIndex);
     }
 
+    /**
+     * Play the current input in the piano roll
+     * @param {Number} bpm - The desired playback bpm
+     * @param {Boolean} loop - Whether the playback should loop after playthrough
+     * @param {Number} startBeat - The index of the beat to begin playback on (defaults to 0)
+     * @param {Number} endBeat - The index of the beat to end playback on (defaults to the beat's length)
+     * @returns 
+     */
     play(bpm, loop, startBeat, endBeat) {
         if (this.audioCtx.state === 'suspended') {
             this.audioCtx.resume().then(() => this.play(bpm, loop, startBeat, endBeat));
@@ -470,17 +522,26 @@ class pianoRoll {
         this._isPlaying = true;
     }
 
+    /**
+     * Stop playback and reset the playhead to the beginning of the beat
+     */
     resetPlayProgress() {
         this.stop();
         this._playHeadAnimator.reset();
     }
 
+    /**
+     * Stop playback
+     */
     stop() {
         this._playHeadAnimator.stop();
 
         this._isPlaying = false;
     }
 
+    /**
+     * Toggle playback
+     */
     togglePlay() {
         if (this._isPlaying) {
             this.stop();
@@ -490,10 +551,17 @@ class pianoRoll {
         }
     }
 
+    /**
+     * Get the current playback state
+     * @returns {Boolean} - Whether the beat is currently playing
+     */
     isPlaying() {
         return this._isPlaying;
     }
 
+    /**
+     * Untoggle all beats
+     */
     reset() {
         for (let i = 0; i < this._dom.squares.length; i++) {
             this._dom.squares[i].classList.remove("pianoRollSquareHighlighted");
@@ -504,6 +572,11 @@ class pianoRoll {
         this._playHeadAnimator.reset();
     }
 
+    /**
+     * Schedule the playing of a specific beat at an AudioContext time
+     * @param {Number} beatIndex - The index of the beat to play
+     * @param {Number} time - The AudioContext time to play the beat at
+     */
     playBeat(beatIndex, time) {
         if (time === undefined) {
             time = this.audioCtx.currentTime;
@@ -520,18 +593,39 @@ class pianoRoll {
         }
     }
 
+    /**
+     * Add a listener to be notified when a beat is played
+     * @param {Function<Number, Number>} listener - A callback in the form of f(beatIndex, scheduledTime)
+     */
     addBeatListener(listener) {
         this._beatListeners.push(listener);
     }
 
+    /**
+     * Add a css class to a specific beat on the piano roll
+     * @param {Number} beatIndex - The index of the beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {String} styleClass - The class to be applied
+     */
     addSquareStyle(beatIndex, noteIndex, styleClass) {
         this._dom.squares[beatIndex + noteIndex * this.length].classList.add(styleClass);
     }
 
+    /**
+     * Remove a css class from a specific beat on the piano roll
+     * @param {Number} beatIndex - The index of the beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {String} styleClass - The class to be removed
+     */
     removeSquareStyle(beatIndex, noteIndex, styleClass) {
         this._dom.squares[beatIndex + noteIndex * this.length].classList.remove(styleClass);
     }
 
+    /**
+     * Remove all added css classes from a specific beat on the piano roll
+     * @param {Number} beatIndex - The index of the beat
+     * @param {Number} noteIndex - The index of the note
+     */
     clearSquareStyles(beatIndex, noteIndex) {
         this._dom.squares[beatIndex + noteIndex * this.length].className = "";
 
@@ -542,6 +636,9 @@ class pianoRoll {
         }
     }
 
+    /**
+     * Remove all added css classes from all beats on the piano roll
+     */
     clearAllSquareStyles() {
         for (let beatIndex = 0; beatIndex < this.length; beatIndex++) {
             for (let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++) {
@@ -550,10 +647,18 @@ class pianoRoll {
         }
     }
 
+    /**
+     * Get a copy of the internal beat state
+     * @returns {Beat} - The state of the piano roll beat
+     */
     getBeatStates() {
         return this._beatStates.getCopy();
     }
 
+    /**
+     * Load a beat into the piano roll
+     * @param {Beat} beatStates - The desired beat state
+     */
     loadBeatStates(beatStates) {
         this._beatStates = beatStates;
 
@@ -577,13 +682,15 @@ class pianoRoll {
     The playHeadAnimator serves two purposes:
     1. Animating the UI playhead to show the user where in the beat is being played
     2. Trigger the beat play callback to play beats in time (using a lookahead)
-    
-    @param { any[] }            dom             array of HTMLElements
-    @param { int }              numBeats        Number of beats in roll 
-    @param { any }              beatCallback    TODO
-    @param { AudioContext }     audioCtx 
 */
-class playHeadAnimator {
+class PlayHeadAnimator {
+    /**
+     * 
+     * @param {HTMLElement} dom - The playhead dom element
+     * @param {Number} numBeats - The number of 16th notes in the beat
+     * @param {Function<Number, Number>} beatCallback - A callback to schedule the playback of a specific beat
+     * @param {AudioContext} audioCtx - The AudioContext used for beat playback
+     */
     constructor(dom, numBeats, beatCallback, audioCtx) {
         this._dom = dom;
         this._numBeats = numBeats;
@@ -606,6 +713,13 @@ class playHeadAnimator {
         this._endBeat;
     }
 
+    /**
+     * Start beat playback
+     * @param {Number} bpm - The desired bpm of playback
+     * @param {Boolean} loop - Whether playback should loop upon completion
+     * @param {Number} startBeat - The index of the beat to start playback on (defaults to 0)
+     * @param {Number} endBeat - The index of the beat to end playback on (defaults to beat length)
+     */
     play(bpm, loop, startBeat, endBeat) {
         if (this._isPlaying) {
             this.reset();
@@ -634,11 +748,17 @@ class playHeadAnimator {
         this._isPlaying = true;
     };
 
+    /**
+     * Stop playback
+     */
     stop() {
         window.cancelAnimationFrame(this._animationId);
         this._isPlaying = false;
     };
 
+    /**
+     * Stop playback and reset progress
+     */
     reset() {
         window.cancelAnimationFrame(this._animationId);
 
@@ -733,9 +853,6 @@ return{
     beatFromEncodedState: beatFromEncodedState,
     renderBeat: renderBeat,
     Beat: Beat,
-    playHeadAnimator: playHeadAnimator,
+    PlayHeadAnimator: PlayHeadAnimator,
 }
-
-
-// Piano Roll For Melodic Contour Game
 })();
