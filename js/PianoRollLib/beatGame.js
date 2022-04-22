@@ -4,6 +4,7 @@ class BeatChecker {
     constructor(pianoRoll) {
         pianoRoll.addBeatListener((i, t) => this._onBeatPlay(i, t));
 
+        this.pianoRoll = pianoRoll;
         this._isCurrentlyChecking = false;
         this._expectedBeat = undefined;   
     }
@@ -23,12 +24,12 @@ class BeatChecker {
 
         // The beat is played at an arbitrary point in the future, we must delay 
         // calling the callbacks until approx that time
-        const delay = Math.floor((time - pianoRoll.audioCtx.currentTime) * 1000);
+        const delay = Math.floor((time - this.pianoRoll.audioCtx.currentTime) * 1000);
 
         var isCorrect = true;
 
-        for (let i = 0; i < pianoRoll.instrument.notes.length; i++) {
-            if (this._expectedBeat.isBeatToggled(beatIndex, i) != pianoRoll.isBeatToggled(beatIndex, i)) {
+        for (let i = 0; i < this.pianoRoll.instrument.notes.length; i++) {
+            if (this._expectedBeat.isBeatToggled(beatIndex, i) != this.pianoRoll.isBeatToggled(beatIndex, i)) {
                 isCorrect = false;
 
                 this._callDelayed(() => this.onIncorrectNote?.(beatIndex, i), delay);
@@ -40,7 +41,7 @@ class BeatChecker {
         }
 
         // If correct but the beat is not finished
-        if (isCorrect && beatIndex < pianoRoll.length - 1)
+        if (isCorrect && beatIndex < this.pianoRoll.length - 1)
             return;
 
         if (isCorrect) {
@@ -61,7 +62,7 @@ class BeatChecker {
     }
 
     _onBeatFailed() {
-        pianoRoll.stop();
+        this.pianoRoll.stop();
         this.onFail?.();
     }
 
@@ -175,32 +176,32 @@ class Game {
 
     submitSolution() {
         this._beatChecker.setCurrentlyChecking(true);
-        pianoRoll.isInteractionEnabled = false;
+        this.pianoRoll.isInteractionEnabled = false;
 
-        pianoRoll.resetPlayProgress();
-        pianoRoll.play(this.currentLevel.bpm, false);
+        this.pianoRoll.resetPlayProgress();
+        this.pianoRoll.play(this.currentLevel.bpm, false);
     }
 
     _onCorrectNote(beatIndex, noteIndex) {
         if (this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)) {
-            pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareSucceeded");
+            this.pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareSucceeded");
         }
     }
 
     _onIncorrectNote(beatIndex, noteIndex) {
         if (!this.currentLevel.beat.isBeatToggled(beatIndex, noteIndex)) {
-            pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareFailed");
+            this.pianoRoll.addSquareStyle(beatIndex, noteIndex, "pianoRollSquareFailed");
         }
     }
 
     _onFail() {
         this._beatChecker.setCurrentlyChecking(false);
-        pianoRoll.isInteractionEnabled = true;
+        this.pianoRoll.isInteractionEnabled = true;
     }
 
     _onSuccess() {
         this._beatChecker.setCurrentlyChecking(false);
-        pianoRoll.isInteractionEnabled = true;
+        this.pianoRoll.isInteractionEnabled = true;
 
         this.onlevelcomplete?.();
     }

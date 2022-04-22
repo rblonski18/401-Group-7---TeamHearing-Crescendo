@@ -623,7 +623,7 @@ class playHeadAnimator {
 
         // Calculate time of next note
         this._nextUnplayedNote = (extraPx == 0 ? currentBeat : currentBeat + 1) % this._numBeats;
-        this._nextNoteTime = audioCtx.currentTime + (extraPx == 0 ? 0 : remainingPx * this._getSecondsPerPx());
+        this._nextNoteTime = this._audioCtx.currentTime + (extraPx == 0 ? 0 : remainingPx * this._getSecondsPerPx());
 
         this._startPos = this._pos;
         this._startTime = performance.now();
@@ -732,7 +732,7 @@ return{
     createRollController: createRollController,
     beatFromEncodedState: beatFromEncodedState,
     renderBeat: renderBeat,
-    beat: beat,
+    beat: Beat,
     playHeadAnimator: playHeadAnimator,
 }
 

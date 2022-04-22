@@ -1,8 +1,8 @@
 function include(file){
     var script = document.createElement('script');
     script.src = file;
-    script.type = 'module';
-    script.defer = true;
+    script.type = 'text/javascript';
+    script.async = false;
 
     document.getElementsByTagName('head').item(0).appendChild(script);
 }
