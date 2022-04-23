@@ -1014,6 +1014,11 @@ layout = {
 		main.appendChild(menu);
 		jQuery(menu).menu();
 	},
+	/**
+	 * Function that generates the indices of the playlist, and renders the random playlists webpage.
+	 * @param {string} difficulty - Select the difficulty of the playlist: {'easy', 'medium', 'hard'}. Select s'easy' by default.
+	 * @param {string} playlistMode - Select the plylist mode: {'music', 'speech'}. Selects 'speech' by default.
+	 */
 	randomPlaylist(difficulty = 'easy', playlistMode = 'speech') {
 		let back = layout.music();//back ? back : () => { layout.dashboard(); };
 
@@ -1041,10 +1046,7 @@ layout = {
 			return playlistMode === 'speech' ? obj.mode === 'speech'
 				: obj.mode !== 'speech';
 		});
-		
 
-		// TODO: ask stakeholder to look over the sql queries to make sure i'm not doing anything too crazy
-		// TODO: have stakeholder insert the table into the db
 		
 		// /*
 		// NOTE: need to set async to false because this data HAS to load before anything happens,
