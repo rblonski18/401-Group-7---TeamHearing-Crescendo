@@ -1,15 +1,24 @@
 <?php
+include_once 'connection.php';
+
 // create table
 $tablename = 'Sequence';
-$sql = "CREATE TABLE $tablename
+$sql = "create table $tablename
 (
-  ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `mode` INT NOT NULL,
-  `level` INT NOT NULL,
-  `score` INT NOT NULL,
-  `user` INT NOT NULL,
-  `subuser` INT NOT NULL
+	ID int not null auto_increment,
+	primary key(ID),
+  entry date,
+	mode int,
+  score int,
+  level int,
+  user int,
+	subuser int
 )";
-if(mysqli_query($connection,$sql)){echo "Table $tablename created successfully.<br>";}
-else{echo mysqli_error($connection).".<br>";}
+
+// run sql and report
+if(mysqli_query($conn,$sql)){echo "Table $tablename created successfully.<br>";}
+else{echo mysqli_error($conn).".<br>";return;}
+
+// close connection
+$conn->close();
 ?>

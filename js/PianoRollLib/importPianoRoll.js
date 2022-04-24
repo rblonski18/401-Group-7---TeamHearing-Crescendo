@@ -11,6 +11,12 @@ var wave = document.createElement('script');
 wave.src = 'https://unpkg.com/wavesurfer.js';
 document.getElementsByTagName('head').item(0).appendChild(wave);
 
+var prCSS = document.createElement('link');
+prCSS.rel = 'stylesheet';
+prCSS.href = './version/crescendo/css/pianoRoll.css';
+prCSS.type = 'text/css';
+document.getElementsByTagName('head').item(0).appendChild(prCSS);
+
 include("./version/crescendo/js/PianoRollLib/pianoRoll.js");
 include("./version/crescendo/js/PianoRollLib/instrument.js");
 include("./version/crescendo/js/PianoRollLib/beatGame.js");
