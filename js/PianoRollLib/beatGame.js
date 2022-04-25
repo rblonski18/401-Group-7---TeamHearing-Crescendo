@@ -234,7 +234,6 @@ class Game {
     _onFail() {
         this._beatChecker.setCurrentlyChecking(false);
         this.pianoRoll.isInteractionEnabled = true;
-
         this.onlevelfail?.();
     }
 
