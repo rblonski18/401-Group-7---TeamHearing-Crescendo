@@ -257,7 +257,8 @@ Sequence.prototype.test = function(){
     // actual message inside above div, can be changed or removed
 	var message = document.createElement('span');
 	message.id = 'message';
-	message.innerHTML = 'Match the sequence of notes.';
+	message.innerHTML = 'Match the sequence of notes.'
+	+' Click the instrument name for a sample.';
 	message.style.display = 'inline-block';
 	message.style.fontSize = '100%';
 	message.style.fontWeight = 'bold';

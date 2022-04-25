@@ -4,8 +4,8 @@ function assignment(back) {
 	// initialize
 	const mode = 'bel_sequence';
 	let a = 0, callbacks = [], options = [];
-	let chances = version == 'alpha' && subuser.ID == 3 ? 1 : 4;
-	let reps = version == 'alpha' && subuser.ID == 3 ? 1 : 3;
+	let chanceCount = version == 'alpha' && subuser.ID == 3 ? 1 : 4;
+	let reps = version == 'alpha' && subuser.ID == 3 ? 1 : 1;
 
 
 	// Loudness Levels
@@ -24,7 +24,8 @@ function assignment(back) {
 		protocol.callback = ()=>{assignment()};
 		protocol.ID = id;
 		protocol.settings.push({
-			mode: 0
+			mode: 0,
+			chances: chanceCount
 		});
 		protocol.start(reps);
 		
@@ -37,7 +38,8 @@ function assignment(back) {
 		protocol.callback = ()=>{assignment()};
 		protocol.ID = id;
 		protocol.settings.push({
-			mode: 1
+			mode: 1,
+			chances: chanceCount
 		});
 		protocol.start(reps);
 	}.bind(null,mode+"."+a++));
