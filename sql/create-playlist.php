@@ -9,8 +9,11 @@ $sql = "create table $tablename
 	primary key(ID),
   entry date,
 	indices varchar(64),
-  subuser int unique,
-	user int unique
+	difficulty enum('easy', 'medium', 'hard),
+	mode enum('speech', 'music'),
+  subuser int,
+	user int,
+	unique(date, indices, subuser, user)
 )";
 
 // run sql and report
