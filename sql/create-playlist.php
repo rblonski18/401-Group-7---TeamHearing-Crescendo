@@ -9,8 +9,8 @@ $sql = "create table $tablename
 	primary key(ID),
   entry date,
 	indices varchar(64),
-  subuser int,
-	user int
+  subuser int unique,
+	user int unique
 )";
 
 // run sql and report
