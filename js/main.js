@@ -1047,7 +1047,10 @@ layout = {
 				: obj.mode !== 'speech';
 		});
 
-		
+		/*
+		The following code is ajax code that will make php calls. Unfortunately, I have made a lot of changes to
+		the structure of the php script and the playlist table, so this ajax code will not work. 
+		*/
 		// /*
 		// NOTE: need to set async to false because this data HAS to load before anything happens,
 		// but that means the webpage will have to block :( 
@@ -1250,6 +1253,8 @@ layout = {
 			setItem('year', JSON.stringify(date.getFullYear()));
 		}
 		
+		// let each exercise take 15 trials. 
+		const TRIALS = 15;
 		// the idea here is store the indices of the exercises instead of the exercises themselves cuz that would be torture...
 		let indices;
 		// need an entry given a difficulty and a playlistMode
@@ -1277,7 +1282,7 @@ layout = {
 				protocol = new Protocol();
 				protocol.activity = obj.activity;
 				protocol.callback = finishCallback.bind(null, i);
-				obj.settings.trials = 15;
+				obj.settings.trials = TRIALS;
 				
 				protocol.settings.push(obj.settings);
 				// default to 3 if reptitions is null/undefined/<0
@@ -1301,7 +1306,7 @@ layout = {
 				protocol = new Protocol();
 				protocol.activity = nextExercise.activity;
 				protocol.callback = finishCallback.bind(null, nextExercise.index);
-				nextExercise.settings.trials = 15;
+				nextExercise.settings.trials = TRIALS;
 				protocol.settings.push(nextExercise.settings);
 				protocol.start(nextExercise.repetitions ? nextExercise.repetitions : 3);
 			} else {

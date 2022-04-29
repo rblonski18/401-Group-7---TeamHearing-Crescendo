@@ -13,7 +13,7 @@ $sql = "create table $tablename
 	mode enum('speech', 'music'),
   subuser int,
 	user int,
-	unique(date, indices, subuser, user)
+	unique(user, subuser, playlist, difficulty)
 )";
 
 // run sql and report
