@@ -53,17 +53,18 @@
 }
 
 /* CONTOUR */
+
 .contourBlankSquare {
     flex-grow: 1;
     background-color: rgb(255, 255, 255);
 }
 
-.contourSelectedSquare {
+.contourWrongSquare {
     flex-grow: 1;
     background-color: rgb(255, 255, 255);
 
     border-style: solid;
-    border-color: rgb(0, 0, 0);
+    border-color: rgb(185, 0, 0);
     border-width: 3px;
     box-sizing: border-box;
 }
@@ -115,6 +116,8 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+/* ----------------------------- */
 
 .pianoRollSquareHighlighted {
     background-color: rgb(235, 235, 8);

@@ -853,5 +853,7 @@ return{
     renderBeat: renderBeat,
     Beat: Beat,
     PlayHeadAnimator: PlayHeadAnimator,
+    base64ToBoolArray: base64ToBoolArray,
+    boolArrayToBase64: boolArrayToBase64
 }
 })();

@@ -4,13 +4,24 @@ const ContourPianoRoll = (function () {
 var numRollSquares = 0;
 const LOOK_AHEAD = .1;
 
+// An array of all the possible melodic contours
+var contours = [
+    ["AAACKi", ['u', 'u', 'd', 'd']], 
+    ["AAHyKC", ['s', 's', 's', 's']],
+    ["AERGaC", ['u', 'u', 'u', 'u']],
+    ["AA6KKC", ['u', 'u', 's', 's']],
+]
+
+// The random number generated for this game
+var contourNum = Math.floor(Math.random() * contours.length);
+
 /**
     Creates PianoRoll Object with a Contour Controller Object binded to it
     @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
     @param      { sampler }             instrument          A sampler with the desired sounds
     @param      { int }                 length              Number of beats in roll
     @param      { AudioContext }        audioCtx            Audio Processing Graph
-    @return     { pianoRollController } controller
+    @return     { pianoContourController } controller
     @return     { pianoRoll }           roll
 */
 function createContourSampleRoll(domParent, instrument, length, audioCtx){
@@ -25,6 +36,15 @@ function createContourSampleRoll(domParent, instrument, length, audioCtx){
     }
 }
 
+/**
+    Creates PianoRoll Object with a Contour Controller Object binded to it
+    @param      { HTMLElement }             domParent           Where in HTML the roll will be created  
+    @param      { sampler }                 instrument          A sampler with the desired sounds
+    @param      { int }                     length              Number of beats in roll
+    @param      { AudioContext }            audioCtx            Audio Processing Graph
+    @return     { pianoContourController }  controller
+    @return     { pianoContourGameRoll }    roll
+*/
 function createContourGameRoll(domParent, instrument, length, audioCtx) {
     const controls = createContourController(domParent);
     const pianoRoll = createContourGameRoll(domParent, instrument, length, audioCtx);
@@ -53,7 +73,6 @@ function createContourController(domParent){
     var controller = new pianoContourController(dom);
 
     const listenBtn = createControllerButton("Listen", () => {
-        console.log("listen");
         controller.onClickListen();
     });
 
@@ -61,7 +80,7 @@ function createContourController(domParent){
 
     const playBtn = createControllerButton("Play", () => {
         console.log("play")
-        controller.onClickPlayButtom();
+        controller.onClickPlayButton();
     });
 
     controls.appendChild(playBtn);
@@ -110,12 +129,14 @@ function createContourController(domParent){
 function pianoContourController(dom){
     this.pianoRoll;
     this._dom = dom;
+    this.listens = 0;
 
     this.bindToPianoRoll = function(pianoRoll){
         this.pianoRoll = pianoRoll;
     }
 
-    this.onClickPlayButtom = function(){
+    // Plays toggled beats
+    this.onClickPlayButton = function(){
         if(this.pianoRoll === undefined){
             return;
         }
@@ -128,8 +149,10 @@ function pianoContourController(dom){
             this.pianoRoll.play(70, true);
             this._dom.playBtn.innerText = "Stop";
         }
+        this.onClickExport()
     }
 
+    // Resets toggled beats
     this.onClickReset = function(){
         if(this.pianoRoll === undefined){
             return;
@@ -143,6 +166,7 @@ function pianoContourController(dom){
         this._dom.playButton.innerText = "Play";
     }
 
+    // Adjusts BPM of playback
     this.onClickBPM = function(){
         var display = this._dom.slider.style.display
         if (display == "none") {
@@ -153,24 +177,27 @@ function pianoContourController(dom){
 
     }
 
+    // Logs current beat state to console as a Base64 string
     this.onClickExport = function(){
         const notes = this.pianoRoll.instrument.notes.length;
         const length = this.pianoRoll.length;
-        const state = boolArrayToBase64(this.pianoRoll.getBeatStates().getState());
+        const state = PianoRoll.boolArrayToBase64(this.pianoRoll.getBeatStates().getState());
         
         console.log(`beatFromEncodedState(${notes}, ${length}, \"${state}\")`);
     }
 
+    // Saves current beat state to clipboard as a Base64 String
     this.onClickSave = function(){
         const beatState = this.pianoRoll.getBeatStates().getState();
         const encoded = boolArrayToBase64(beatState);
         navigator.clipboard.writeText(encoded);
     }
 
+    // Loads beat state from clipboard
     this.onClickLoad = function(){
         const beatState = navigator.clipboard.readText().then(
             text => {
-                const decoded = base64ToBoolArray(text);
+                const decoded = PianoRoll.base64ToBoolArray(text);
 
                 const stateCopy = this.pianoRoll.getBeatStates();
                 stateCopy.setState(decoded);
@@ -179,20 +206,19 @@ function pianoContourController(dom){
         });
     }
 
+    // Loads desired beat state and plays it
     this.onClickListen = function(){
-        var text = "AAACKi"
-        const decoded = base64ToBoolArray(text);
+        var text = contours[contourNum][0];
+        const decoded = PianoRoll.base64ToBoolArray(text);
+
+        console.log(decoded);
 
         const stateCopy = this.pianoRoll.getBeatStates();
         stateCopy.setState(decoded);
 
-        this.pianoRoll.loadBeatStates(stateCopy);
+        // this.pianoRoll.loadBeatStates(stateCopy);
 
-        // this.onClickReset();
-        console.log(this);
         this.pianoRoll.play(this._dom.slider.value, false);
-        // console.log("RESET");
-        // this.onClickReset();
     }
 }
 
@@ -213,11 +239,11 @@ function createControllerButton(text, onClick){
 
 /**
     Creates the HTML of the piano roll, including the playhead
-    @param      { HTMLElement }         domParent           Where in HTML the roll will be created  
-    @param      { sampler }             instrument          A sampler with the desired sounds
-    @param      { int }                 length              Number of beats in roll
-    @param      { AudioContext }        audioCtx            Audio Processing Graph
-    @return     { pianoCountourGameRoll }           roll
+    @param      { HTMLElement }                 domParent           Where in HTML the roll will be created  
+    @param      { sampler }                     instrument          A sampler with the desired sounds
+    @param      { int }                         length              Number of beats in roll
+    @param      { AudioContext }                audioCtx            Audio Processing Graph
+    @return     { pianoCountourGameRoll }       roll
 */
 function createContourGameRoll(domParent, instrument, length, audioCtx){
     var rollSquares = [];
@@ -248,29 +274,39 @@ function createContourGameRoll(domParent, instrument, length, audioCtx){
     playHeadHolder.appendChild(playHead);
     dom.playHead = playHead;
 
-        for (let i = 0; i < 11; i++) {
-            if (i == 5) {
-                var row = createPianoRollRow(roll, instrument, rollSquares, i);
-            } else {
-                var row = createBlankPianoRollRow(roll, instrument, rollSquares, i);
-            }
-            rollDom.appendChild(row);
+    // Create rows of piano roll, with a selected one at the center
+    for (let i = 0; i < (roll.length*2 + 1) ; i++) {
+        if (i == length) {
+            var row = createPianoRollRow(roll, instrument, rollSquares, i);
+        } else {
+            var row = createBlankPianoRollRow(roll, instrument, rollSquares, i);
         }
+        rollDom.appendChild(row);
+    }
 
-        nextNotes(90, rollSquares);
+    var startIndex = roll.length*(roll.length*2 - 1);
+    nextNotes(startIndex, roll);
 
-        domParent.appendChild(rollHolder);
+    domParent.appendChild(rollHolder);
 
-        return roll;
+    return roll;
 }
 
+/**
+    Creates center row of piano roll, with the first selected square
+    @param      { pianoCountourGameRoll }       roll                Current piano roll  
+    @param      { sampler }                     instrument          A sampler with the desired sounds
+    @param      { Array }                       rollSquares         Array of squares HTML elements in roll
+    @param      { int }                         row                 Row ID number
+    @return     { HTMLElement }                 row
+*/
 function createPianoRollRow(roll, instrument, rollSquares, row) {
     var row = document.createElement("div");
     row.classList.add("contourRow");
 
     row.id = row;
 
-    for(let j = 0; j < 11; j++){
+    for(let j = 0; j < (roll.length*2 -1); j++){
         var square = document.createElement("div");
         if (j == 0) {
             square.classList.add("contourSelectedSquare");
@@ -282,10 +318,13 @@ function createPianoRollRow(roll, instrument, rollSquares, row) {
         square.value = numRollSquares;
         numRollSquares += 1;
 
-        // square.onmouseenter = () => roll.hoverSquare(instrument.notes.length - 1 - row, j);
-        square.onclick = () => roll.clickSquare(square.id);
+        const s = new Square(roll, square, roll.numSquares);
+        
+        square.onclick = () => s.clickSquare();
 
         rollSquares.push(square);
+        roll.squares.push(s);
+        roll.numSquares += 1;
 
         row.appendChild(square);
     }
@@ -293,12 +332,20 @@ function createPianoRollRow(roll, instrument, rollSquares, row) {
     return row;
 }
 
+/**
+    Creates row of blank squares
+    @param      { pianoCountourGameRoll }       roll                Current piano roll  
+    @param      { sampler }                     instrument          A sampler with the desired sounds
+    @param      { Array }                       rollSquares         Array of squares HTML elements in roll
+    @param      { int }                         id                  Row ID number
+    @return     { HTMLElement }                 row
+*/
 function createBlankPianoRollRow(roll, instrument, rollSquares, id) {
     var row = document.createElement("div");
     row.classList.add("pianoRollRow");
     row.id = id;
 
-    for(let j = 0; j < 11; j++){
+    for(let j = 0; j < (roll.length*2 -1); j++){
         var square = document.createElement("div");
         square.classList.add("contourBlankSquare");
         
@@ -306,10 +353,14 @@ function createBlankPianoRollRow(roll, instrument, rollSquares, id) {
         square.value = numRollSquares;
         numRollSquares += 1;
 
+        const s = new Square(roll, square, roll.numSquares);
+
         // square.onmouseenter = () => roll.hoverSquare(instrument.notes.length - 1 - id, j);
-        square.onclick = () => roll.clickSquare();
+        square.onclick = () => s.clickSquare();
         
         rollSquares.push(square);
+        roll.squares.push(s);
+        roll.numSquares += 1;
 
         row.appendChild(square);
     }
@@ -317,30 +368,32 @@ function createBlankPianoRollRow(roll, instrument, rollSquares, id) {
     return row;
 }
 
+/**
+    Handles input and game choices with html piano roll
+    @param      { HTMLElement }                 domParent           Where in HTML the roll will be created  
+    @param      { sampler }                     instrument          A sampler with the desired sounds
+    @param      { int }                         length              Number of beats in roll
+    @param      { AudioContext }                audioCtx            Audio Processing Graph
+    @return     { pianoCountourGameRoll }       roll
+*/
 function pianoContourGameRoll(instrument, length, dom, audioCtx){
     this.instrument = instrument;
     this.audioCtx = audioCtx;
     this.length = length;
     this.isInteractionEnabled = true;
 
+    this.squares = []
+    this.numSquares = 0;
+    this.choices = 0;
+
     this._dom = dom;
-    this._beatStates = new PianoRoll.beat(instrument.notes.length, length);
+    this._beatStates = new PianoRoll.Beat(instrument.notes.length, length);
     this._isPlaying = false;
-    this._playHeadAnimator = new PianoRoll.playHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
+    this._playHeadAnimator = new PianoRoll.PlayHeadAnimator(dom, length, (i, time) => this.playBeat(i, time), audioCtx);
     this._playHeadAnimator.onFinishPlaying = () => this.resetPlayProgress();
     this._bpm = 70;
 
     this._beatListeners = []
-
-    this.clickSquare = function(squareId){
-        console.log(squareId);
-        const something = (element) => element.getAttribute('id') == (squareId);
-        var square = this._dom.squares.find(something);
-        console.log(square);
-        if(square.classList.contains("contourChoiceSquare")){
-            nextNotes(square)
-        }
-    }
 
     this.hoverSquare = function(noteIndex, beatIndex){
         var square = this._dom.squares[beatIndex + noteIndex * length];
@@ -352,6 +405,11 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         }
     }
 
+    /**
+     * Toggle the value of a specified beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {Number} beatIndex - The index of the beat
+     */
     this.toggleSquare = function(noteIndex, beatIndex){
         let isToggled = this._beatStates.isBeatToggled(beatIndex, noteIndex);
 
@@ -365,10 +423,23 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         this._beatStates.setBeat(beatIndex, noteIndex, !isToggled)
     };
 
+    /**
+     * Get the value of a specified beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {Number} beatIndex - The index of the beat
+     * @returns {Boolean} - The value of the beat
+     */
     this.isBeatToggled = function(beatIndex, noteIndex){
         return this._beatStates.isBeatToggled(beatIndex, noteIndex);
     };
 
+    /**
+     * Play the current input in the piano roll
+     * @param {Number} bpm - The desired playback bpm
+     * @param {Boolean} loop - Whether the playback should loop after playthrough
+     * @param {Number} startBeat - The index of the beat to begin playback on (defaults to 0)
+     * @param {Number} endBeat - The index of the beat to end playback on (defaults to the beat's length)
+     */
     this.play = function(bpm, loop, startBeat, endBeat){
         if(this.audioCtx.state === 'suspended'){
             this.audioCtx.resume().then(()=>this.play(bpm, loop, startBeat, endBeat));
@@ -388,17 +459,26 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         this._isPlaying = true;
     }
 
+    /**
+     * Stop playback and reset the playhead to the beginning of the beat
+     */
     this.resetPlayProgress = function(){
         this.stop();
         this._playHeadAnimator.reset();
     }
 
+    /**
+     * Stop playback
+     */
     this.stop = function(){
         this._playHeadAnimator.stop();
 
         this._isPlaying = false;
     }
 
+    /**
+     * Toggle playback
+     */
     this.togglePlay = function(){
         if(this._isPlaying){
             this.stop();
@@ -408,10 +488,17 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         }
     }
 
+    /**
+     * Get the current playback state
+     * @returns {Boolean} - Whether the beat is currently playing
+     */
     this.isPlaying = function(){
         return this._isPlaying;
     }
 
+    /**
+     * Untoggle all beats
+     */
     this.reset = function(){
         for(let i = 0; i < this._dom.squares.length; i++){
             this._dom.squares[i].classList.remove("pianoRollSquareHighlighted");
@@ -422,6 +509,11 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         this._playHeadAnimator.reset();
     };
 
+    /**
+     * Schedule the playing of a specific beat at an AudioContext time
+     * @param {Number} beatIndex - The index of the beat to play
+     * @param {Number} time - The AudioContext time to play the beat at
+     */
     this.playBeat = function(beatIndex, time){
         if(time === undefined){
             time = this.audioCtx.currentTime;
@@ -438,18 +530,39 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         }
     }
 
+    /**
+     * Add a listener to be notified when a beat is played
+     * @param {Function} listener - A callback in the form of f(beatIndex, scheduledTime)
+     */
     this.addBeatListener = function(listener){
         this._beatListeners.push(listener);
     }
 
+    /**
+     * Add a css class to a specific beat on the piano roll
+     * @param {Number} beatIndex - The index of the beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {String} styleClass - The class to be applied
+     */
     this.addSquareStyle = function(beatIndex, noteIndex, styleClass){
         this._dom.squares[beatIndex + noteIndex * length].classList.add(styleClass);
     }
 
+    /**
+     * Remove a css class from a specific beat on the piano roll
+     * @param {Number} beatIndex - The index of the beat
+     * @param {Number} noteIndex - The index of the note
+     * @param {String} styleClass - The class to be removed
+     */
     this.removeSquareStyle = function(beatIndex, noteIndex, styleClass){
         this._dom.squares[beatIndex + noteIndex * length].classList.remove(styleClass);
     }
 
+    /**
+     * Remove all added css classes from a specific beat on the piano roll
+     * @param {Number} beatIndex - The index of the beat
+     * @param {Number} noteIndex - The index of the note
+     */
     this.clearSquareStyles = function(beatIndex, noteIndex){
         this._dom.squares[beatIndex + noteIndex * length].className = "";
 
@@ -460,6 +573,9 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         }
     }
 
+    /**
+     * Remove all added css classes from all beats on the piano roll
+     */
     this.clearAllSquareStyles = function(){
         for(let beatIndex = 0; beatIndex < this.length; beatIndex++){
             for(let noteIndex = 0; noteIndex < this.instrument.notes.length; noteIndex++){
@@ -468,10 +584,18 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
         }
     }
 
+    /**
+     * Get a copy of the internal beat state
+     * @returns {Beat} - The state of the piano roll beat
+     */
     this.getBeatStates = function(){
         return this._beatStates.getCopy();
     }
 
+    /**
+     * Load a beat into the piano roll
+     * @param {Beat} beatStates - The desired beat state
+     */
     this.loadBeatStates = function(beatStates){
         this._beatStates = beatStates;
 
@@ -490,14 +614,108 @@ function pianoContourGameRoll(instrument, length, dom, audioCtx){
     }
 }
 
-function nextNotes(startIndex, rollSquares) {
-    for (var i = -1; i <= 1; i++) {
-        // Change the next squares
-        var nextSquare = startIndex + i*11 + 2;
-        const something = (element) => element.getAttribute('id') == ("pianoRollSquare_" + nextSquare);
-        var x = rollSquares.find(something);
+/**
+    Displays three choice nodes in the directions "up", "down", and "stay"
+    @param      { int }                         startIndex          index of square you want to find neighnobors 
+    @param      { pianoCountourGameRoll }       roll                The piano game roll with the given square
+*/
+function nextNotes(startIndex, roll) {
+    var nextNotes = [
+        startIndex - (roll.length*2-1) + 2, 
+        startIndex+2, 
+        startIndex + (roll.length*2-1) + 2
+    ];
+    for (let i = 0; i < nextNotes.length; i++) {
+        const something2 = (element) => element.getAttribute('id') == ("pianoRollSquare_" + nextNotes[i]);
+        roll.squares[nextNotes[i]].parent = startIndex;
+        var x = roll._dom.squares.find(something2);
         x.classList.remove("contourBlankSquare");
         x.classList.add("contourChoiceSquare");
+    }
+}
+
+/**
+    The Square class serves to:
+    1. Evaluate if the user choices are correct
+    2. Generate the next choice nodes after a selection
+*/
+class Square {
+    /**
+     * 
+     * @param {HTMLElement} dom - The square dom element
+     * @param {pianoCountourGameRoll} roll - The piano roll which the square resides in
+     * @param {int} id - Id of the square
+     */
+    constructor(roll, dom, id) {
+        this.id = id;
+        this.dom = dom;
+        this.roll = roll;
+        this.parent = 0;
+
+        this.nextNotes = [
+            id - (this.roll.length*2-1) + 2, 
+            id+2, 
+            id + (this.roll.length*2-1) + 2
+        ];
+        this.column = [
+            id + (-2*(this.roll.length*2-1)), 
+            id + (-1*(this.roll.length*2-1)), 
+            id + (1*(this.roll.length*2-1)), 
+            id + (2*(this.roll.length*2-1))
+        ];
+    }
+
+    /**
+     * Responds to the user clicking on a specific square
+     */
+    clickSquare = function(){
+        var squareId = this.dom.id;
+        console.log(squareId);
+        const something = (element) => element.getAttribute('id') == (squareId);
+        var square = this.roll._dom.squares.find(something);
+        if(square.classList.contains("contourChoiceSquare")){
+            // First check if this is the correct square
+            var correctSquareNumber = this.parent;
+            console.log(this.parent);
+            console.log(contours[contourNum][1][this.roll.choices]);
+            switch (contours[contourNum][1][this.roll.choices]){
+                case 'u':
+                    correctSquareNumber -= (this.roll.length*2 - 3);
+                    break;
+                case 'd':
+                    correctSquareNumber += (this.roll.length*2 + 1);
+                    break;
+                default:
+                    correctSquareNumber += 2;
+                    break;
+            }
+            console.log(correctSquareNumber);
+            if (correctSquareNumber == this.id) {
+                this.roll.choices += 1;
+                if (this.roll.choices >= 4) {
+                    window.alert("you won!");
+                } else {
+                    for (let i = 0; i < this.nextNotes.length; i++) {
+                        const something2 = (element) => element.getAttribute('id') == ("pianoRollSquare_" + this.nextNotes[i]);
+                        this.roll.squares[this.nextNotes[i]].parent = this.id;
+                        var x = this.roll._dom.squares.find(something2);
+                        x.classList.remove("contourBlankSquare");
+                        x.classList.add("contourChoiceSquare");
+                    }
+                }
+                for (let i = 0; i < this.column.length; i++) {
+                    const something2 = (element) => element.getAttribute('id') == ("pianoRollSquare_" + this.column[i]);
+                    var x = this.roll._dom.squares.find(something2);
+                    x.classList.remove("contourChoiceSquare");
+                    x.classList.remove("contourWrongSquare");
+                    x.classList.add("contourBlankSquare");
+                } 
+                square.classList.add("contourSelectedSquare");
+            } else {
+                square.classList.add("contourWrongSquare");
+                square.classList.remove("contourChoiceSquare");
+            } 
+        }
     }
 }
 
